@@ -76,7 +76,7 @@ export function Game({ onNavigate }) {
     error: cameraError,
     canvasRef: mediaPipeCanvasRef
   } = useMediaPipeHands({
-    enabled: settings.cameraEnabled && gameState === 'playing',
+    enabled: settings.cameraEnabled && (gameState === 'ready' || gameState === 'playing' || gameState === 'paused'),
     onJumpTrigger: handleJumpGesture
   });
 
@@ -124,7 +124,16 @@ export function Game({ onNavigate }) {
   }, [activeSkin]);
 
   // Inicia a física e o movimento apenas quando o jogador clica em DAR PLAY
-  const handleStartPlay = () => {
+  const handleStartPlay = async () => {
+    // Requisita permissão de giroscópio/acelerômetro no clique do usuário (essencial para iOS/Safari)
+    if (needsPermissionPrompt && !permissionGranted && requestOrientationPermission) {
+      try {
+        await requestOrientationPermission();
+      } catch (e) {
+        console.warn('Aviso de permissão ao iniciar:', e);
+      }
+    }
+
     if (engineRef.current) {
       setGameState('playing');
       engineRef.current.start();
@@ -220,19 +229,6 @@ export function Game({ onNavigate }) {
         ]);
       } catch (err) {
         console.warn('Aviso: Falha ao inserir no Supabase diretamente:', err);
-      }
-    }
-
-    // 4. Tenta gravar na API Serverless Netlify se estiver em produção (não no localhost)
-    if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
-      try {
-        await fetch('/api/save-score', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } catch (err) {
-        // Falha silenciosa em ambiente estático
       }
     }
   };
@@ -622,7 +618,7 @@ export function Game({ onNavigate }) {
             isCameraActive={isCameraActive}
             gestureDetected={gestureDetected}
             error={cameraError}
-            enabled={settings.cameraEnabled && (gameState === 'playing' || gameState === 'paused')}
+            enabled={settings.cameraEnabled && (gameState === 'ready' || gameState === 'playing' || gameState === 'paused')}
           />
         </div>
       )}

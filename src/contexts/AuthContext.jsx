@@ -248,10 +248,22 @@ export function AuthProvider({ children }) {
 
     if (supabase && isSupabaseConfigured && user && !isGuest) {
       try {
-        await supabase
-          .from('profiles')
-          .update(updates)
-          .eq('id', user.id);
+        // Envia apenas colunas existentes na tabela 'profiles' do banco
+        const ALLOWED_DB_COLUMNS = ['username', 'full_name', 'avatar_url', 'ball_skin', 'high_score', 'total_jumps', 'stages_completed'];
+        const dbUpdates = {};
+        for (const col of ALLOWED_DB_COLUMNS) {
+          if (updates[col] !== undefined) {
+            dbUpdates[col] = updates[col];
+          }
+        }
+        dbUpdates.updated_at = new Date().toISOString();
+
+        if (Object.keys(dbUpdates).length > 1) {
+          await supabase
+            .from('profiles')
+            .update(dbUpdates)
+            .eq('id', user.id);
+        }
       } catch (err) {
         console.error('Erro ao sincronizar perfil com o Supabase:', err);
       }
