@@ -168,8 +168,8 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
         </div>
       </header>
 
-      {/* Barra de Navegação Inferior para Mobile (Apenas exibida quando o usuário estiver autenticado) */}
-      {user && (
+      {/* Barra de Navegação Inferior para Mobile (Ocultada durante a tela do jogo para não sobrepor os controles) */}
+      {user && currentRoute !== 'game' && (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800/90 bg-slate-950/90 py-1.5 px-3 flex justify-around items-center">
           {navItems.map((item) => {
             const Icon = item.icon;

@@ -312,7 +312,10 @@ export function Game({ onNavigate }) {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+    <div className={gameState === 'menu' 
+      ? "max-w-4xl mx-auto px-4 py-6 sm:py-8" 
+      : "w-full flex-1 flex flex-col items-center justify-center p-2 sm:p-4 min-h-[calc(100dvh-4.5rem)] max-h-[calc(100dvh-4.5rem)] overflow-hidden select-none"
+    }>
       {/* 1. MENU DE SELEÇÃO DE FASES (10 Fases) */}
       {gameState === 'menu' && (
         <div className="space-y-6">
@@ -364,48 +367,48 @@ export function Game({ onNavigate }) {
 
       {/* 2. TELA DO JOGO (CANVAS + HUD + CONTROLES) */}
       {gameState !== 'menu' && (
-        <div className="flex flex-col items-center">
+        <div className="w-full max-w-[420px] flex flex-col items-center justify-center h-full max-h-full">
           {/* Top Bar / HUD do Jogo */}
-          <div className="w-full max-w-[440px] mb-3 flex items-center justify-between glass-panel px-4 py-2.5 rounded-2xl border border-slate-800">
+          <div className="w-full mb-1.5 flex items-center justify-between glass-panel px-3 py-1.5 rounded-2xl border border-slate-800 shrink-0">
             <button
               onClick={handleExitGame}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
               title="Menu de Fases"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
 
             <div className="text-center">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block leading-none mb-0.5">
                 Fase {selectedStage?.number} • {selectedStage?.title}
               </span>
-              <span className="text-lg font-black text-amber-400">
-                {currentScore.toLocaleString()} <span className="text-xs text-slate-400 font-normal">pts</span>
+              <span className="text-base sm:text-lg font-black text-amber-400 leading-tight">
+                {currentScore.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">pts</span>
               </span>
             </div>
 
             {gameState === 'ready' ? (
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xs font-bold animate-pulse" title="Aguardando Play">
+              <div className="w-7 h-7 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xs font-bold animate-pulse" title="Aguardando Play">
                 ▶
               </div>
             ) : (
               <button
                 onClick={togglePause}
-                className="p-2 rounded-xl bg-slate-800/80 text-cyan-300 hover:bg-slate-700 transition-colors"
+                className="p-1.5 rounded-xl bg-slate-800/80 text-cyan-300 hover:bg-slate-700 transition-colors"
                 title={gameState === 'paused' ? 'Continuar' : 'Pausar'}
               >
-                {gameState === 'paused' ? <Play className="w-4 h-4 fill-current" /> : <Pause className="w-4 h-4" />}
+                {gameState === 'paused' ? <Play className="w-3.5 h-3.5 fill-current" /> : <Pause className="w-3.5 h-3.5" />}
               </button>
             )}
           </div>
 
           {/* Barra de Progresso até a Meta da Fase */}
-          <div className="w-full max-w-[440px] mb-2 px-1">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1">
+          <div className="w-full mb-1.5 px-1 shrink-0">
+            <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400 mb-0.5">
               <span>Altura: <strong className="text-cyan-300">{currentHeight}m</strong></span>
               <span>Meta: <strong className="text-amber-400">{selectedStage?.targetHeight}m</strong></span>
             </div>
-            <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+            <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
               <div
                 className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-amber-400 transition-all duration-100"
                 style={{
@@ -416,11 +419,11 @@ export function Game({ onNavigate }) {
           </div>
 
           {/* Viewport do Canvas do Jogo */}
-          <div className="relative w-full max-w-[440px] rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center">
+          <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center flex-1 min-h-0 max-h-[calc(100dvh-13.5rem)] sm:max-h-[calc(100dvh-12rem)]">
             <canvas
               id="gameCanvas"
               ref={canvasRef}
-              className="w-full h-auto block"
+              className="w-auto h-full max-h-full aspect-[440/720] block object-contain"
             />
 
             {/* Overlay Inicial de Prontidão: O jogo só inicia a física após o clique em DAR PLAY */}
@@ -600,15 +603,17 @@ export function Game({ onNavigate }) {
           </div>
 
           {/* Controles de Toque na Tela (Mobile & Fallback) */}
-          <TouchControls
-            onTouchLeft={() => engineRef.current?.setTouch(-1)}
-            onTouchRight={() => engineRef.current?.setTouch(1)}
-            onTouchJump={() => engineRef.current?.triggerGestureJump()}
-            onRelease={() => engineRef.current?.setTouch(0)}
-          />
+          <div className="w-full shrink-0 flex justify-center">
+            <TouchControls
+              onTouchLeft={() => engineRef.current?.setTouch(-1)}
+              onTouchRight={() => engineRef.current?.setTouch(1)}
+              onTouchJump={() => engineRef.current?.triggerGestureJump()}
+              onRelease={() => engineRef.current?.setTouch(0)}
+            />
+          </div>
 
           {/* Dica de Teclas Desktop */}
-          <div className="mt-3 text-center text-[11px] text-slate-500 hidden sm:block">
+          <div className="mt-1 text-center text-[10px] text-slate-500 hidden sm:block shrink-0">
             Use as setas <strong>← →</strong> ou <strong>A D</strong> para mover • <strong>Espaço</strong> para Super Salto
           </div>
 

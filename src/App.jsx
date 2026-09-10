@@ -46,7 +46,7 @@ function AppContent() {
   const activeRoute = (!user && isProtectedRoute) ? 'login' : currentRoute;
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950 pb-16 md:pb-0">
+    <div className={`min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950 ${activeRoute !== 'game' ? 'pb-16 md:pb-0' : 'pb-0'}`}>
       {/* Barra de Navegação Superior (com Início, Jogar, Histórico, Perfil, Ajustes e Botões de Entrar/Cadastrar) */}
       <Navbar
         currentRoute={activeRoute}

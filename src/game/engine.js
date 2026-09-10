@@ -69,10 +69,12 @@ export class GameEngine {
     const dpr = window.devicePixelRatio || 1;
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
-    this.canvas.style.width = '100%';
-    this.canvas.style.maxWidth = `${this.width}px`;
-    this.canvas.style.height = 'auto';
     this.canvas.style.aspectRatio = `${this.width} / ${this.height}`;
+    this.canvas.style.maxWidth = '100%';
+    this.canvas.style.maxHeight = '100%';
+    this.canvas.style.width = 'auto';
+    this.canvas.style.height = 'auto';
+    this.canvas.style.objectFit = 'contain';
 
     this.ctx.scale(dpr, dpr);
   }

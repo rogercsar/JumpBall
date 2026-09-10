@@ -14,8 +14,9 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const cameraInstanceRef = useRef(null);
   const handsInstanceRef = useRef(null);
+  const streamRef = useRef(null);
+  const animFrameIdRef = useRef(null);
   const lastWristYRef = useRef(null);
   const lastJumpTimeRef = useRef(0);
   const isInitializingRef = useRef(false);
@@ -26,34 +27,36 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
     onJumpTriggerRef.current = onJumpTrigger;
   }, [onJumpTrigger]);
 
-  // Carrega scripts CDN do MediaPipe sob demanda
+  // Carrega apenas o script CDN oficial do MediaPipe Hands (sem dependência do camera_utils.js externo)
   const loadMediaPipeScripts = useCallback(() => {
     return new Promise((resolve, reject) => {
-      if (window.Hands && window.Camera) {
+      if (typeof window !== 'undefined' && window.Hands) {
         return resolve();
       }
 
+      const existingScript = document.querySelector('script[src*="mediapipe/hands"]');
+      if (existingScript) {
+        if (window.Hands) return resolve();
+        existingScript.addEventListener('load', () => resolve());
+        existingScript.addEventListener('error', () => reject(new Error('Falha ao carregar script do MediaPipe Hands')));
+        return;
+      }
+
       const scriptHands = document.createElement('script');
-      scriptHands.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js';
+      scriptHands.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
       scriptHands.crossOrigin = 'anonymous';
-
-      const scriptCamera = document.createElement('script');
-      scriptCamera.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1675466862/camera_utils.js';
-      scriptCamera.crossOrigin = 'anonymous';
-
-      let loadedCount = 0;
-      const checkDone = () => {
-        loadedCount++;
-        if (loadedCount === 2) resolve();
+      scriptHands.onload = () => resolve();
+      scriptHands.onerror = () => {
+        // Fallback para unpkg caso jsDelivr tenha oscilação
+        const fallback = document.createElement('script');
+        fallback.src = 'https://unpkg.com/@mediapipe/hands/hands.js';
+        fallback.crossOrigin = 'anonymous';
+        fallback.onload = () => resolve();
+        fallback.onerror = () => reject(new Error('Falha ao carregar script do MediaPipe Hands'));
+        document.body.appendChild(fallback);
       };
 
-      scriptHands.onload = checkDone;
-      scriptHands.onerror = () => reject(new Error('Falha ao carregar script do MediaPipe Hands'));
-      scriptCamera.onload = checkDone;
-      scriptCamera.onerror = () => reject(new Error('Falha ao carregar script de CameraUtils'));
-
       document.body.appendChild(scriptHands);
-      document.body.appendChild(scriptCamera);
     });
   }, []);
 
@@ -144,7 +147,7 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
   }, []);
 
   const startCamera = useCallback(async () => {
-    if (isInitializingRef.current || cameraInstanceRef.current) return;
+    if (isInitializingRef.current || streamRef.current) return;
     if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setError('Câmera não suportada neste navegador.');
       return;
@@ -163,7 +166,6 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
         video.setAttribute('autoplay', 'true');
         video.setAttribute('muted', 'true');
         video.muted = true;
-        // Posicionamento fora da tela sem usar display:none (evita que o iOS/Chrome pause os frames)
         video.style.position = 'fixed';
         video.style.top = '-9999px';
         video.style.left = '-9999px';
@@ -175,8 +177,32 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
         videoRef.current = video;
       }
 
+      // Conexão nativa com a câmera
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 320 },
+            height: { ideal: 240 },
+            facingMode: 'user'
+          }
+        });
+      } catch (e) {
+        // Fallback para qualquer câmera disponível caso facingMode: 'user' seja restrito
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 320 },
+            height: { ideal: 240 }
+          }
+        });
+      }
+
+      streamRef.current = stream;
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play();
+
       const hands = new window.Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
       });
 
       hands.setOptions({
@@ -189,34 +215,23 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
       hands.onResults(onResults);
       handsInstanceRef.current = hands;
 
-      let camera;
-      try {
-        camera = new window.Camera(videoRef.current, {
-          onFrame: async () => {
-            if (videoRef.current && handsInstanceRef.current) {
-              await handsInstanceRef.current.send({ image: videoRef.current });
-            }
-          },
-          width: 320,
-          height: 240,
-          facingMode: 'user'
-        });
-        await camera.start();
-      } catch (camErr) {
-        console.warn('Aviso: câmera frontal específica falhou, iniciando câmera padrão...', camErr);
-        camera = new window.Camera(videoRef.current, {
-          onFrame: async () => {
-            if (videoRef.current && handsInstanceRef.current) {
-              await handsInstanceRef.current.send({ image: videoRef.current });
-            }
-          },
-          width: 320,
-          height: 240
-        });
-        await camera.start();
-      }
+      // Loop nativo otimizado de processamento via requestAnimationFrame
+      let isRunning = true;
+      const processFrame = async () => {
+        if (!isRunning || !streamRef.current) return;
+        if (videoRef.current && videoRef.current.readyState >= 2 && handsInstanceRef.current) {
+          try {
+            await handsInstanceRef.current.send({ image: videoRef.current });
+          } catch (e) {
+            // Ignora descarte normal de frame
+          }
+        }
+        if (isRunning && streamRef.current) {
+          animFrameIdRef.current = requestAnimationFrame(processFrame);
+        }
+      };
 
-      cameraInstanceRef.current = camera;
+      animFrameIdRef.current = requestAnimationFrame(processFrame);
       setIsCameraActive(true);
       setIsModelLoaded(true);
     } catch (err) {
@@ -229,18 +244,19 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
   }, [loadMediaPipeScripts, onResults]);
 
   const stopCamera = useCallback(() => {
-    if (cameraInstanceRef.current) {
+    if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+    }
+    if (streamRef.current) {
       try {
-        cameraInstanceRef.current.stop();
+        const tracks = streamRef.current.getTracks();
+        tracks.forEach(track => track.stop());
       } catch (e) { /* ignore */ }
-      cameraInstanceRef.current = null;
+      streamRef.current = null;
     }
     if (videoRef.current && videoRef.current.srcObject) {
-      try {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      } catch (e) { /* ignore */ }
+      videoRef.current.srcObject = null;
     }
     setIsCameraActive(false);
   }, []);
