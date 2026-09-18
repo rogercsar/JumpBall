@@ -68,11 +68,11 @@ function AppContent() {
       />
 
       {/* Roteamento de Telas */}
-      <main className={`flex-1 ${activeRoute === 'game' ? 'h-full min-h-0 overflow-hidden flex flex-col' : ''}`}>
+      <main className={`flex-1 flex flex-col ${activeRoute === 'game' ? 'h-full min-h-0 overflow-hidden' : ''}`}>
         {activeRoute === 'home' && (
           <Home
             onNavigate={setCurrentRoute}
-            hasOrientation={isSupported}
+            hasOrientation={false}
             isCameraActive={false}
           />
         )}
@@ -100,7 +100,7 @@ function AppContent() {
         )}
 
         {(activeRoute === 'login' || activeRoute === 'register') && (
-          <div className="py-8">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 w-full my-auto">
             <Login 
               onNavigate={setCurrentRoute} 
               initialMode={activeRoute === 'register' ? 'register' : 'login'} 
@@ -109,7 +109,7 @@ function AppContent() {
         )}
 
         {activeRoute === 'forgot-password' && (
-          <div className="py-8">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 w-full my-auto">
             <ForgotPassword onNavigate={setCurrentRoute} />
           </div>
         )}

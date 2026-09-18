@@ -52,7 +52,7 @@ export function Login({ onNavigate, initialMode = 'login' }) {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8 sm:py-14">
+    <div className="w-full max-w-md mx-auto px-4 py-4">
       <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6">
         {/* Cabeçalho */}
         <div className="text-center space-y-2">

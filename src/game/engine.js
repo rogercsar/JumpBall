@@ -3,7 +3,7 @@ import { ParticleSystem } from './particles';
 import { BackgroundRenderer } from './background';
 
 export class GameEngine {
-  constructor(canvas, stage, skin, onGameOver, onVictory, onScoreUpdate, onLivesUpdate) {
+  constructor(canvas, stage, skin, onGameOver, onVictory, onScoreUpdate, onLivesUpdate, gameOptions = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.stage = stage;
@@ -12,6 +12,11 @@ export class GameEngine {
     this.onVictory = onVictory;
     this.onScoreUpdate = onScoreUpdate;
     this.onLivesUpdate = onLivesUpdate;
+
+    // Modos de Jogo: 'solo' (padrão) ou 'race_ai' (Corrida 1v1 vs Máquina)
+    this.mode = gameOptions.mode || 'solo';
+    this.aiDifficulty = gameOptions.aiDifficulty || 'medium';
+    this.onRaceUpdate = gameOptions.onRaceUpdate || null;
 
     // Dimensões lógicas
     this.width = 440;
@@ -29,9 +34,10 @@ export class GameEngine {
     this.deathMarkers = [];
     this.invulnerableTimer = 0;
 
-    // Estado da Bola (inicialmente repousando na plataforma base)
+    // Estado da Bola do Jogador
+    const initialPlayerX = this.mode === 'race_ai' ? this.width / 2 - 32 : this.width / 2;
     this.ball = {
-      x: this.width / 2,
+      x: initialPlayerX,
       y: this.height - 76,
       vx: 0,
       vy: 0,
@@ -40,6 +46,32 @@ export class GameEngine {
       stretchY: 1,
       angle: 0
     };
+
+    // Estado da Bola do Bot IA (Competidor na Corrida)
+    if (this.mode === 'race_ai') {
+      this.botBall = {
+        x: this.width / 2 + 32,
+        y: this.height - 76,
+        vx: 0,
+        vy: 0,
+        radius: 16,
+        stretchX: 1,
+        stretchY: 1,
+        angle: 0,
+        lives: 3,
+        maxHeightReached: 0,
+        invulnerableTimer: 0,
+        skin: {
+          primary: '#c084fc', // Púrpura Neon Cyber
+          glow: '#a855f7',
+          trail: '#7e22ce'
+        },
+        targetPlatform: null,
+        decisionTimer: 0
+      };
+    } else {
+      this.botBall = null;
+    }
 
     // Câmera
     this.cameraY = 0;
@@ -52,8 +84,8 @@ export class GameEngine {
     this.gemsCollected = 0;
     this.startTime = Date.now();
 
-    // Controles e Sensores
-    this.tiltX = 0; // -1 a 1 vindo do DeviceOrientation
+    // Controles e Sensores (Giroscópio desabilitado por solicitação)
+    this.tiltX = 0; // Desabilitado
     this.keys = { left: false, right: false, jump: false };
     this.touchDirection = 0; // -1 (esquerda), 0, 1 (direita)
     this.gestureSuperJumpTriggered = false;
@@ -92,11 +124,12 @@ export class GameEngine {
     this.platforms = [];
     this.gems = [];
 
-    // Plataforma base inicial
+    // Plataforma base inicial (mais larga no modo corrida para acomodar jogador e bot)
+    const baseWidth = this.mode === 'race_ai' ? 160 : 120;
     this.platforms.push({
-      x: this.width / 2 - 60,
+      x: this.width / 2 - baseWidth / 2,
       y: this.height - 60,
-      width: 120,
+      width: baseWidth,
       height: 16,
       type: 'standard',
       vx: 0
@@ -156,7 +189,8 @@ export class GameEngine {
     }
   }
 
-  // Acionado pelo hook do giroscópio
+  // Giroscópio desabilitado conforme solicitação (preservado para uso futuro)
+  /*
   setTilt(gamma, sensitivity = 1.2, deadzone = 1.5) {
     if (Math.abs(gamma) < deadzone) {
       this.tiltX = 0;
@@ -165,14 +199,18 @@ export class GameEngine {
       this.tiltX = normalized * sensitivity;
     }
   }
+  */
+  setTilt(gamma, sensitivity = 1.2, deadzone = 1.5) {
+    this.tiltX = 0; // Desativado para priorizar botões touch e teclado
+  }
 
-  // Acionado pelo MediaPipe Hands
+  // Acionado pelo botão de Super Salto na tela ou Teclas (Espaço, W, Seta Cima)
   triggerGestureJump() {
     if (!this.running || this.paused) return;
     this.gestureSuperJumpTriggered = true;
   }
 
-  // Controles de Toque na tela
+  // Controles de Toque na tela e botões táteis
   setTouch(direction) {
     this.touchDirection = direction;
   }
@@ -181,7 +219,7 @@ export class GameEngine {
   handleKeyDown(e) {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = true;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = true;
-    if (e.code === 'Space') {
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
       e.preventDefault();
       this.triggerGestureJump();
     }
@@ -196,7 +234,10 @@ export class GameEngine {
     this.running = true;
     this.paused = false;
     this.finished = false;
-    this.ball.vy = this.jumpForce; // Dispara o primeiro pulo ao dar Play
+    this.ball.vy = this.jumpForce; // Dispara o primeiro pulo do jogador ao dar Play
+    if (this.botBall) {
+      this.botBall.vy = this.jumpForce; // Dispara largada da bola do Bot simultaneamente
+    }
     soundEngine.playJump();
     this.startTime = Date.now();
     this.lastTime = performance.now();
@@ -242,8 +283,8 @@ export class GameEngine {
       this.invulnerableTimer = Math.max(0, this.invulnerableTimer - dt * 0.0166);
     }
 
-    // 1. Entrada Horizontal (Giroscópio + Teclado + Toque na Tela)
-    let moveInput = this.tiltX;
+    // 1. Entrada Horizontal (Apenas Teclado + Toque na Tela)
+    let moveInput = 0;
     if (this.keys.left) moveInput = -1;
     if (this.keys.right) moveInput = 1;
     if (this.touchDirection !== 0) {
@@ -282,7 +323,7 @@ export class GameEngine {
       this.particles.emitTrail(this.ball.x, this.ball.y, this.skin.trail);
     }
 
-    // 2.5 Super Pulo Disparado por Gesto MediaPipe ou Tecla Espaço
+    // 2.5 Super Pulo Disparado por Botão Touch ou Tecla Espaço / W / Seta Cima
     if (this.gestureSuperJumpTriggered) {
       this.gestureSuperJumpTriggered = false;
       this.ball.vy = this.jumpForce * 1.45;
@@ -381,7 +422,27 @@ export class GameEngine {
       }
     }
 
-    // 7. Câmera Vertical (Segue a bola para cima suavemente)
+    // 6.5. Atualizar IA do Bot Oponente (se estiver no Modo Corrida)
+    if (this.mode === 'race_ai' && this.botBall) {
+      this.updateBot(dt);
+
+      // Notificar estatísticas de duelo de corrida
+      if (this.onRaceUpdate) {
+        const pHeight = Math.max(0, this.maxHeightReached);
+        const bHeight = Math.max(0, this.botBall.maxHeightReached);
+        const diff = pHeight - bHeight;
+        const leader = diff > 4 ? 'player' : (diff < -4 ? 'bot' : 'tied');
+        this.onRaceUpdate({
+          playerHeight: pHeight,
+          botHeight: bHeight,
+          distanceDiff: diff,
+          leader,
+          botLives: this.botBall.lives
+        });
+      }
+    }
+
+    // 7. Câmera Vertical (Segue a bola do jogador para cima suavemente)
     const targetY = this.ball.y - this.height * 0.45;
     if (targetY < this.cameraY) {
       this.cameraY += (targetY - this.cameraY) * 0.12 * dt;
@@ -403,7 +464,7 @@ export class GameEngine {
     // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada)
     const goalY = -this.stage.targetHeight + (this.height - 120);
     if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
-      this.finishGame('completed');
+      this.finishGame('completed', { raceWinner: 'player' });
       return;
     }
 
@@ -424,7 +485,7 @@ export class GameEngine {
           this.onLivesUpdate(this.lives);
         }
 
-        // SFX de perda de vida e partículas vermelhes
+        // SFX de perda de vida e partículas vermelhas
         soundEngine.playLoseLife();
         this.particles.emit(this.ball.x, this.cameraY + this.height - 30, 24, {
           color: '#ef4444',
@@ -447,9 +508,206 @@ export class GameEngine {
         if (this.onLivesUpdate) {
           this.onLivesUpdate(0);
         }
-        this.finishGame('game_over');
+        this.finishGame('game_over', { raceWinner: 'bot' });
       }
     }
+  }
+
+  // Lógica da Inteligência Artificial do Bot na Corrida
+  updateBot(dt) {
+    if (!this.botBall || this.botBall.lives <= 0) return;
+    const bot = this.botBall;
+
+    // Timer do escudo de respawn do bot
+    if (bot.invulnerableTimer > 0) {
+      bot.invulnerableTimer = Math.max(0, bot.invulnerableTimer - dt * 0.0166);
+    }
+
+    bot.decisionTimer = (bot.decisionTimer || 0) + dt;
+
+    // Tomada de decisão: encontra plataforma ideal a cada ciclo de decisão
+    if (bot.decisionTimer > 6 || !bot.targetPlatform || bot.targetPlatform.broken) {
+      bot.decisionTimer = 0;
+
+      // Plataformas alcançáveis (entre 30px abaixo e 220px acima)
+      const reachable = this.platforms.filter((p) => {
+        if (p.broken) return false;
+        const dy = bot.y - p.y;
+        return dy > -30 && dy < 230;
+      });
+
+      if (reachable.length > 0) {
+        if (this.aiDifficulty === 'hard') {
+          // Prioriza molas ou a plataforma mais alta
+          reachable.sort((a, b) => {
+            if (a.type === 'spring' && b.type !== 'spring') return -1;
+            if (b.type === 'spring' && a.type !== 'spring') return 1;
+            return a.y - b.y;
+          });
+          bot.targetPlatform = reachable[0];
+        } else if (this.aiDifficulty === 'easy') {
+          // Chance de hesitar ou pegar plataforma lateral
+          if (Math.random() < 0.35) {
+            bot.targetPlatform = reachable[Math.floor(Math.random() * reachable.length)];
+          } else {
+            reachable.sort((a, b) => Math.hypot(a.x + a.width / 2 - bot.x, a.y - bot.y) - Math.hypot(b.x + b.width / 2 - bot.x, b.y - bot.y));
+            bot.targetPlatform = reachable[0];
+          }
+        } else {
+          // 'medium': equilíbrio inteligente entre proximidade e ascensão
+          reachable.sort((a, b) => {
+            const scoreA = a.y + Math.abs(a.x + a.width / 2 - bot.x) * 0.35;
+            const scoreB = b.y + Math.abs(b.x + b.width / 2 - bot.x) * 0.35;
+            return scoreA - scoreB;
+          });
+          bot.targetPlatform = reachable[0];
+        }
+      }
+    }
+
+    // Direcionamento horizontal em direção à plataforma alvo
+    const targetX = bot.targetPlatform 
+      ? (bot.targetPlatform.x + bot.targetPlatform.width * 0.5)
+      : (this.width * 0.5);
+
+    const dx = targetX - bot.x;
+    let botInput = 0;
+    if (dx > 6) botInput = 1;
+    else if (dx < -6) botInput = -1;
+    else botInput = dx / 6;
+
+    let botAccel = 0.75 * (this.stage.speedFactor || 1);
+    let botMaxSpeed = 6.2;
+    if (this.aiDifficulty === 'easy') {
+      botAccel = 0.55 * (this.stage.speedFactor || 1);
+      botMaxSpeed = 4.8;
+    } else if (this.aiDifficulty === 'hard') {
+      botAccel = 0.95 * (this.stage.speedFactor || 1);
+      botMaxSpeed = 8.2;
+    }
+
+    bot.vx += botInput * botAccel * dt;
+    bot.vx += (this.wind * 0.4) * dt;
+    bot.vx *= Math.pow(this.friction, dt);
+    bot.vx = Math.max(-botMaxSpeed, Math.min(botMaxSpeed, bot.vx));
+
+    bot.x += bot.vx * dt;
+    bot.angle += (bot.vx * 0.05) * dt;
+
+    // Wrap around nas bordas da tela
+    if (bot.x < -bot.radius) {
+      bot.x = this.width + bot.radius;
+    } else if (bot.x > this.width + bot.radius) {
+      bot.x = -bot.radius;
+    }
+
+    // Física Vertical
+    bot.vy += this.gravity * dt;
+    bot.y += bot.vy * dt;
+
+    bot.stretchX += (1 - bot.stretchX) * 0.12 * dt;
+    bot.stretchY += (1 - bot.stretchY) * 0.12 * dt;
+
+    // Partículas de rastro do Bot
+    if (Math.abs(bot.vy) > 2) {
+      this.particles.emitTrail(bot.x, bot.y, bot.skin.trail);
+    }
+
+    // Atualizar recorde de altura alcançada pelo Bot
+    const botCurrentHeight = Math.max(0, Math.floor(-bot.y + this.height - 120));
+    if (botCurrentHeight > bot.maxHeightReached) {
+      bot.maxHeightReached = botCurrentHeight;
+    }
+
+    // Colisão do Bot com plataformas (vy > 0)
+    if (bot.vy > 0) {
+      for (const p of this.platforms) {
+        if (p.broken) continue;
+
+        const isCollidingX = bot.x + bot.radius * 0.7 > p.x &&
+                             bot.x - bot.radius * 0.7 < p.x + p.width;
+
+        const wasAbove = (bot.y - bot.vy * dt) <= p.y + 4;
+        const isNowAtOrBelow = bot.y + bot.radius >= p.y &&
+                               bot.y + bot.radius <= p.y + p.height + 12;
+
+        if (isCollidingX && wasAbove && isNowAtOrBelow) {
+          bot.y = p.y - bot.radius;
+
+          if (p.type === 'spring') {
+            bot.vy = this.jumpForce * 1.65;
+            bot.stretchX = 0.6;
+            bot.stretchY = 1.6;
+            soundEngine.playSpring();
+            this.particles.emitSuperJumpBurst(bot.x, p.y, '#c084fc');
+          } else if (p.type === 'fragile') {
+            bot.vy = this.jumpForce;
+            p.broken = true;
+            soundEngine.playCrumble();
+            this.particles.emitPlatformCrumble(p.x, p.y, p.width, p.height, '#ef4444');
+          } else {
+            bot.vy = this.jumpForce;
+            bot.stretchX = 1.35;
+            bot.stretchY = 0.7;
+            this.particles.emitJumpBurst(bot.x, p.y, '#a855f7');
+            if (p.type === 'conveyor') {
+              bot.vx += p.vx * 1.8;
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    // Verificação de queda do Bot
+    if (bot.y > this.cameraY + this.height + 60) {
+      if (bot.lives > 1) {
+        bot.lives--;
+        this.particles.emit(bot.x, this.cameraY + this.height - 30, 18, {
+          color: '#a855f7',
+          size: 4,
+          speed: 3.5,
+          life: 0.7
+        });
+        this.respawnBot();
+      } else {
+        // Bot perdeu todas as vidas: o jogador vence a corrida por eliminação!
+        bot.lives = 0;
+        this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
+        return;
+      }
+    }
+
+    // Verificação de Vitória do Bot na corrida
+    const goalY = -this.stage.targetHeight + (this.height - 120);
+    if (bot.maxHeightReached >= this.stage.targetHeight || bot.y <= goalY + bot.radius) {
+      this.finishGame('race_bot_won', { raceWinner: 'bot', raceReason: 'bot_reached_goal' });
+      return;
+    }
+  }
+
+  // Respawn do Bot em plataforma segura
+  respawnBot() {
+    if (!this.botBall) return;
+    const visiblePlatforms = this.platforms.filter((p) => {
+      if (p.broken) return false;
+      const screenY = p.y - this.cameraY;
+      return screenY >= 90 && screenY <= this.height - 90;
+    });
+
+    let targetPlat = null;
+    if (visiblePlatforms.length > 0) {
+      visiblePlatforms.sort((a, b) => b.y - a.y);
+      targetPlat = visiblePlatforms[0];
+    } else {
+      targetPlat = this.platforms[0] || { x: this.width / 2, y: this.height - 60, width: 100 };
+    }
+
+    this.botBall.x = targetPlat.x + targetPlat.width / 2;
+    this.botBall.y = targetPlat.y - this.botBall.radius - 2;
+    this.botBall.vx = 0;
+    this.botBall.vy = this.jumpForce * 1.05;
+    this.botBall.invulnerableTimer = 2.0;
   }
 
   respawnPlayer() {
@@ -493,7 +751,7 @@ export class GameEngine {
     this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y, '#38bdf8');
   }
 
-  finishGame(status) {
+  finishGame(status, details = {}) {
     if (this.finished) return;
     this.finished = true;
     this.running = false;
@@ -502,32 +760,32 @@ export class GameEngine {
       this.animationId = null;
     }
     const duration = Math.floor((Date.now() - this.startTime) / 1000);
+    const isRace = this.mode === 'race_ai';
+    const isPlayerWin = status === 'completed';
 
-    if (status === 'completed') {
+    const resultPayload = {
+      score: isPlayerWin ? this.score + 1000 : this.score,
+      maxHeight: this.maxHeightReached,
+      duration,
+      jumps: this.jumpsCount,
+      gems: this.gemsCollected,
+      status: status,
+      stage: this.stage,
+      isRace,
+      winner: isPlayerWin ? 'player' : (status === 'race_bot_won' ? 'bot' : (details.raceWinner || 'none')),
+      botHeight: this.botBall ? this.botBall.maxHeightReached : 0,
+      raceReason: details.raceReason || null
+    };
+
+    if (isPlayerWin) {
       soundEngine.playVictory();
       if (this.onVictory) {
-        this.onVictory({
-          score: this.score + 1000,
-          maxHeight: this.maxHeightReached,
-          duration,
-          jumps: this.jumpsCount,
-          gems: this.gemsCollected,
-          status: 'completed',
-          stage: this.stage
-        });
+        this.onVictory(resultPayload);
       }
     } else {
       soundEngine.playGameOver();
       if (this.onGameOver) {
-        this.onGameOver({
-          score: this.score,
-          maxHeight: this.maxHeightReached,
-          duration,
-          jumps: this.jumpsCount,
-          gems: this.gemsCollected,
-          status: 'game_over',
-          stage: this.stage
-        });
+        this.onGameOver(resultPayload);
       }
     }
   }
@@ -733,6 +991,106 @@ export class GameEngine {
     }
 
     ctx.restore();
+
+    // 5.5 Desenhar a Bola do Bot IA e Indicador de Corrida (Modo Corrida)
+    if (this.botBall && this.botBall.lives > 0) {
+      const botScreenY = this.botBall.y - this.cameraY;
+
+      // Se o Bot estiver no campo visível da tela
+      if (botScreenY > -40 && botScreenY < this.height + 40) {
+        ctx.save();
+        ctx.translate(this.botBall.x, botScreenY);
+        ctx.rotate(this.botBall.angle);
+        ctx.scale(this.botBall.stretchX, this.botBall.stretchY);
+
+        // Glow externo do Bot
+        ctx.shadowColor = this.botBall.skin.glow;
+        ctx.shadowBlur = 18;
+
+        // Gradiente do Bot
+        const botGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.botBall.radius);
+        botGrad.addColorStop(0, '#ffffff');
+        botGrad.addColorStop(0.35, this.botBall.skin.primary);
+        botGrad.addColorStop(1, this.botBall.skin.trail);
+
+        ctx.fillStyle = botGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.botBall.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Contorno brilhante
+        ctx.strokeStyle = this.botBall.skin.glow;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Visor óptico cibernético de IA
+        ctx.fillStyle = '#38bdf8';
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(-6, -3, 12, 5);
+
+        ctx.restore();
+
+        // Placa "🤖 BOT IA" flutuando acima da esfera
+        ctx.save();
+        ctx.translate(this.botBall.x, botScreenY - this.botBall.radius - 12);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.strokeStyle = '#a855f7';
+        ctx.lineWidth = 1;
+        this.roundRect(ctx, -26, -10, 52, 16, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f3e8ff';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🤖 BOT IA', 0, -2);
+        ctx.restore();
+      } else {
+        // Indicador Off-screen do Bot (mostra se o Bot está na frente ou atrás do jogador)
+        ctx.save();
+        const clampedX = Math.max(42, Math.min(this.width - 42, this.botBall.x));
+        if (botScreenY <= -40) {
+          // Bot está ACIMA da visão do jogador!
+          ctx.translate(clampedX, 24);
+          ctx.fillStyle = 'rgba(168, 85, 247, 0.95)';
+          ctx.shadowColor = '#c084fc';
+          ctx.shadowBlur = 12;
+          this.roundRect(ctx, -42, -12, 84, 24, 6);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const distAbove = Math.round((this.cameraY - this.botBall.y) / 10);
+          ctx.fillText(`▲ BOT +${distAbove}m`, 0, 0);
+        } else if (botScreenY >= this.height + 40) {
+          // Bot está ABAIXO da visão do jogador!
+          ctx.translate(clampedX, this.height - 24);
+          ctx.fillStyle = 'rgba(168, 85, 247, 0.95)';
+          ctx.shadowColor = '#c084fc';
+          ctx.shadowBlur = 12;
+          this.roundRect(ctx, -42, -12, 84, 24, 6);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const distBelow = Math.round((this.botBall.y - (this.cameraY + this.height)) / 10);
+          ctx.fillText(`▼ BOT -${distBelow}m`, 0, 0);
+        }
+        ctx.restore();
+      }
+    }
 
     // 6. Meta de Altura / Linha de Chegada
     const goalY = -this.stage.targetHeight + (this.height - 120);

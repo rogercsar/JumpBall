@@ -135,107 +135,118 @@ export function Settings({ orientation, requestOrientationPermission, permission
         </button>
       </div>
 
-      {/* 1. SEÇÃO DE GIROSCÓPIO E INCLINAÇÃO */}
-      <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-              <Smartphone className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-white">Sensor de Giroscópio / Acelerômetro</h2>
-              <p className="text-xs text-slate-400">Controle horizontal pela inclinação lateral do aparelho</p>
-            </div>
-          </div>
+      {/* SEÇÕES DE GIROSCÓPIO E MEDIAPIPE (DESABILITADAS TEMPORARIAMENTE - PRESERVADAS PARA O FUTURO) */}
+      {false && (
+        <>
+          {/* 1. SEÇÃO DE GIROSCÓPIO E INCLINAÇÃO */}
+          <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">Sensor de Giroscópio / Acelerômetro</h2>
+                  <p className="text-xs text-slate-400">Controle horizontal pela inclinação lateral do aparelho</p>
+                </div>
+              </div>
 
-          {/* Botão de Permissão iOS 13+ */}
-          {needsPermissionPrompt && !permissionGranted && (
-            <button
-              onClick={requestOrientationPermission}
-              className="px-3 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 hover:bg-cyan-400 animate-pulse"
-            >
-              Liberar no iOS
-            </button>
-          )}
-        </div>
-
-        {/* Nível Visual com Teste em Tempo Real */}
-        <TiltMeter
-          gamma={activeGamma}
-          onSimulateTilt={setSimulatedGamma}
-          onCalibrate={handleCalibrate}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <div>
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-2">
-              <span>Sensibilidade do Giroscópio</span>
-              <span className="text-cyan-400 font-mono font-bold">{settings.gyroSensitivity}x</span>
+              {needsPermissionPrompt && !permissionGranted && (
+                <button
+                  onClick={requestOrientationPermission}
+                  className="px-3 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 hover:bg-cyan-400 animate-pulse"
+                >
+                  Liberar no iOS
+                </button>
+              )}
             </div>
-            <input
-              type="range"
-              min="0.5"
-              max="3.0"
-              step="0.1"
-              value={settings.gyroSensitivity}
-              onChange={(e) => handleSensitivityChange(e.target.value)}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+
+            <TiltMeter
+              gamma={activeGamma}
+              onSimulateTilt={setSimulatedGamma}
+              onCalibrate={handleCalibrate}
             />
-            <span className="text-[10px] text-slate-500 block mt-1">Quanto maior, mais rápido a bola reage à inclinação</span>
-          </div>
 
-          <div>
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-2">
-              <span>Zona Morta (Deadzone)</span>
-              <span className="text-cyan-400 font-mono font-bold">{settings.gyroDeadzone}°</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div>
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-2">
+                  <span>Sensibilidade do Giroscópio</span>
+                  <span className="text-cyan-400 font-mono font-bold">{settings.gyroSensitivity}x</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="3.0"
+                  step="0.1"
+                  value={settings.gyroSensitivity}
+                  onChange={(e) => handleSensitivityChange(e.target.value)}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                />
+                <span className="text-[10px] text-slate-500 block mt-1">Quanto maior, mais rápido a bola reage à inclinação</span>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-2">
+                  <span>Zona Morta (Deadzone)</span>
+                  <span className="text-cyan-400 font-mono font-bold">{settings.gyroDeadzone}°</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="5.0"
+                  step="0.5"
+                  value={settings.gyroDeadzone}
+                  onChange={(e) => handleDeadzoneChange(e.target.value)}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                />
+                <span className="text-[10px] text-slate-500 block mt-1">Evita que tremores leves movam a bola</span>
+              </div>
             </div>
-            <input
-              type="range"
-              min="0.5"
-              max="5.0"
-              step="0.5"
-              value={settings.gyroDeadzone}
-              onChange={(e) => handleDeadzoneChange(e.target.value)}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-            />
-            <span className="text-[10px] text-slate-500 block mt-1">Evita que tremores leves movam a bola</span>
           </div>
-        </div>
-      </div>
 
-      {/* 2. SEÇÃO DE CÂMERA E VISÃO COMPUTACIONAL (MEDIAPIPE) */}
-      <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
-              <Camera className="w-4 h-4" />
+          {/* 2. SEÇÃO DE CÂMERA E VISÃO COMPUTACIONAL (MEDIAPIPE) */}
+          <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+                  <Camera className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">Visão Computacional (MediaPipe Hands)</h2>
+                  <p className="text-xs text-slate-400">Detecta punho fechado na câmera selfie para disparar o salto</p>
+                </div>
+              </div>
+
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.cameraEnabled}
+                  onChange={(e) => handleCameraToggle(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500" />
+              </label>
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-white">Visão Computacional (MediaPipe Hands)</h2>
-              <p className="text-xs text-slate-400">Detecta punho fechado na câmera selfie para disparar o salto</p>
+
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
+                <HelpCircle className="w-4 h-4 text-cyan-400" />
+                <span>Como funciona no jogo:</span>
+              </div>
+              <p>
+                Ao habilitar, a câmera frontal roda localmente no seu dispositivo. Quando você <strong>fecha o punho 👊</strong> ou faz um movimento rápido para cima, a bola ganha um <strong>Super Salto com Impulso Extra</strong>.
+              </p>
             </div>
           </div>
+        </>
+      )}
 
-          {/* Toggle Switch */}
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.cameraEnabled}
-              onChange={(e) => handleCameraToggle(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500" />
-          </label>
-        </div>
-
-        <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 space-y-1">
-          <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
-            <HelpCircle className="w-4 h-4 text-cyan-400" />
-            <span>Como funciona no jogo:</span>
-          </div>
-          <p>
-            Ao habilitar, a câmera frontal roda localmente no seu dispositivo. Quando você <strong>fecha o punho 👊</strong> ou faz um movimento rápido para cima, a bola ganha um <strong>Super Salto com Impulso Extra</strong>.
-          </p>
+      {/* AVISO DE CONTROLE ATIVO */}
+      <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs flex items-center gap-3">
+        <Sliders className="w-5 h-5 shrink-0 text-cyan-400" />
+        <div>
+          <span className="font-bold block text-white text-sm">Controles Ativos: Botões Touch e Teclado</span>
+          <span>Os controles de giroscópio e câmera foram desativados para máxima precisão e estabilidade. Utilize as setas na tela ou o teclado para pilotar a esfera!</span>
         </div>
       </div>
 
@@ -247,7 +258,7 @@ export function Settings({ orientation, requestOrientationPermission, permission
           </div>
           <div>
             <h2 className="text-sm font-bold text-white">Modo de Controle</h2>
-            <p className="text-xs text-slate-400">Escolha a combinação de hardware ideal para seu dispositivo</p>
+            <p className="text-xs text-slate-400">Escolha o layout de entrada ideal para seu dispositivo</p>
           </div>
         </div>
 
