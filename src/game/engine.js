@@ -293,12 +293,12 @@ export class GameEngine {
       this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.glow);
     }
 
-    // 3. Atualizar Altura e Pontuação
-    const currentHeightMeters = Math.max(0, Math.floor((this.height - 76 - this.ball.y) / 10));
-    if (currentHeightMeters > this.maxHeightReached) {
-      const diff = currentHeightMeters - this.maxHeightReached;
-      this.maxHeightReached = currentHeightMeters;
-      this.score += diff * 10;
+    // 3. Atualizar Altura e Pontuação (Alinhado exatamente à escala da Meta da Fase)
+    const currentHeight = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
+    if (currentHeight > this.maxHeightReached) {
+      const diff = currentHeight - this.maxHeightReached;
+      this.maxHeightReached = currentHeight;
+      this.score += diff;
       if (this.onScoreUpdate) {
         this.onScoreUpdate(this.score, this.maxHeightReached);
       }
@@ -400,8 +400,9 @@ export class GameEngine {
     // 10. Atualizar Partículas
     this.particles.update(dt);
 
-    // 11. Verificação de Vitória (Chegou na meta de altura da fase)
-    if (this.maxHeightReached >= this.stage.targetHeight) {
+    // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada)
+    const goalY = -this.stage.targetHeight + (this.height - 120);
+    if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
       this.finishGame('completed');
       return;
     }
@@ -736,19 +737,31 @@ export class GameEngine {
     // 6. Meta de Altura / Linha de Chegada
     const goalY = -this.stage.targetHeight + (this.height - 120);
     const goalScreenY = goalY - this.cameraY;
-    if (goalScreenY > -40 && goalScreenY < this.height + 40) {
+    if (goalScreenY > -60 && goalScreenY < this.height + 60) {
       ctx.save();
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 14;
+
       ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([8, 8]);
+      ctx.lineWidth = 4;
+      ctx.setLineDash([12, 8]);
       ctx.beginPath();
       ctx.moveTo(0, goalScreenY);
       ctx.lineTo(this.width, goalScreenY);
       ctx.stroke();
 
-      ctx.fillStyle = '#facc15';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText('🏆 META DA FASE', 15, goalScreenY - 8);
+      // Placa de Chegada
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([]);
+      this.roundRect(ctx, 12, goalScreenY - 26, 180, 22, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('🏆 LINHA DE CHEGADA', 22, goalScreenY - 11);
       ctx.restore();
     }
   }
