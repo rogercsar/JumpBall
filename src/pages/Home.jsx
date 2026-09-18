@@ -33,16 +33,20 @@ export function Home({ onNavigate }) {
   const gamesPlayed = profile?.games_played || 0;
   const progressPercent = Math.min(100, Math.round((stagesCompleted / STAGES.length) * 100));
 
-  // Sistema de Nível e Patente Gamer
+  // Sistema de Nível e Patente Gamer calibrado dinamicamente para todas as fases
+  const maxAltitude = STAGES[STAGES.length - 1]?.targetHeight || 43000;
   const playerXP = stagesCompleted * 1200 + Math.floor(highScore / 4) + totalJumps * 2;
   const playerLevel = Math.max(1, Math.floor(playerXP / 1800) + 1);
   const currentLevelProgress = Math.min(100, Math.round(((playerXP % 1800) / 1800) * 100));
 
   const getRankData = (lvl) => {
-    if (lvl >= 15) return { title: 'Lorde Cósmico', gradient: 'from-amber-400 via-rose-500 to-purple-500', icon: Crown, border: 'border-amber-500/40' };
-    if (lvl >= 10) return { title: 'Mestre da Gravidade', gradient: 'from-purple-400 via-indigo-400 to-cyan-400', icon: Sparkles, border: 'border-purple-500/40' };
-    if (lvl >= 6) return { title: 'Salteador Estelar', gradient: 'from-cyan-400 via-sky-400 to-blue-500', icon: Zap, border: 'border-cyan-500/40' };
-    if (lvl >= 3) return { title: 'Piloto Veterano', gradient: 'from-emerald-400 to-teal-400', icon: Award, border: 'border-emerald-500/40' };
+    if (lvl >= 30) return { title: 'Divindade Cósmica', gradient: 'from-amber-300 via-rose-500 to-violet-600', icon: Crown, border: 'border-amber-400 shadow-amber-500/20' };
+    if (lvl >= 24) return { title: 'Titã Dimensional', gradient: 'from-fuchsia-400 via-rose-400 to-amber-300', icon: Sparkles, border: 'border-fuchsia-500/40' };
+    if (lvl >= 18) return { title: 'Soberano Elemental', gradient: 'from-indigo-400 via-purple-400 to-pink-500', icon: Shield, border: 'border-indigo-500/40' };
+    if (lvl >= 13) return { title: 'Lorde Cósmico', gradient: 'from-amber-400 via-orange-400 to-rose-500', icon: Crown, border: 'border-amber-500/40' };
+    if (lvl >= 9) return { title: 'Mestre da Gravidade', gradient: 'from-purple-400 via-indigo-400 to-cyan-400', icon: Sparkles, border: 'border-purple-500/40' };
+    if (lvl >= 5) return { title: 'Salteador Estelar', gradient: 'from-cyan-400 via-sky-400 to-blue-500', icon: Zap, border: 'border-cyan-500/40' };
+    if (lvl >= 2) return { title: 'Piloto Veterano', gradient: 'from-emerald-400 to-teal-400', icon: Award, border: 'border-emerald-500/40' };
     return { title: 'Cadete Espacial', gradient: 'from-slate-300 to-slate-400', icon: Star, border: 'border-slate-700' };
   };
 
@@ -70,7 +74,7 @@ export function Home({ onNavigate }) {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-black uppercase tracking-wider shadow-sm">
                 <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                TEMPORADA 1: RUMO AOS 20.000M
+                TEMPORADA 1: RUMO AOS {maxAltitude.toLocaleString()}M
               </span>
 
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border ${rank.border} text-xs font-bold text-slate-200 shadow-sm`}>
@@ -86,13 +90,13 @@ export function Home({ onNavigate }) {
                 </>
               ) : (
                 <>
-                  JUMPBALL <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">RUNNER 20K</span>
+                  JUMPBALL <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">TITAN {Math.round(maxAltitude / 1000)}K</span>
                 </>
               )}
             </h1>
 
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Desafie 20 biomas cósmicos extremos, salte sobre plataformas móveis, desvie de magma e alcance o ápice da singularidade espacial a 20.000 metros de altitude!
+              Desafie {STAGES.length} biomas cósmicos extremos, salte sobre plataformas móveis, desvie de perigos e alcance o ápice da jornada a {maxAltitude.toLocaleString()} metros de altitude!
             </p>
 
             {/* Barra de XP do Nível Gamer */}

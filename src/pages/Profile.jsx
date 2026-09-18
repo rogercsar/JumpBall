@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDialog } from '../contexts/DialogContext';
-import { BALL_SKINS } from '../game/stages';
+import { BALL_SKINS, STAGES } from '../game/stages';
 
 export function Profile({ onNavigate }) {
   const { user, profile, updateProfile, isGuest } = useAuth();
@@ -172,7 +172,7 @@ export function Profile({ onNavigate }) {
             <Layers className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-3xl font-black text-cyan-400">
-            {profile?.stages_completed || 0} <span className="text-lg text-slate-500 font-normal">/ 10</span>
+            {profile?.stages_completed || 0} <span className="text-lg text-slate-500 font-normal">/ {STAGES.length}</span>
           </div>
           <p className="text-[11px] text-slate-500">Progressão na campanha</p>
         </div>
