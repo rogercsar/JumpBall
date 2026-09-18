@@ -1,5 +1,6 @@
 import { soundEngine } from './audio';
 import { ParticleSystem } from './particles';
+import { BackgroundRenderer } from './background';
 
 export class GameEngine {
   constructor(canvas, stage, skin, onGameOver, onVictory, onScoreUpdate) {
@@ -11,14 +12,15 @@ export class GameEngine {
     this.onVictory = onVictory;
     this.onScoreUpdate = onScoreUpdate;
 
-    this.particles = new ParticleSystem();
-    this.running = false;
-    this.paused = false;
-    this.animationId = null;
-
     // Dimensões lógicas
     this.width = 440;
     this.height = 720;
+
+    this.particles = new ParticleSystem();
+    this.background = new BackgroundRenderer(this.width, this.height, this.stage);
+    this.running = false;
+    this.paused = false;
+    this.animationId = null;
 
     // Estado da Bola (inicialmente repousando na plataforma base)
     this.ball = {
@@ -225,6 +227,9 @@ export class GameEngine {
   }
 
   update(dt) {
+    // 0. Atualizar partículas de fundo e efeitos dinâmicos
+    this.background.update(dt);
+
     // 1. Entrada Horizontal (Giroscópio + Teclado + Toque)
     let moveInput = this.tiltX;
     if (this.keys.left || this.touchDirection < 0) moveInput = -1;
@@ -432,26 +437,8 @@ export class GameEngine {
   render() {
     const ctx = this.ctx;
 
-    // 1. Fundo Gradiente da Fase
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, this.height);
-    bgGrad.addColorStop(0, this.stage.bgGradient[0]);
-    bgGrad.addColorStop(0.5, this.stage.bgGradient[1]);
-    bgGrad.addColorStop(1, this.stage.bgGradient[2]);
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, this.width, this.height);
-
-    // Grade de fundo sutil com efeito parallax
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-    ctx.lineWidth = 1;
-    const gridOffsetY = -this.cameraY * 0.3 % 40;
-    for (let y = gridOffsetY; y < this.height; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.width, y);
-      ctx.stroke();
-    }
-    ctx.restore();
+    // 1. Cenário de Fundo Temático com Parallax e Partículas Atmosféricas
+    this.background.draw(ctx, this.cameraY);
 
     // 2. Desenhar Plataformas
     for (const p of this.platforms) {
