@@ -20,6 +20,7 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
   const lastWristYRef = useRef(null);
   const lastJumpTimeRef = useRef(0);
   const isInitializingRef = useRef(false);
+  const deviceNotFoundRef = useRef(false);
 
   // Mantém a referência do callback sempre atualizada sem recriar onResults
   const onJumpTriggerRef = useRef(onJumpTrigger);
@@ -147,7 +148,7 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
   }, []);
 
   const startCamera = useCallback(async () => {
-    if (isInitializingRef.current || streamRef.current) return;
+    if (isInitializingRef.current || streamRef.current || deviceNotFoundRef.current) return;
     if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setError('Câmera não suportada neste navegador.');
       return;
@@ -156,6 +157,20 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
     try {
       isInitializingRef.current = true;
       setError(null);
+
+      // Verifica antecipadamente se o dispositivo possui alguma câmera de vídeo
+      if (navigator.mediaDevices.enumerateDevices) {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const hasVideoInput = devices.some((d) => d.kind === 'videoinput');
+          if (!hasVideoInput) {
+            deviceNotFoundRef.current = true;
+            setError('Nenhuma câmera encontrada.');
+            setIsCameraActive(false);
+            return;
+          }
+        } catch (e) { /* ignore */ }
+      }
 
       await loadMediaPipeScripts();
 
@@ -188,6 +203,9 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
           }
         });
       } catch (e) {
+        if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+          throw e;
+        }
         // Fallback para qualquer câmera disponível caso facingMode: 'user' seja restrito
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -235,8 +253,16 @@ export function useMediaPipeHands({ enabled = true, onJumpTrigger } = {}) {
       setIsCameraActive(true);
       setIsModelLoaded(true);
     } catch (err) {
-      console.warn('Aviso ao inicializar MediaPipe:', err);
-      setError('Câmera indisponível ou permissão não concedida.');
+      const isNotFound = err.name === 'NotFoundError' || 
+                         err.name === 'DevicesNotFoundError' || 
+                         err.message?.includes('Requested device not found');
+      if (isNotFound) {
+        deviceNotFoundRef.current = true;
+        setError('Nenhuma câmera conectada.');
+      } else {
+        console.warn('Aviso ao inicializar MediaPipe:', err);
+        setError('Câmera indisponível ou permissão não concedida.');
+      }
       setIsCameraActive(false);
     } finally {
       isInitializingRef.current = false;
