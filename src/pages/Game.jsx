@@ -251,7 +251,7 @@ export function Game({ onNavigate }) {
     );
     if (isRemoteUser) {
       try {
-        await supabase.from('game_history').insert([
+        const { error: histError } = await supabase.from('game_history').insert([
           {
             user_id: user.id,
             stage_id: stageNumber,
@@ -263,8 +263,23 @@ export function Game({ onNavigate }) {
             control_mode: controlModeVal
           }
         ]);
+        if (histError) console.warn('Aviso: Erro ao inserir game_history:', histError);
       } catch (err) {
         console.warn('Aviso: Falha ao inserir no Supabase diretamente:', err);
+      }
+
+      // Se venceu a fase, assegura a persistência na nuvem imediatamente
+      if (isWin) {
+        try {
+          const { error: profError } = await supabase.from('profiles').upsert({
+            id: user.id,
+            stages_completed: newStagesCompleted,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' });
+          if (profError) console.warn('Aviso: Erro ao atualizar stages_completed no Supabase:', profError);
+        } catch (err) {
+          console.warn('Aviso ao sincronizar stages_completed:', err);
+        }
       }
     }
   };

@@ -120,30 +120,52 @@ export function AuthProvider({ children }) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (data) {
-        const local = localStore.getProfile();
-        const merged = {
-          ...data,
-          stages_completed: Math.max(data.stages_completed || 0, local.stages_completed || 0),
-          high_score: Math.max(data.high_score || 0, local.high_score || 0),
-          total_jumps: Math.max(data.total_jumps || 0, local.total_jumps || 0),
-          games_played: Math.max(data.games_played || 0, local.games_played || 0)
-        };
-        setProfile(merged);
-        localStore.saveProfile(merged);
-
-        // Se o progresso local estava à frente, sincroniza de volta com o Supabase
-        if (merged.stages_completed > (data.stages_completed || 0) || merged.high_score > (data.high_score || 0)) {
-          supabase.from('profiles').update({
-            stages_completed: merged.stages_completed,
-            high_score: merged.high_score,
-            total_jumps: merged.total_jumps
-          }).eq('id', userId).then(() => {}).catch(() => {});
+      // Busca redundante: maior stage_id completado na tabela game_history
+      let maxStageFromHistory = 0;
+      try {
+        const { data: histData } = await supabase
+          .from('game_history')
+          .select('stage_id')
+          .eq('user_id', userId)
+          .eq('status', 'completed');
+        if (histData && histData.length > 0) {
+          maxStageFromHistory = Math.max(...histData.map(h => Number(h.stage_id) || 0));
         }
-      } else {
-        setProfile(localStore.getProfile());
+      } catch (hErr) {
+        /* ignore */
+      }
+
+      const local = localStore.getProfile();
+      const bestStage = Math.max(data?.stages_completed || 0, maxStageFromHistory, local.stages_completed || 0);
+      const bestHighScore = Math.max(data?.high_score || 0, local.high_score || 0);
+      const bestTotalJumps = Math.max(data?.total_jumps || 0, local.total_jumps || 0);
+      const bestGamesPlayed = Math.max(data?.games_played || 0, local.games_played || 0);
+
+      const merged = {
+        ...(data || {}),
+        id: userId,
+        stages_completed: bestStage,
+        high_score: bestHighScore,
+        total_jumps: bestTotalJumps,
+        games_played: bestGamesPlayed
+      };
+
+      setProfile(merged);
+      localStore.saveProfile(merged);
+
+      // Sincroniza via upsert com o Supabase para garantir que a linha exista com os dados corretos
+      try {
+        await supabase.from('profiles').upsert({
+          id: userId,
+          stages_completed: bestStage,
+          high_score: bestHighScore,
+          total_jumps: bestTotalJumps,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      } catch (upErr) {
+        /* ignore */
       }
     } catch (e) {
       console.warn('Perfil do Supabase inacessível, mantendo dados locais:', e);
@@ -358,10 +380,12 @@ export function AuthProvider({ children }) {
         dbUpdates.updated_at = new Date().toISOString();
 
         if (Object.keys(dbUpdates).length > 1) {
-          await supabase
+          const { error: upErr } = await supabase
             .from('profiles')
-            .update(dbUpdates)
-            .eq('id', user.id);
+            .upsert({ id: user.id, ...dbUpdates }, { onConflict: 'id' });
+          if (upErr) {
+            console.error('Erro ao sincronizar perfil com o Supabase:', upErr);
+          }
         }
       } catch (err) {
         console.error('Erro ao sincronizar perfil com o Supabase:', err);
