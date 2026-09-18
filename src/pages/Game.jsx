@@ -431,22 +431,37 @@ export function Game({ onNavigate }) {
   }, []);
 
   return (
-    <div className={gameState === 'menu' 
-      ? "max-w-4xl mx-auto px-4 pt-4 pb-28 sm:py-8" 
-      : "w-full flex-1 flex flex-col items-center justify-center p-1 sm:p-2 h-full max-h-full overflow-hidden select-none touch-none overscroll-none"
-    }>
-      {/* 1. MENU DE SELEÇÃO DE FASES (10 Fases) */}
+    <div 
+      className={gameState === 'menu' 
+        ? "w-full h-full min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain" 
+        : "w-full flex-1 flex flex-col items-center justify-center p-1 sm:p-2 h-full max-h-full overflow-hidden select-none touch-none overscroll-none"
+      }
+      style={gameState === 'menu' ? { WebkitOverflowScrolling: 'touch' } : undefined}
+    >
+      {/* 1. MENU DE SELEÇÃO DE FASES (20 Fases) */}
       {gameState === 'menu' && (
-        <div className="space-y-6">
+        <div className="max-w-4xl mx-auto px-4 pt-4 pb-32 sm:py-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Layers className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl sm:text-3xl font-black text-white">Seleção de Fases</h1>
+            <div className="flex items-center gap-3">
+              {onNavigate && (
+                <button
+                  onClick={() => onNavigate('home')}
+                  className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 active:scale-95 shadow-md"
+                  title="Voltar ao Início"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Início</span>
+                </button>
+              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  <Layers className="w-6 h-6 text-cyan-400" />
+                  <h1 className="text-2xl sm:text-3xl font-black text-white">Seleção de Fases</h1>
+                </div>
+                <p className="text-xs text-slate-400 mt-1">
+                  Explore as 20 fases temáticas e desafie os limites até os 20.000m
+                </p>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Explore as 20 fases temáticas e desafie os limites até os 20.000m
-              </p>
             </div>
 
             {/* Status dos Sensores */}
