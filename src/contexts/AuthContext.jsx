@@ -192,6 +192,14 @@ export function AuthProvider({ children }) {
                            err.message?.includes('ERR_NAME_NOT_RESOLVED');
       if (isNetworkErr) {
         console.warn('Supabase offline ou inacessível. Iniciando sessão em modo local resiliente.');
+        try {
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+              localStorage.removeItem(key);
+            }
+          }
+        } catch (e) { /* ignore */ }
         const fallbackUser = { id: 'offline-' + Date.now(), email };
         const prof = { 
           ...localStore.getProfile(), 

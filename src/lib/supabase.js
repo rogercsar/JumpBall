@@ -13,6 +13,24 @@ export const isSupabaseConfigured = Boolean(
 // Padrão Singleton no globalThis para evitar múltiplas instâncias do GoTrueClient no HMR
 let client = typeof globalThis !== 'undefined' ? globalThis.__jumpball_supabase__ : null;
 
+// Limpa tokens órfãos/antigos do Supabase no localStorage se a sessão atual for offline ou convidado
+if (typeof window !== 'undefined') {
+  try {
+    const activeSession = localStorage.getItem('jumpball_active_session');
+    if (activeSession) {
+      const parsed = JSON.parse(activeSession);
+      if (parsed?.user?.id?.startsWith('offline-') || parsed?.isGuest) {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    }
+  } catch (e) { /* ignore */ }
+}
+
 if (!client && isSupabaseConfigured) {
   client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
