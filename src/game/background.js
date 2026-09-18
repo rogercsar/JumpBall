@@ -314,6 +314,304 @@ export class BackgroundRenderer {
         });
       }
     }
+
+    // 21. Olimpo: Poeira divina dourada
+    else if (this.theme === 'olympus') {
+      for (let i = 0; i < 35; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.8 + 1.2,
+          speedY: -(Math.random() * 0.5 + 0.2),
+          speedX: (Math.random() - 0.5) * 0.4,
+          pulse: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.4 ? 'rgba(250, 204, 21,' : 'rgba(254, 240, 138,'
+        });
+      }
+    }
+
+    // 22. Campo de Futebol: Confetes e faíscas de vitória
+    else if (this.theme === 'soccer') {
+      for (let i = 0; i < 28; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1.5,
+          speedY: Math.random() * 1.2 + 0.6,
+          speedX: (Math.random() - 0.5) * 1.2,
+          wobble: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(34, 197, 94,' : 'rgba(255, 255, 255,'
+        });
+      }
+    }
+
+    // 23. Barco/Nau: Brisa marítima e espuma do mar
+    else if (this.theme === 'ship') {
+      for (let i = 0; i < 35; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.5 + 1,
+          speedX: -(Math.random() * 2.2 + 1.0),
+          speedY: Math.random() * 0.8 - 0.4,
+          opacity: Math.random() * 0.5 + 0.25
+        });
+      }
+    }
+
+    // 24. Primavera: Pétalas de cerejeira (sakura) flutuantes
+    else if (this.theme === 'spring_season') {
+      for (let i = 0; i < 36; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.5 + 2,
+          speedY: Math.random() * 0.7 + 0.3,
+          speedX: Math.random() * 1.0 + 0.3,
+          wobble: Math.random() * Math.PI * 2,
+          wobbleSpeed: 0.04,
+          color: Math.random() > 0.3 ? 'rgba(244, 114, 182,' : 'rgba(251, 207, 232,'
+        });
+      }
+    }
+
+    // 25. Outono: Folhas de carvalho e bordo secas caindo
+    else if (this.theme === 'autumn') {
+      for (let i = 0; i < 34; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.8 + 2.2,
+          speedY: Math.random() * 0.9 + 0.4,
+          speedX: -(Math.random() * 1.2 + 0.4),
+          wobble: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(249, 115, 22,' : 'rgba(234, 88, 12,'
+        });
+      }
+    }
+
+    // 26. Multiverso dos Heróis: Faíscas de energia cinética
+    else if (this.theme === 'heroes') {
+      for (let i = 0; i < 30; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1.2,
+          speedY: -(Math.random() * 1.8 + 0.6),
+          speedX: (Math.random() - 0.5) * 1.2,
+          pulse: Math.random() * Math.PI * 2,
+          glowColor: Math.random() > 0.5 ? '#60a5fa' : '#ef4444'
+        });
+      }
+    }
+
+    // 27. Computador: Bits de dados binários e pulso eletrônico
+    else if (this.theme === 'computer') {
+      for (let i = 0; i < 32; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.5 + 1.2,
+          speedY: -(Math.random() * 1.5 + 0.5),
+          speedX: 0,
+          color: Math.random() > 0.4 ? 'rgba(52, 211, 153,' : 'rgba(16, 185, 129,'
+        });
+      }
+    }
+
+    // 28. Música: Notas musicais estelares flutuantes
+    else if (this.theme === 'music') {
+      for (let i = 0; i < 26; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 2,
+          speedY: -(Math.random() * 0.8 + 0.3),
+          speedX: Math.sin(Math.random() * Math.PI * 2) * 0.4,
+          wobble: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(192, 132, 252,' : 'rgba(233, 213, 255,'
+        });
+      }
+    }
+
+    // 29. Internet: Pacotes de rede navegando na malha
+    else if (this.theme === 'internet') {
+      for (let i = 0; i < 34; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.8 + 1.4,
+          speedX: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 1.5 + 0.8),
+          speedY: (Math.random() - 0.5) * 0.8,
+          pulse: Math.random() * Math.PI * 2,
+          color: 'rgba(34, 211, 238,'
+        });
+      }
+    }
+
+    // 30. Geometria: Fragmentos poliédricos neon
+    else if (this.theme === 'geometry') {
+      for (let i = 0; i < 28; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.5 + 2,
+          speedY: -(Math.random() * 0.9 + 0.3),
+          speedX: (Math.random() - 0.5) * 0.6,
+          pulse: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(129, 140, 248,' : 'rgba(199, 210, 254,'
+        });
+      }
+    }
+
+    // 31. Cubo Mágico: Facetas coloridas flutuantes
+    else if (this.theme === 'magic_cube') {
+      const cubeColors = ['rgba(239, 68, 68,', 'rgba(59, 130, 246,', 'rgba(234, 179, 8,', 'rgba(34, 197, 94,', 'rgba(249, 115, 22,'];
+      for (let i = 0; i < 30; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.5 + 2,
+          speedY: -(Math.random() * 0.7 + 0.2),
+          speedX: (Math.random() - 0.5) * 0.5,
+          pulse: Math.random() * Math.PI * 2,
+          color: cubeColors[Math.floor(Math.random() * cubeColors.length)]
+        });
+      }
+    }
+
+    // 32. Doce: Confeitos de açúcar e granulados coloridos
+    else if (this.theme === 'candy') {
+      for (let i = 0; i < 35; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1.5,
+          speedY: Math.random() * 0.8 + 0.4,
+          speedX: (Math.random() - 0.5) * 0.6,
+          wobble: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(244, 114, 182,' : 'rgba(251, 207, 232,'
+        });
+      }
+    }
+
+    // 33. Dragão: Fagulhas de fogo de dragão
+    else if (this.theme === 'dragon') {
+      for (let i = 0; i < 34; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.2 + 1.5,
+          speedY: -(Math.random() * 1.6 + 0.8),
+          speedX: (Math.random() - 0.5) * 1.0,
+          pulse: Math.random() * Math.PI * 2,
+          glowColor: Math.random() > 0.4 ? '#ef4444' : '#f59e0b'
+        });
+      }
+    }
+
+    // 34. Arcade: Pixels coloridos retrô
+    else if (this.theme === 'arcade') {
+      for (let i = 0; i < 32; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 2,
+          speedY: -(Math.random() * 1.2 + 0.4),
+          speedX: 0,
+          pulse: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(34, 211, 238,' : 'rgba(236, 72, 153,'
+        });
+      }
+    }
+
+    // 35. Metrópole: Luzes de tráfego aéreo e néon
+    else if (this.theme === 'metropolis') {
+      for (let i = 0; i < 30; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.6 + 1.2,
+          speedX: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 2.5 + 1.5),
+          speedY: 0,
+          color: Math.random() > 0.5 ? 'rgba(56, 189, 248,' : 'rgba(251, 191, 36,'
+        });
+      }
+    }
+
+    // 36. Aurora Boreal: Ondas de plasma boreal
+    else if (this.theme === 'aurora') {
+      for (let i = 0; i < 35; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1.5,
+          speedY: -(Math.random() * 0.6 + 0.2),
+          speedX: Math.sin(Math.random() * Math.PI * 2) * 0.5,
+          pulse: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(52, 211, 153,' : 'rgba(45, 212, 191,'
+        });
+      }
+    }
+
+    // 37. Parque de Diversões: Serpentinas e luzes de carrossel
+    else if (this.theme === 'carnival') {
+      for (let i = 0; i < 32; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.2 + 1.4,
+          speedY: Math.random() * 0.9 + 0.4,
+          speedX: (Math.random() - 0.5) * 1.2,
+          pulse: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(244, 63, 94,' : 'rgba(250, 204, 21,'
+        });
+      }
+    }
+
+    // 38. Pirâmides: Poeira do deserto e brilho dourado
+    else if (this.theme === 'pyramids') {
+      for (let i = 0; i < 35; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.4 + 1.0,
+          speedX: Math.random() * 1.6 + 0.8,
+          speedY: Math.random() * 0.4 - 0.2,
+          opacity: Math.random() * 0.45 + 0.25
+        });
+      }
+    }
+
+    // 39. Steampunk: Fuligem e vapor sob pressão
+    else if (this.theme === 'steampunk') {
+      for (let i = 0; i < 32; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 4 + 2,
+          speedY: -(Math.random() * 1.4 + 0.6),
+          speedX: (Math.random() - 0.5) * 0.6,
+          pulse: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(217, 119, 6,' : 'rgba(168, 162, 158,'
+        });
+      }
+    }
+
+    // 40. Hiperespaço Quântico: Tachyons e partículas de dobra
+    else if (this.theme === 'quantum') {
+      for (let i = 0; i < 50; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.5 + 1.5,
+          speedY: -(Math.random() * 3.0 + 1.5),
+          speedX: (Math.random() - 0.5) * 2.0,
+          pulse: Math.random() * Math.PI * 2,
+          glowColor: Math.random() > 0.5 ? '#38bdf8' : '#818cf8'
+        });
+      }
+    }
   }
 
   update(dt = 1) {
@@ -427,6 +725,66 @@ export class BackgroundRenderer {
         break;
       case 'singularity':
         this.drawSingularity(ctx, cameraY);
+        break;
+      case 'olympus':
+        this.drawOlympus(ctx, cameraY);
+        break;
+      case 'soccer':
+        this.drawSoccer(ctx, cameraY);
+        break;
+      case 'ship':
+        this.drawShip(ctx, cameraY);
+        break;
+      case 'spring_season':
+        this.drawSpringSeason(ctx, cameraY);
+        break;
+      case 'autumn':
+        this.drawAutumn(ctx, cameraY);
+        break;
+      case 'heroes':
+        this.drawHeroes(ctx, cameraY);
+        break;
+      case 'computer':
+        this.drawComputer(ctx, cameraY);
+        break;
+      case 'music':
+        this.drawMusic(ctx, cameraY);
+        break;
+      case 'internet':
+        this.drawInternet(ctx, cameraY);
+        break;
+      case 'geometry':
+        this.drawGeometry(ctx, cameraY);
+        break;
+      case 'magic_cube':
+        this.drawMagicCube(ctx, cameraY);
+        break;
+      case 'candy':
+        this.drawCandy(ctx, cameraY);
+        break;
+      case 'dragon':
+        this.drawDragon(ctx, cameraY);
+        break;
+      case 'arcade':
+        this.drawArcade(ctx, cameraY);
+        break;
+      case 'metropolis':
+        this.drawMetropolis(ctx, cameraY);
+        break;
+      case 'aurora':
+        this.drawAurora(ctx, cameraY);
+        break;
+      case 'carnival':
+        this.drawCarnival(ctx, cameraY);
+        break;
+      case 'pyramids':
+        this.drawPyramids(ctx, cameraY);
+        break;
+      case 'steampunk':
+        this.drawSteampunk(ctx, cameraY);
+        break;
+      case 'quantum':
+        this.drawQuantum(ctx, cameraY);
         break;
       default:
         this.drawDefaultGrid(ctx, cameraY);
@@ -1212,6 +1570,644 @@ export class BackgroundRenderer {
     ctx.shadowBlur = 0;
 
     ctx.restore();
+  }
+
+  // 21. MONTE OLIMPO DOS DEUSES
+  drawOlympus(ctx, cameraY) {
+    const p1 = -cameraY * 0.04;
+    // Raios de sol divinos dourados no topo
+    const rayGrad = ctx.createRadialGradient(this.width / 2, -40, 20, this.width / 2, 280, 420);
+    rayGrad.addColorStop(0, 'rgba(253, 224, 71, 0.45)');
+    rayGrad.addColorStop(0.5, 'rgba(234, 179, 8, 0.15)');
+    rayGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = rayGrad;
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // Colunas gregas de mármore dourado (Parallax 0.12)
+    const colP = -cameraY * 0.12;
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.22)';
+    ctx.strokeStyle = 'rgba(254, 240, 138, 0.45)';
+    ctx.lineWidth = 2;
+
+    const colSpacing = 110;
+    for (let x = 30; x < this.width + 60; x += colSpacing) {
+      const colX = x;
+      const baseY = ((colP + x * 2) % (this.height + 400)) - 100;
+      // Fuste da coluna
+      ctx.fillRect(colX, baseY, 24, 260);
+      ctx.strokeRect(colX, baseY, 24, 260);
+      // Capitel e base
+      ctx.fillRect(colX - 8, baseY - 12, 40, 12);
+      ctx.fillRect(colX - 8, baseY + 260, 40, 12);
+    }
+
+    // Nuvens divinas do Olimpo (Parallax 0.08)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    for (let i = 0; i < 4; i++) {
+      const cy = ((-cameraY * 0.08 + i * 180) % (this.height + 100)) - 50;
+      ctx.beginPath();
+      ctx.arc(60 + i * 80, cy, 45, 0, Math.PI * 2);
+      ctx.arc(110 + i * 80, cy - 15, 60, 0, Math.PI * 2);
+      ctx.arc(160 + i * 80, cy, 45, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 22. ESTÁDIO DOS CAMPEÕES (FUTEBOL)
+  drawSoccer(ctx, cameraY) {
+    // Faixas verticais do gramado do estádio (Parallax 0.08)
+    const stripeP = (-cameraY * 0.08) % 60;
+    for (let y = -60 + stripeP; y < this.height + 60; y += 60) {
+      ctx.fillStyle = 'rgba(22, 163, 74, 0.08)';
+      ctx.fillRect(0, y, this.width, 30);
+    }
+
+    // Holofotes de estádio nos cantos superiores
+    const spotGrad1 = ctx.createRadialGradient(20, 20, 5, 140, 320, 350);
+    spotGrad1.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+    spotGrad1.addColorStop(0.3, 'rgba(134, 239, 172, 0.15)');
+    spotGrad1.addColorStop(1, 'transparent');
+    ctx.fillStyle = spotGrad1;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(260, this.height);
+    ctx.lineTo(0, this.height);
+    ctx.fill();
+
+    const spotGrad2 = ctx.createRadialGradient(this.width - 20, 20, 5, this.width - 140, 320, 350);
+    spotGrad2.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+    spotGrad2.addColorStop(0.3, 'rgba(134, 239, 172, 0.15)');
+    spotGrad2.addColorStop(1, 'transparent');
+    ctx.fillStyle = spotGrad2;
+    ctx.beginPath();
+    ctx.moveTo(this.width, 0);
+    ctx.lineTo(this.width - 260, this.height);
+    ctx.lineTo(this.width, this.height);
+    ctx.fill();
+
+    // Silhueta de Trave de Futebol no fundo (Parallax 0.15)
+    const goalY = ((-cameraY * 0.15) % (this.height + 300)) + 120;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(this.width / 2 - 90, goalY, 180, 100);
+    // Rede
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.lineWidth = 1;
+    for (let gx = this.width / 2 - 80; gx < this.width / 2 + 85; gx += 15) {
+      ctx.beginPath();
+      ctx.moveTo(gx, goalY);
+      ctx.lineTo(gx, goalY + 100);
+      ctx.stroke();
+    }
+  }
+
+  // 23. NAU DOS MARES TEMPESTUOSOS (BARCO)
+  drawShip(ctx, cameraY) {
+    // Ondas oceânicas ao fundo (Parallax 0.06)
+    const waveP = -cameraY * 0.06;
+    ctx.fillStyle = 'rgba(3, 105, 161, 0.35)';
+    ctx.beginPath();
+    ctx.moveTo(0, this.height);
+    for (let x = 0; x <= this.width; x += 30) {
+      const wy = this.height - 160 + Math.sin(x * 0.03 + this.time * 2) * 18 + (waveP % 40);
+      ctx.lineTo(x, wy);
+    }
+    ctx.lineTo(this.width, this.height);
+    ctx.fill();
+
+    // Mastro gigante e cordames de navio pirata (Parallax 0.18)
+    const mastP = (-cameraY * 0.18) % (this.height + 400);
+    const mastX = this.width / 2 + 35;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.55)';
+    ctx.fillRect(mastX - 7, 0, 14, this.height);
+
+    // Vergas horizontais do mastro
+    for (let my = mastP - 200; my < this.height + 200; my += 220) {
+      ctx.fillRect(mastX - 90, my, 180, 8);
+      // Cordas
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(mastX - 90, my);
+      ctx.lineTo(mastX, my - 60);
+      ctx.lineTo(mastX + 90, my);
+      ctx.stroke();
+    }
+  }
+
+  // 24. PRIMAVERA DAS CEREJEIRAS
+  drawSpringSeason(ctx, cameraY) {
+    // Sol matinal suave rosado (Parallax 0.03)
+    const sunY = 160 + (-cameraY * 0.03);
+    const sunGrad = ctx.createRadialGradient(this.width / 2, sunY, 20, this.width / 2, sunY, 130);
+    sunGrad.addColorStop(0, 'rgba(251, 207, 232, 0.65)');
+    sunGrad.addColorStop(0.4, 'rgba(244, 114, 182, 0.25)');
+    sunGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = sunGrad;
+    ctx.beginPath();
+    ctx.arc(this.width / 2, sunY, 130, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Galhos orgânicos de cerejeira em flor nas laterais (Parallax 0.12)
+    const branchP = (-cameraY * 0.12) % (this.height + 300);
+    ctx.strokeStyle = 'rgba(80, 7, 36, 0.6)';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    for (let by = branchP - 150; by < this.height + 200; by += 280) {
+      // Galho vindo da esquerda
+      ctx.beginPath();
+      ctx.moveTo(0, by);
+      ctx.quadraticCurveTo(60, by - 20, 120, by + 10);
+      ctx.stroke();
+      // Flores de sakura
+      ctx.fillStyle = 'rgba(244, 114, 182, 0.85)';
+      ctx.beginPath();
+      ctx.arc(120, by + 10, 8, 0, Math.PI * 2);
+      ctx.arc(90, by - 12, 7, 0, Math.PI * 2);
+      ctx.arc(50, by - 15, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 25. BOSQUE DOURADO DE OUTONO
+  drawAutumn(ctx, cameraY) {
+    // Colinas outonais distantes em camadas (Parallax 0.06)
+    const p1 = -cameraY * 0.06;
+    ctx.fillStyle = 'rgba(120, 53, 15, 0.4)';
+    ctx.beginPath();
+    ctx.moveTo(0, this.height);
+    for (let x = 0; x <= this.width; x += 40) {
+      const y = this.height - 200 + Math.sin(x * 0.02) * 35 + (p1 % 50);
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(this.width, this.height);
+    ctx.fill();
+
+    // Silhuetas de árvores de bordo com folhas avermelhadas (Parallax 0.14)
+    const p2 = (-cameraY * 0.14) % (this.height + 300);
+    for (let tx = 40; tx < this.width; tx += 120) {
+      const ty = p2 + (tx * 1.5) % 250 + 100;
+      // Tronco
+      ctx.fillStyle = 'rgba(69, 26, 3, 0.7)';
+      ctx.fillRect(tx - 5, ty, 10, 180);
+      // Copa em tons de fogo outonal
+      ctx.fillStyle = 'rgba(249, 115, 22, 0.55)';
+      ctx.beginPath();
+      ctx.arc(tx, ty - 25, 42, 0, Math.PI * 2);
+      ctx.arc(tx - 20, ty - 15, 30, 0, Math.PI * 2);
+      ctx.arc(tx + 20, ty - 15, 30, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 26. MULTIVERSO DOS HERÓIS (MARVEL)
+  drawHeroes(ctx, cameraY) {
+    // Padrão de retícula de quadrinhos (Comic Halftone Dots)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    const dotP = (-cameraY * 0.1) % 30;
+    for (let x = 15; x < this.width; x += 30) {
+      for (let y = dotP; y < this.height; y += 30) {
+        ctx.beginPath();
+        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Raios de energia heroicos diagonais
+    ctx.save();
+    ctx.strokeStyle = 'rgba(96, 165, 250, 0.18)';
+    ctx.lineWidth = 4;
+    const rayOff = (this.time * 40 + cameraY * 0.2) % (this.width + 200);
+    ctx.beginPath();
+    ctx.moveTo(rayOff - 100, 0);
+    ctx.lineTo(rayOff + 100, this.height);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.18)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(this.width - rayOff + 100, 0);
+    ctx.lineTo(this.width - rayOff - 100, this.height);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 27. CÓRTEX DA PLACA-MÃE (COMPUTADOR)
+  drawComputer(ctx, cameraY) {
+    // Trilhas de circuito impresso (PCB Traces 45 graus)
+    const pcbP = (-cameraY * 0.15) % 80;
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+    ctx.lineWidth = 2;
+    for (let y = pcbP - 80; y < this.height + 80; y += 80) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(100, y);
+      ctx.lineTo(150, y + 50);
+      ctx.lineTo(this.width - 80, y + 50);
+      ctx.lineTo(this.width, y + 130);
+      ctx.stroke();
+
+      // Pontos de solda (Pads) dourados/esmeralda
+      ctx.fillStyle = '#34d399';
+      ctx.beginPath();
+      ctx.arc(100, y, 4, 0, Math.PI * 2);
+      ctx.arc(150, y + 50, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Chip de Processador Central estilizado no fundo (Parallax 0.05)
+    const chipY = 220 + (-cameraY * 0.05);
+    ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(this.width / 2 - 50, chipY, 100, 100);
+    ctx.fillStyle = 'rgba(2, 44, 34, 0.6)';
+    ctx.fillRect(this.width / 2 - 50, chipY, 100, 100);
+  }
+
+  // 28. SINFONIA DAS ESTRELAS (MÚSICA)
+  drawMusic(ctx, cameraY) {
+    // Pauta musical ondulante (5 linhas horizontais do pentagrama)
+    const staveP = (-cameraY * 0.12) % 240;
+    ctx.strokeStyle = 'rgba(192, 132, 252, 0.3)';
+    ctx.lineWidth = 1.5;
+
+    for (let baseStave = staveP - 200; baseStave < this.height + 150; baseStave += 220) {
+      for (let line = 0; line < 5; line++) {
+        const ly = baseStave + line * 10;
+        ctx.beginPath();
+        for (let x = 0; x <= this.width; x += 20) {
+          const y = ly + Math.sin(x * 0.02 + this.time * 1.5) * 12;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      // Notas musicais desenhadas na pauta (♪, ♫)
+      ctx.fillStyle = 'rgba(233, 213, 255, 0.65)';
+      ctx.font = '24px sans-serif';
+      ctx.fillText('♪', 60, baseStave + 35);
+      ctx.fillText('♫', 180, baseStave + 25);
+      ctx.fillText('♩', 310, baseStave + 40);
+    }
+  }
+
+  // 29. TEIA DA CIBER-REDE (INTERNET)
+  drawInternet(ctx, cameraY) {
+    // Nós de rede interconectados
+    const netP = (-cameraY * 0.14) % 180;
+    const nodes = [
+      { x: 50, y: netP + 50 },
+      { x: 180, y: netP + 120 },
+      { x: 340, y: netP + 60 },
+      { x: 110, y: netP + 220 },
+      { x: 280, y: netP + 260 },
+      { x: 400, y: netP + 190 }
+    ];
+
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.25)';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+        if (dist < 200) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+      // Ponto do nó
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath();
+      ctx.arc(nodes[i].x, nodes[i].y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 30. DIMENSÃO DOS POLÍGONOS (GEOMETRIA)
+  drawGeometry(ctx, cameraY) {
+    // Polígonos neon flutuantes e rotativos
+    const geoP = (-cameraY * 0.15) % 300;
+    const polyList = [
+      { x: 80, y: geoP + 80, sides: 3, r: 35 },
+      { x: 320, y: geoP + 140, sides: 6, r: 42 },
+      { x: 160, y: geoP + 260, sides: 4, r: 38 },
+      { x: 380, y: geoP + 350, sides: 5, r: 30 }
+    ];
+
+    ctx.strokeStyle = 'rgba(129, 140, 248, 0.4)';
+    ctx.lineWidth = 2;
+    for (const poly of polyList) {
+      ctx.save();
+      ctx.translate(poly.x, poly.y);
+      ctx.rotate(this.time * 0.8);
+      ctx.beginPath();
+      for (let s = 0; s < poly.sides; s++) {
+        const angle = (s * Math.PI * 2) / poly.sides;
+        const px = Math.cos(angle) * poly.r;
+        const py = Math.sin(angle) * poly.r;
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // 31. CUBO MÁGICO TRIDIMENSIONAL
+  drawMagicCube(ctx, cameraY) {
+    // Cubos mágicos 3D isométricos com faces coloridas rotacionando
+    const cubeP = (-cameraY * 0.12) % 340;
+    const cubes = [
+      { x: 90, y: cubeP + 90, size: 36, rot: this.time * 0.5 },
+      { x: 310, y: cubeP + 230, size: 48, rot: -this.time * 0.6 }
+    ];
+
+    for (const c of cubes) {
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.rotate(c.rot);
+      const s = c.size;
+
+      // Face superior (Amarelo)
+      ctx.fillStyle = 'rgba(234, 179, 8, 0.7)';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.lineTo(s * 0.86, -s * 0.5);
+      ctx.lineTo(0, 0);
+      ctx.lineTo(-s * 0.86, -s * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Face esquerda (Vermelho)
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.86, -s * 0.5);
+      ctx.lineTo(0, 0);
+      ctx.lineTo(0, s);
+      ctx.lineTo(-s * 0.86, s * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Face direita (Azul)
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.7)';
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(s * 0.86, -s * 0.5);
+      ctx.lineTo(s * 0.86, s * 0.5);
+      ctx.lineTo(0, s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+  }
+
+  // 32. REINO DOCE DE CONFEITOS
+  drawCandy(ctx, cameraY) {
+    // Bengalas doces e pirulitos gigantes espiralados
+    const candyP = (-cameraY * 0.15) % 360;
+    const lollipops = [
+      { x: 70, y: candyP + 120, r: 35 },
+      { x: 360, y: candyP + 260, r: 42 }
+    ];
+
+    for (const l of lollipops) {
+      // Haste branca
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(l.x - 3, l.y, 6, 140);
+      // Espiral do pirulito
+      ctx.save();
+      ctx.translate(l.x, l.y);
+      ctx.rotate(this.time);
+      const radGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, l.r);
+      radGrad.addColorStop(0, '#fbcfe8');
+      radGrad.addColorStop(0.5, '#ec4899');
+      radGrad.addColorStop(1, '#be185d');
+      ctx.fillStyle = radGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, l.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // 33. COVIL DO DRAGÃO DE FOGO
+  drawDragon(ctx, cameraY) {
+    // Caverna vulcânica com estalactites no topo
+    ctx.fillStyle = 'rgba(69, 10, 10, 0.75)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    for (let x = 0; x <= this.width; x += 30) {
+      const h = 40 + Math.sin(x * 0.08) * 25;
+      ctx.lineTo(x, h);
+    }
+    ctx.lineTo(this.width, 0);
+    ctx.fill();
+
+    // Silhueta de Dragão alado voando na distância (Parallax 0.06)
+    const dragX = ((this.time * 60) % (this.width + 120)) - 60;
+    const dragY = 160 + Math.sin(this.time * 2) * 25;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.beginPath();
+    ctx.arc(dragX, dragY, 12, 0, Math.PI * 2); // corpo
+    // Asas
+    ctx.moveTo(dragX, dragY);
+    ctx.lineTo(dragX - 35, dragY - 20 - Math.sin(this.time * 4) * 15);
+    ctx.lineTo(dragX - 10, dragY + 5);
+    ctx.moveTo(dragX, dragY);
+    ctx.lineTo(dragX + 35, dragY - 20 - Math.sin(this.time * 4) * 15);
+    ctx.lineTo(dragX + 10, dragY + 5);
+    ctx.fill();
+  }
+
+  // 34. FLIPERAMA PIXEL 8-BIT (ARCADE)
+  drawArcade(ctx, cameraY) {
+    // Grade de perspectiva 80s Synthwave (Tron Floor)
+    const floorP = (-cameraY * 0.25) % 40;
+    ctx.strokeStyle = 'rgba(236, 72, 153, 0.35)';
+    ctx.lineWidth = 1.5;
+
+    // Linhas horizontais
+    for (let y = floorP; y < this.height; y += 35) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+      ctx.stroke();
+    }
+
+    // Linhas verticais convergentes
+    for (let x = 0; x <= this.width; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, this.height);
+      ctx.stroke();
+    }
+  }
+
+  // 35. METRÓPOLE FLUTUANTE NEON
+  drawMetropolis(ctx, cameraY) {
+    // Silhuetas de mega-edifícios com janelas iluminadas
+    const p1 = -cameraY * 0.1;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    const bSpacing = 70;
+    for (let x = 10; x < this.width; x += bSpacing) {
+      const bHeight = 280 + (x % 110);
+      ctx.fillRect(x, this.height - bHeight + (p1 % 100), 55, bHeight);
+
+      // Janelas de LED
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+      for (let wy = this.height - bHeight + (p1 % 100) + 15; wy < this.height; wy += 25) {
+        ctx.fillRect(x + 10, wy, 8, 8);
+        ctx.fillRect(x + 32, wy, 8, 8);
+      }
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    }
+  }
+
+  // 36. VÉU DA AURORA BOREAL
+  drawAurora(ctx, cameraY) {
+    // Cortinas de plasma verde-esmeralda e magenta ondulantes
+    for (let a = 0; a < 3; a++) {
+      const aGrad = ctx.createLinearGradient(0, 80 + a * 60, 0, 240 + a * 60);
+      aGrad.addColorStop(0, 'rgba(52, 211, 153, 0.45)');
+      aGrad.addColorStop(0.5, 'rgba(45, 212, 191, 0.25)');
+      aGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = aGrad;
+
+      ctx.beginPath();
+      ctx.moveTo(0, this.height);
+      for (let x = 0; x <= this.width; x += 25) {
+        const ay = 120 + a * 70 + Math.sin(x * 0.015 + this.time * 1.5 + a) * 45;
+        ctx.lineTo(x, ay);
+      }
+      ctx.lineTo(this.width, this.height);
+      ctx.fill();
+    }
+  }
+
+  // 37. PARQUE DE DIVERSÕES CÓSMICO (CARNIVAL)
+  drawCarnival(ctx, cameraY) {
+    // Roda-gigante cósmica em rotação suave no fundo (Parallax 0.05)
+    const wheelY = 180 + (-cameraY * 0.05);
+    const wheelX = this.width / 2;
+    const radius = 95;
+
+    ctx.save();
+    ctx.translate(wheelX, wheelY);
+    ctx.rotate(this.time * 0.4);
+
+    ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Raios e cabines
+    for (let i = 0; i < 8; i++) {
+      const ang = (i * Math.PI * 2) / 8;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(ang) * radius, Math.sin(ang) * radius);
+      ctx.stroke();
+
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(Math.cos(ang) * radius, Math.sin(ang) * radius, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 38. PIRÂMIDES DO EGITO ANCESTRAL
+  drawPyramids(ctx, cameraY) {
+    // Sol de Rá gigante
+    const sunY = 150 + (-cameraY * 0.02);
+    const sunGrad = ctx.createRadialGradient(this.width / 2, sunY, 20, this.width / 2, sunY, 120);
+    sunGrad.addColorStop(0, 'rgba(254, 240, 138, 0.9)');
+    sunGrad.addColorStop(0.4, 'rgba(234, 179, 8, 0.35)');
+    sunGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = sunGrad;
+    ctx.beginPath();
+    ctx.arc(this.width / 2, sunY, 120, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Silhuetas das Pirâmides de Gizé
+    const pyrP = -cameraY * 0.05;
+    ctx.fillStyle = 'rgba(113, 63, 18, 0.65)';
+    ctx.beginPath();
+    // Grande Pirâmide
+    ctx.moveTo(30, this.height);
+    ctx.lineTo(160, this.height - 180 + (pyrP % 40));
+    ctx.lineTo(290, this.height);
+    // Segunda Pirâmide
+    ctx.moveTo(210, this.height);
+    ctx.lineTo(320, this.height - 140 + (pyrP % 40));
+    ctx.lineTo(430, this.height);
+    ctx.fill();
+  }
+
+  // 39. FÁBRICA STEAMPUNK DE BRONZE
+  drawSteampunk(ctx, cameraY) {
+    // Engrenagens colossais de bronze girando em parallax
+    const gearP = (-cameraY * 0.1) % 350;
+    const gears = [
+      { x: 70, y: gearP + 90, r: 65, rot: this.time * 0.8 },
+      { x: 340, y: gearP + 220, r: 85, rot: -this.time * 0.6 }
+    ];
+
+    for (const g of gears) {
+      ctx.save();
+      ctx.translate(g.x, g.y);
+      ctx.rotate(g.rot);
+      ctx.strokeStyle = 'rgba(217, 119, 6, 0.45)';
+      ctx.lineWidth = 12;
+      ctx.beginPath();
+      ctx.arc(0, 0, g.r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Dentes da engrenagem
+      for (let t = 0; t < 12; t++) {
+        const ang = (t * Math.PI * 2) / 12;
+        ctx.fillRect(Math.cos(ang) * g.r - 5, Math.sin(ang) * g.r - 5, 10, 10);
+      }
+      ctx.restore();
+    }
+  }
+
+  // 40. HIPERESPAÇO QUÂNTICO INFINITO
+  drawQuantum(ctx, cameraY) {
+    // Túnel de dobra estelar com anéis de distorção de espaço-tempo
+    const centerX = this.width / 2;
+    const centerY = this.height / 2;
+
+    // Raios de aceleração de dobra
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+    ctx.lineWidth = 1.5;
+    for (let r = 0; r < 16; r++) {
+      const ang = (r * Math.PI * 2) / 16 + this.time * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX + Math.cos(ang) * 450, centerY + Math.sin(ang) * 450);
+      ctx.stroke();
+    }
+
+    // Anéis quânticos expansivos
+    for (let ring = 1; ring <= 4; ring++) {
+      const radius = ((this.time * 90 + ring * 80) % 360);
+      ctx.strokeStyle = `rgba(129, 140, 248, ${0.4 - radius / 1000})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
   }
 
   // Grade Padrão Fallback

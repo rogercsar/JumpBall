@@ -22,7 +22,24 @@ import {
   Landmark,
   SunMedium,
   Orbit,
-  Atom
+  Atom,
+  Crown,
+  Trophy,
+  Anchor,
+  Flower2,
+  Leaf,
+  Shield,
+  Music,
+  Globe,
+  Shapes,
+  Boxes,
+  Cookie,
+  Gamepad2,
+  Building2,
+  Ticket,
+  Pyramid,
+  Cog,
+  Infinity
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -44,7 +61,24 @@ const ICON_MAP = {
   Landmark,
   SunMedium,
   Orbit,
-  Atom
+  Atom,
+  Crown,
+  Trophy,
+  Anchor,
+  Flower2,
+  Leaf,
+  Shield,
+  Music,
+  Globe,
+  Shapes,
+  Boxes,
+  Cookie,
+  Gamepad2,
+  Building2,
+  Ticket,
+  Pyramid,
+  Cog,
+  Infinity
 };
 
 export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {

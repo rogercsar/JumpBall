@@ -44,7 +44,10 @@ export class GameEngine {
       radius: 16,
       stretchX: 1,
       stretchY: 1,
-      angle: 0
+      angle: 0,
+      hasMagicBackpack: false,
+      backpackFuel: 0,
+      backpackMaxFuel: 100
     };
 
     // Estado da Bola do Bot IA (Competidor na Corrida)
@@ -93,6 +96,9 @@ export class GameEngine {
     // Entidades
     this.platforms = [];
     this.gems = [];
+    this.magicBackpacks = [];
+    this.spawnedBackpacksCount = 0;
+    this.thrustSoundTimer = 0;
     this.highestPlatformY = this.height;
 
     // Configuração de Física da Fase
@@ -104,6 +110,16 @@ export class GameEngine {
     this.initCanvas();
     this.initInitialPlatforms();
     this.render();
+  }
+
+  // Quantidade de mochilas balanceada gradualmente pela dificuldade/altura da fase
+  getMaxBackpacksForStage() {
+    const stageNum = this.stage.number || 1;
+    if (stageNum <= 3) return 1; // Nas primeiras fases: apenas 1 mochila
+    if (stageNum <= 8) return 2;
+    if (stageNum <= 16) return 3;
+    if (stageNum <= 28) return 4;
+    return 5; // Fases mais altas com maior extensão vertical
   }
 
   initCanvas() {
@@ -123,6 +139,8 @@ export class GameEngine {
   initInitialPlatforms() {
     this.platforms = [];
     this.gems = [];
+    this.magicBackpacks = [];
+    this.spawnedBackpacksCount = 0;
 
     // Plataforma base inicial (mais larga no modo corrida para acomodar jogador e bot)
     const baseWidth = this.mode === 'race_ai' ? 160 : 120;
@@ -186,6 +204,30 @@ export class GameEngine {
         collected: false,
         pulse: 0
       });
+    }
+
+    // Geração controlada da Mochila Mágica:
+    // Nas primeiras fases tem somente 1 mochila, aumentando gradualmente nas fases mais altas
+    const maxBackpacks = this.getMaxBackpacksForStage();
+    if (this.spawnedBackpacksCount < maxBackpacks) {
+      const currentPlatHeight = Math.max(0, Math.floor(-y + this.height - 120));
+      const targetStageHeight = this.stage.targetHeight || 2000;
+
+      // Distribui a aparição ao longo da subida da fase
+      const intervalHeight = targetStageHeight / (maxBackpacks + 1);
+      const targetMilestone = intervalHeight * (this.spawnedBackpacksCount + 1);
+
+      if (currentPlatHeight >= targetMilestone - 90) {
+        this.magicBackpacks.push({
+          x: pX + pWidth / 2,
+          y: y - 32,
+          width: 24,
+          height: 28,
+          collected: false,
+          pulse: Math.random() * Math.PI * 2
+        });
+        this.spawnedBackpacksCount++;
+      }
     }
   }
 
@@ -291,13 +333,14 @@ export class GameEngine {
       moveInput = Math.max(-1, Math.min(1, this.touchDirection));
     }
 
-    const accel = 0.85 * (this.stage.speedFactor || 1);
+    const isFloating = this.ball.hasMagicBackpack && this.ball.backpackFuel > 0;
+    const accel = (isFloating ? 1.35 : 0.85) * (this.stage.speedFactor || 1);
     this.ball.vx += moveInput * accel * dt;
-    this.ball.vx += this.wind * dt; // Efeito do vento da fase
-    this.ball.vx *= Math.pow(this.friction, dt);
+    this.ball.vx += (isFloating ? this.wind * 0.4 : this.wind) * dt; // Vento mais brando durante a flutuação
+    this.ball.vx *= Math.pow(isFloating ? 0.90 : this.friction, dt);
 
     // Limitar velocidade máxima horizontal
-    const maxSpeedX = 8.5;
+    const maxSpeedX = isFloating ? 9.5 : 8.5;
     this.ball.vx = Math.max(-maxSpeedX, Math.min(maxSpeedX, this.ball.vx));
 
     this.ball.x += this.ball.vx * dt;
@@ -310,13 +353,50 @@ export class GameEngine {
       this.ball.x = -this.ball.radius;
     }
 
-    // 2. Física Vertical (Gravidade)
-    this.ball.vy += this.gravity * dt;
-    this.ball.y += this.ball.vy * dt;
+    // 2. Física Vertical (Gravidade ou Efeito Balão Suave da Mochila Mágica)
+    if (this.ball.hasMagicBackpack && this.ball.backpackFuel > 0) {
+      // Duração de ~5.5 segundos reais: garante que a mochila acabe bem antes do final da fase
+      const fuelConsumptionPerSecond = 100 / 5.5; // consome 100% em 5.5s (~18.2% por segundo)
+      this.ball.backpackFuel = Math.max(0, this.ball.backpackFuel - fuelConsumptionPerSecond * (dt / 60));
 
-    // Recuperação suave do formato esférico da bola
-    this.ball.stretchX += (1 - this.ball.stretchX) * 0.12 * dt;
-    this.ball.stretchY += (1 - this.ball.stretchY) * 0.12 * dt;
+      // Voo 2x mais lento: subida calma e serena a -1.2px/frame estilo balão do Mario
+      const floatBobbing = Math.sin(Date.now() * 0.005) * 0.2;
+      const targetFlyVy = -1.2 + floatBobbing; // Exatamente 2x mais lento que antes
+      this.ball.vy += (targetFlyVy - this.ball.vy) * 0.14 * dt;
+      this.ball.y += this.ball.vy * dt;
+
+      // Efeito inflado suave tipo balão do Mario
+      const targetInflation = 1.28 + Math.sin(Date.now() * 0.008) * 0.05;
+      this.ball.stretchX += (targetInflation - this.ball.stretchX) * 0.12 * dt;
+      this.ball.stretchY += (targetInflation - this.ball.stretchY) * 0.12 * dt;
+
+      // Jato propulsor suave de sustentação
+      this.particles.emitBackpackThrust(this.ball.x, this.ball.y + (this.ball.radius * targetInflation) + 2);
+
+      // Efeito sonoro suave em cadência tranquila
+      this.thrustSoundTimer = (this.thrustSoundTimer || 0) + dt;
+      if (this.thrustSoundTimer > 18) {
+        this.thrustSoundTimer = 0;
+        soundEngine.playJetpackThrust();
+      }
+
+      // Ao esgotar o combustível, desinfla e a mochila desaparece com fumaça
+      if (this.ball.backpackFuel <= 0) {
+        this.ball.hasMagicBackpack = false;
+        this.ball.backpackFuel = 0;
+        this.ball.stretchX = 1.0;
+        this.ball.stretchY = 1.0;
+        soundEngine.playJetpackExhausted();
+        this.particles.emitBackpackSmoke(this.ball.x, this.ball.y);
+      }
+    } else {
+      this.ball.vy += this.gravity * dt;
+      this.ball.y += this.ball.vy * dt;
+
+      // Recuperação suave do formato esférico da bola
+      this.ball.stretchX += (1 - this.ball.stretchX) * 0.12 * dt;
+      this.ball.stretchY += (1 - this.ball.stretchY) * 0.12 * dt;
+    }
 
     // Partículas de rastro contínuo com a cor da skin
     if (Math.abs(this.ball.vy) > 2) {
@@ -407,7 +487,17 @@ export class GameEngine {
       if (!g.collected) {
         g.pulse += 0.05 * dt;
         const dist = Math.hypot(this.ball.x - g.x, this.ball.y - g.y);
-        if (dist < this.ball.radius + g.radius + 6) {
+
+        // Atração magnética suave das gemas em direção à bola enquanto flutua com a mochila
+        if (this.ball.hasMagicBackpack && dist < 120) {
+          const pullAngle = Math.atan2(this.ball.y - g.y, this.ball.x - g.x);
+          g.x += Math.cos(pullAngle) * 3.5 * dt;
+          g.y += Math.sin(pullAngle) * 3.5 * dt;
+        }
+
+        // Raio de coleta generoso durante o voo com a mochila mágica
+        const collectThreshold = this.ball.hasMagicBackpack ? this.ball.radius + g.radius + 18 : this.ball.radius + g.radius + 6;
+        if (dist < collectThreshold) {
           g.collected = true;
           this.gemsCollected++;
           this.score += 150;
@@ -418,6 +508,24 @@ export class GameEngine {
             speed: 3.5,
             life: 0.6
           });
+        }
+      }
+    }
+
+    // 6.2. Coleta de Mochila Mágica (Jetpack Cósmico)
+    for (const mb of this.magicBackpacks) {
+      if (!mb.collected) {
+        mb.pulse += 0.05 * dt;
+        const dist = Math.hypot(this.ball.x - mb.x, this.ball.y - mb.y);
+        if (dist < this.ball.radius + 18) {
+          mb.collected = true;
+          this.ball.hasMagicBackpack = true;
+          this.ball.backpackFuel = 100;
+          this.ball.backpackMaxFuel = 100;
+          this.score += 250;
+          soundEngine.playMagicBackpack();
+          this.particles.emitSuperJumpBurst(mb.x, mb.y, '#f59e0b');
+          this.particles.emitSuperJumpBurst(mb.x, mb.y, '#38bdf8');
         }
       }
     }
@@ -457,6 +565,7 @@ export class GameEngine {
     // 9. Limpeza de Entidades Fora da Tela
     this.platforms = this.platforms.filter((p) => p.y < this.cameraY + this.height + 150);
     this.gems = this.gems.filter((g) => !g.collected && g.y < this.cameraY + this.height + 150);
+    this.magicBackpacks = this.magicBackpacks.filter((mb) => !mb.collected && mb.y < this.cameraY + this.height + 150);
 
     // 10. Atualizar Partículas
     this.particles.update(dt);
@@ -470,6 +579,14 @@ export class GameEngine {
 
     // 12. Verificação de Queda / Sistema de 3 Vidas
     if (this.ball.y > this.cameraY + this.height + 60) {
+      // Perda imediata da Mochila Mágica se o jogador cair
+      if (this.ball.hasMagicBackpack) {
+        this.ball.hasMagicBackpack = false;
+        this.ball.backpackFuel = 0;
+        this.ball.stretchX = 1.0;
+        this.ball.stretchY = 1.0;
+        this.particles.emitBackpackSmoke(this.ball.x, this.ball.y);
+      }
       if (this.lives > 1) {
         // Registra o marcador holográfico no local exato onde a bola caiu
         const deathNumber = (this.maxLives - this.lives) + 1;
@@ -743,6 +860,8 @@ export class GameEngine {
     this.ball.vy = this.jumpForce * 1.08;
     this.ball.stretchX = 1.35;
     this.ball.stretchY = 0.65;
+    this.ball.hasMagicBackpack = false;
+    this.ball.backpackFuel = 0;
 
     // Concede 2.5s de escudo de energia
     this.invulnerableTimer = 2.5;
@@ -891,6 +1010,78 @@ export class GameEngine {
       ctx.restore();
     }
 
+    // 3.2. Desenhar Mochilas Mágicas Colecionáveis Flutuantes
+    for (const mb of this.magicBackpacks) {
+      if (mb.collected) continue;
+      const screenY = mb.y - this.cameraY;
+      if (screenY < -30 || screenY > this.height + 30) continue;
+
+      ctx.save();
+      const floatOffset = Math.sin(mb.pulse * 3) * 5;
+      ctx.translate(mb.x, screenY + floatOffset);
+
+      // Glow pulsante dourado e ciano
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 14;
+
+      // Asas / Propulsores laterais estilizados
+      ctx.fillStyle = '#0284c7';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      // Asa esquerda
+      ctx.beginPath();
+      ctx.moveTo(-8, -2);
+      ctx.lineTo(-17, -8);
+      ctx.lineTo(-13, 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Asa direita
+      ctx.beginPath();
+      ctx.moveTo(8, -2);
+      ctx.lineTo(17, -8);
+      ctx.lineTo(13, 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Corpo principal da mochila mágica (dourado com contorno amarelo)
+      const bagGrad = ctx.createLinearGradient(-10, -12, 10, 12);
+      bagGrad.addColorStop(0, '#fbbf24');
+      bagGrad.addColorStop(0.5, '#f59e0b');
+      bagGrad.addColorStop(1, '#d97706');
+      ctx.fillStyle = bagGrad;
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.8;
+      this.roundRect(ctx, -10, -12, 20, 24, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Núcleo central de energia cósmica
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0, 2, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bicos de propulsão inferiores
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(-7, 12, 4, 4);
+      ctx.fillRect(3, 12, 4, 4);
+
+      // Mini chama decorativa
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-6, 16, 2, 3);
+      ctx.fillRect(4, 16, 2, 3);
+
+      // Ícone holográfico flutuando no topo
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🎒', 0, -16);
+
+      ctx.restore();
+    }
+
     // 3.5. Desenhar Marcadores de Morte ("Onde Morreu")
     for (const marker of this.deathMarkers) {
       const screenY = marker.y - this.cameraY;
@@ -942,6 +1133,71 @@ export class GameEngine {
 
     // 5. Desenhar a Bola do Jogador
     const ballScreenY = this.ball.y - this.cameraY;
+
+    // Se a bola estiver com a Mochila Mágica equipada, desenhar a mochila acoplada com asas e chamas
+    if (this.ball.hasMagicBackpack) {
+      ctx.save();
+      ctx.translate(this.ball.x, ballScreenY);
+
+      // Glow da mochila
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 12;
+
+      // Asas do jetpack
+      ctx.fillStyle = '#0284c7';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      // Asa esquerda
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(-24, -8);
+      ctx.lineTo(-16, 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Asa direita
+      ctx.beginPath();
+      ctx.moveTo(10, 0);
+      ctx.lineTo(24, -8);
+      ctx.lineTo(16, 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Corpo da mochila
+      const bagGrad = ctx.createLinearGradient(-13, -12, 13, 14);
+      bagGrad.addColorStop(0, '#fbbf24');
+      bagGrad.addColorStop(0.5, '#f59e0b');
+      bagGrad.addColorStop(1, '#d97706');
+      ctx.fillStyle = bagGrad;
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.8;
+      this.roundRect(ctx, -13, -12, 26, 25, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bicos propulsores inferiores
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(-10, 13, 6, 5);
+      ctx.fillRect(4, 13, 6, 5);
+
+      // Chamas vivas saindo dos bocais propulsores
+      const flameLen = 8 + Math.random() * 8;
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(-10, 18);
+      ctx.lineTo(-7, 18 + flameLen);
+      ctx.lineTo(-4, 18);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(4, 18);
+      ctx.lineTo(7, 18 + flameLen);
+      ctx.lineTo(10, 18);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
     ctx.save();
     ctx.translate(this.ball.x, ballScreenY);
     ctx.rotate(this.ball.angle);
@@ -991,6 +1247,66 @@ export class GameEngine {
     }
 
     ctx.restore();
+
+    // 5.2. Medidor de Combustível da Mochila Mágica (HUD e Barra sobre a bola)
+    if (this.ball.hasMagicBackpack && this.ball.backpackFuel > 0) {
+      const fuelPct = Math.max(0, Math.min(100, Math.round((this.ball.backpackFuel / this.ball.backpackMaxFuel) * 100)));
+
+      // 1. Barra Flutuando Logo Acima da Bola
+      ctx.save();
+      ctx.translate(this.ball.x, ballScreenY - this.ball.radius - 22);
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.strokeStyle = fuelPct < 25 ? '#ef4444' : '#f59e0b';
+      ctx.lineWidth = 1.4;
+      this.roundRect(ctx, -38, -12, 76, 16, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Preenchimento do combustível
+      const barW = Math.max(0, (fuelPct / 100) * 44);
+      const fuelGrad = ctx.createLinearGradient(-16, 0, 28, 0);
+      if (fuelPct < 25) {
+        fuelGrad.addColorStop(0, '#ef4444');
+        fuelGrad.addColorStop(1, '#f87171');
+      } else {
+        fuelGrad.addColorStop(0, '#f59e0b');
+        fuelGrad.addColorStop(0.5, '#fbbf24');
+        fuelGrad.addColorStop(1, '#38bdf8');
+      }
+      ctx.fillStyle = fuelGrad;
+      this.roundRect(ctx, -16, -9, barW, 10, 3);
+      ctx.fill();
+
+      // Ícone e Porcentagem
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('🎒', -34, -1);
+      ctx.textAlign = 'right';
+      ctx.fillText(`${fuelPct}%`, 33, -1);
+      ctx.restore();
+
+      // 2. Banner Holográfico no Topo da Tela
+      ctx.save();
+      ctx.translate(this.width / 2, 54);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.strokeStyle = fuelPct < 25 ? '#ef4444' : '#0ea5e9';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = fuelPct < 25 ? '#ef4444' : '#38bdf8';
+      ctx.shadowBlur = 10;
+      this.roundRect(ctx, -95, -13, 190, 26, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = fuelPct < 25 ? '#fca5a5' : '#7dd3fc';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const warningText = fuelPct < 25 ? '⚠️ COMBUSTÍVEL BAIXO' : '🚀 MOCHILA MÁGICA ATIVA';
+      ctx.fillText(`${warningText} (${fuelPct}%)`, 0, 0);
+      ctx.restore();
+    }
 
     // 5.5 Desenhar a Bola do Bot IA e Indicador de Corrida (Modo Corrida)
     if (this.botBall && this.botBall.lives > 0) {
