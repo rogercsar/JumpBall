@@ -34,16 +34,24 @@ export function AuthProvider({ children }) {
             checkLocalSession();
           }
 
-          const { data: subData } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+          const { data: subData } = supabase.auth.onAuthStateChange(async (event, newSession) => {
             if (!isMounted) return;
             if (newSession?.user) {
               setUser(newSession.user);
               setIsGuest(false);
               fetchProfile(newSession.user.id);
-            } else {
-              setUser(null);
-              setProfile(null);
-              setIsGuest(false);
+            } else if (event === 'SIGNED_OUT') {
+              // Só encerra a sessão se o usuário realmente clicou em Sair (onde LOCAL_SESSION_KEY é apagada)
+              // Se LOCAL_SESSION_KEY ainda existe no localStorage, trata-se de falha de conexão de rede,
+              // projeto Supabase pausado ou erro temporário de refresh do token. NUNCA desloga o jogador!
+              const savedSession = localStorage.getItem(LOCAL_SESSION_KEY);
+              if (!savedSession) {
+                setUser(null);
+                setProfile(null);
+                setIsGuest(false);
+              } else {
+                console.warn('[JumpBall Auth] Supabase desconectado ou inacessível. Mantendo sessão local ativa.');
+              }
             }
           });
           authListener = subData?.subscription;
@@ -76,8 +84,19 @@ export function AuthProvider({ children }) {
       if (saved) {
         const sessionData = JSON.parse(saved);
         if (sessionData?.user) {
+          const localProf = localStore.getProfile();
+          const sessProf = sessionData.profile || {};
+          const mergedProfile = {
+            ...localProf,
+            ...sessProf,
+            stages_completed: Math.max(localProf.stages_completed || 0, sessProf.stages_completed || 0),
+            high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0),
+            total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0),
+            games_played: Math.max(localProf.games_played || 0, sessProf.games_played || 0)
+          };
           setUser(sessionData.user);
-          setProfile(sessionData.profile || localStore.getProfile());
+          setProfile(mergedProfile);
+          localStore.saveProfile(mergedProfile);
           setIsGuest(Boolean(sessionData.isGuest));
           return;
         }
@@ -92,7 +111,10 @@ export function AuthProvider({ children }) {
   };
 
   const fetchProfile = async (userId) => {
-    if (!supabase) return;
+    if (!supabase || !userId || userId.startsWith('offline-') || userId.startsWith('guest-')) {
+      setProfile(localStore.getProfile());
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -120,15 +142,16 @@ export function AuthProvider({ children }) {
             total_jumps: merged.total_jumps
           }).eq('id', userId).then(() => {}).catch(() => {});
         }
-      } else if (error) {
-        console.warn('Perfil não encontrado no Supabase, usando local:', error.message);
+      } else {
         setProfile(localStore.getProfile());
       }
     } catch (e) {
-      console.error('Erro ao buscar perfil:', e);
+      console.warn('Perfil do Supabase inacessível, mantendo dados locais:', e);
+      setProfile(localStore.getProfile());
     }
   };
 
+  // Login com E-mail e Senha
   // Login com E-mail e Senha
   const login = async (email, password) => {
     if (!isSupabaseConfigured || !supabase) {
@@ -147,36 +170,62 @@ export function AuthProvider({ children }) {
       return { success: true };
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    if (error) throw error;
-    if (data?.user) {
-      setUser(data.user);
-      setIsGuest(false);
-      await fetchProfile(data.user.id);
-      localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: data.user, isGuest: false }));
+      if (error) throw error;
+      if (data?.user) {
+        setUser(data.user);
+        setIsGuest(false);
+        await fetchProfile(data.user.id);
+        const currentProf = localStore.getProfile();
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: data.user, profile: currentProf, isGuest: false }));
+      }
+      return data;
+    } catch (err) {
+      // Se for erro de rede/servidor offline/DNS não resolvido, ativa modo local de emergência
+      const isNetworkErr = err.message?.includes('Failed to fetch') || 
+                           err.name === 'AuthRetryableFetchError' || 
+                           err.message?.includes('ERR_NAME_NOT_RESOLVED');
+      if (isNetworkErr) {
+        console.warn('Supabase offline ou inacessível. Iniciando sessão em modo local resiliente.');
+        const fallbackUser = { id: 'offline-' + Date.now(), email };
+        const prof = { 
+          ...localStore.getProfile(), 
+          username: email.split('@')[0], 
+          email 
+        };
+        setUser(fallbackUser);
+        setProfile(prof);
+        setIsGuest(false);
+        localStore.saveProfile(prof);
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: fallbackUser, profile: prof, isGuest: false }));
+        return { success: true, offline: true };
+      }
+      throw err;
     }
-    return data;
   };
 
   // Cadastro de Novo Usuário
   const signup = async (email, password, username, fullName) => {
+    const createFallbackProfile = (userId) => ({
+      id: userId,
+      username: username || email.split('@')[0],
+      full_name: fullName || 'Novo Jogador',
+      avatar_url: null,
+      ball_skin: 'neon-cyan',
+      high_score: 0,
+      total_jumps: 0,
+      stages_completed: 0,
+      created_at: new Date().toISOString()
+    });
+
     if (!isSupabaseConfigured || !supabase) {
       const mockUser = { id: 'user-' + Date.now(), email };
-      const prof = {
-        id: mockUser.id,
-        username: username || email.split('@')[0],
-        full_name: fullName || 'Novo Jogador',
-        avatar_url: null,
-        ball_skin: 'neon-cyan',
-        high_score: 0,
-        total_jumps: 0,
-        stages_completed: 0,
-        created_at: new Date().toISOString()
-      };
+      const prof = createFallbackProfile(mockUser.id);
       setUser(mockUser);
       setProfile(prof);
       setIsGuest(false);
@@ -185,25 +234,44 @@ export function AuthProvider({ children }) {
       return { success: true };
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
-          full_name: fullName
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            full_name: fullName
+          }
         }
-      }
-    });
+      });
 
-    if (error) throw error;
-    if (data?.user) {
-      setUser(data.user);
-      setIsGuest(false);
-      await fetchProfile(data.user.id);
-      localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: data.user, isGuest: false }));
+      if (error) throw error;
+      if (data?.user) {
+        setUser(data.user);
+        setIsGuest(false);
+        await fetchProfile(data.user.id);
+        const currentProf = localStore.getProfile();
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: data.user, profile: currentProf, isGuest: false }));
+      }
+      return data;
+    } catch (err) {
+      const isNetworkErr = err.message?.includes('Failed to fetch') || 
+                           err.name === 'AuthRetryableFetchError' || 
+                           err.message?.includes('ERR_NAME_NOT_RESOLVED');
+      if (isNetworkErr) {
+        console.warn('Supabase offline ou inacessível. Criando conta em modo local resiliente.');
+        const fallbackUser = { id: 'offline-' + Date.now(), email };
+        const prof = createFallbackProfile(fallbackUser.id);
+        setUser(fallbackUser);
+        setProfile(prof);
+        setIsGuest(false);
+        localStore.saveProfile(prof);
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: fallbackUser, profile: prof, isGuest: false }));
+        return { success: true, offline: true };
+      }
+      throw err;
     }
-    return data;
   };
 
   // Login como Visitante / Convidado
@@ -216,14 +284,29 @@ export function AuthProvider({ children }) {
     localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ user: guestUser, profile: guestProfile, isGuest: true }));
   };
 
-  // Logout
+  // Logout (Encerramento voluntário da sessão)
   const logout = async () => {
+    // 1. Remove sessão local primeiro
+    localStorage.removeItem(LOCAL_SESSION_KEY);
+
+    // 2. Limpa tokens do Supabase no localStorage para evitar tentativas de renovação em segundo plano
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+    } catch (e) { /* ignore */ }
+
+    // 3. Notifica o Supabase
     if (supabase && isSupabaseConfigured) {
       try {
         await supabase.auth.signOut();
       } catch (e) { /* ignore */ }
     }
-    localStorage.removeItem(LOCAL_SESSION_KEY);
     setUser(null);
     setProfile(null);
     setIsGuest(false);
@@ -231,8 +314,16 @@ export function AuthProvider({ children }) {
 
   // Atualizar Perfil (Nome, Skin da Bola, Fases Concluídas, etc.)
   const updateProfile = async (updates) => {
-    const current = profile || localStore.getProfile();
-    const updated = { ...current, ...updates };
+    const local = localStore.getProfile();
+    const current = profile ? { ...local, ...profile } : local;
+    const updated = { 
+      ...current, 
+      ...updates,
+      stages_completed: Math.max(current.stages_completed || 0, updates.stages_completed !== undefined ? updates.stages_completed : 0),
+      high_score: Math.max(current.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
+      total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (current.total_jumps || 0),
+      games_played: (updates.games_played !== undefined) ? updates.games_played : (current.games_played || 0)
+    };
     setProfile(updated);
     localStore.saveProfile(updated);
 
@@ -246,7 +337,7 @@ export function AuthProvider({ children }) {
       } catch (e) { /* ignore */ }
     }
 
-    if (supabase && isSupabaseConfigured && user && !isGuest) {
+    if (supabase && isSupabaseConfigured && user && !isGuest && !user.id?.startsWith('offline-') && !user.id?.startsWith('guest-')) {
       try {
         // Envia apenas colunas existentes na tabela 'profiles' do banco
         const ALLOWED_DB_COLUMNS = ['username', 'full_name', 'avatar_url', 'ball_skin', 'high_score', 'total_jumps', 'stages_completed'];
@@ -270,6 +361,62 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Solicitar recuperação / redefinição de senha
+  const resetPassword = async (email) => {
+    if (!isSupabaseConfigured || !supabase) {
+      return { 
+        success: true, 
+        offline: true, 
+        message: 'Ambiente local: se o e-mail estiver cadastrado, as instruções para redefinir a senha foram enviadas!' 
+      };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/#recovery`
+      });
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (err) {
+      const isNetworkErr = err.message?.includes('Failed to fetch') || 
+                           err.name === 'AuthRetryableFetchError' || 
+                           err.message?.includes('ERR_NAME_NOT_RESOLVED');
+      if (isNetworkErr) {
+        return { 
+          success: true, 
+          offline: true, 
+          message: 'Servidor offline: simulação de recuperação de senha concluída com sucesso!' 
+        };
+      }
+      throw err;
+    }
+  };
+
+  // Definir nova senha
+  const updateUserPassword = async (newPassword) => {
+    if (!isSupabaseConfigured || !supabase) {
+      return { success: true, offline: true };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (err) {
+      const isNetworkErr = err.message?.includes('Failed to fetch') || 
+                           err.name === 'AuthRetryableFetchError' || 
+                           err.message?.includes('ERR_NAME_NOT_RESOLVED');
+      if (isNetworkErr) {
+        return { success: true, offline: true };
+      }
+      throw err;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -284,6 +431,8 @@ export function AuthProvider({ children }) {
         loginAsGuest,
         logout,
         updateProfile,
+        resetPassword,
+        updateUserPassword,
         refreshProfile: () => user && fetchProfile(user.id)
       }}
     >
@@ -307,6 +456,8 @@ export function useAuth() {
       loginAsGuest: () => {},
       logout: async () => {},
       updateProfile: async () => {},
+      resetPassword: async () => ({ success: false }),
+      updateUserPassword: async () => ({ success: false }),
       refreshProfile: () => {}
     };
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, ShieldAlert, CheckCircle2, User, Key, Mail, Sparkles } from 'lucide-react';
+import { LogIn, UserPlus, ShieldAlert, CheckCircle2, User, Key, Mail, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 export function Login({ onNavigate, initialMode = 'login' }) {
@@ -7,6 +7,7 @@ export function Login({ onNavigate, initialMode = 'login' }) {
   const [isRegister, setIsRegister] = useState(initialMode === 'register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,8 +63,8 @@ export function Login({ onNavigate, initialMode = 'login' }) {
             {isRegister ? 'Criar Conta de Piloto' : 'Acessar JumpBall'}
           </h2>
           <p className="text-xs text-slate-400">
-            {isRegister 
-              ? 'Cadastre-se para salvar seus recordes e skins na nuvem' 
+            {isRegister
+              ? 'Cadastre-se para salvar seus recordes e skins na nuvem'
               : 'Entre com sua conta para sincronizar pontuações'}
           </p>
         </div>
@@ -73,18 +74,16 @@ export function Login({ onNavigate, initialMode = 'login' }) {
           <button
             type="button"
             onClick={() => { setIsRegister(false); setErrorMsg(null); setSuccessMsg(null); }}
-            className={`py-2 rounded-lg transition-all ${
-              !isRegister ? 'bg-cyan-500 text-slate-950 shadow-md font-bold' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`py-2 rounded-lg transition-all ${!isRegister ? 'bg-cyan-500 text-slate-950 shadow-md font-bold' : 'text-slate-400 hover:text-white'
+              }`}
           >
             Entrar
           </button>
           <button
             type="button"
             onClick={() => { setIsRegister(true); setErrorMsg(null); setSuccessMsg(null); }}
-            className={`py-2 rounded-lg transition-all ${
-              isRegister ? 'bg-cyan-500 text-slate-950 shadow-md font-bold' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`py-2 rounded-lg transition-all ${isRegister ? 'bg-cyan-500 text-slate-950 shadow-md font-bold' : 'text-slate-400 hover:text-white'
+              }`}
           >
             Criar Conta
           </button>
@@ -153,18 +152,37 @@ export function Login({ onNavigate, initialMode = 'login' }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Senha</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium text-slate-300">Senha</label>
+              {!isRegister && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate('forgot-password')}
+                  className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                >
+                  Esqueceu sua senha?
+                </button>
+              )}
+            </div>
             <div className="relative">
               <Key className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Mínimo de 6 caracteres"
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                className="w-full pl-9 pr-10 py-2.5 bg-slate-900/80 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300 focus:outline-none"
+                aria-label={showPassword ? 'Ocultar senha' : 'Ver senha'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -190,7 +208,7 @@ export function Login({ onNavigate, initialMode = 'login' }) {
         </form>
 
         {/* Opção Rápida de Convidado */}
-        <div className="pt-2 border-t border-slate-800 text-center">
+        {/*<div className="pt-2 border-t border-slate-800 text-center">
           <button
             type="button"
             onClick={handleGuestContinue}
@@ -198,7 +216,7 @@ export function Login({ onNavigate, initialMode = 'login' }) {
           >
             Continuar jogando no Modo Convidado →
           </button>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

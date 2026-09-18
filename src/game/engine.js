@@ -409,7 +409,8 @@ export class GameEngine {
           duration,
           jumps: this.jumpsCount,
           gems: this.gemsCollected,
-          status: 'completed'
+          status: 'completed',
+          stage: this.stage
         });
       }
     } else {
@@ -421,7 +422,8 @@ export class GameEngine {
           duration,
           jumps: this.jumpsCount,
           gems: this.gemsCollected,
-          status: 'game_over'
+          status: 'game_over',
+          stage: this.stage
         });
       }
     }

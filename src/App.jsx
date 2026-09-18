@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { DialogProvider } from './contexts/DialogContext';
@@ -10,10 +10,18 @@ import { Profile } from './pages/Profile';
 import { History } from './pages/History';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
+import { ForgotPassword } from './pages/ForgotPassword';
 
 function AppContent() {
   const { user, loading } = useAuth();
   const [currentRoute, setCurrentRoute] = useState('home');
+
+  // Detecta se o usuário clicou no link de recuperação de senha vindo do e-mail
+  useEffect(() => {
+    if (window.location.hash.includes('recovery') || window.location.hash.includes('type=recovery')) {
+      setCurrentRoute('forgot-password');
+    }
+  }, []);
 
   // Sensores globais
   const {
@@ -42,7 +50,7 @@ function AppContent() {
   }
 
   // Se o usuário não está autenticado e tentar acessar uma rota restrita, redireciona para login
-  const isProtectedRoute = ['game', 'profile', 'history', 'settings'].includes(currentRoute);
+  const isProtectedRoute = ['game', 'profile', 'history'].includes(currentRoute);
   const activeRoute = (!user && isProtectedRoute) ? 'login' : currentRoute;
 
   return (
@@ -93,6 +101,12 @@ function AppContent() {
               onNavigate={setCurrentRoute} 
               initialMode={activeRoute === 'register' ? 'register' : 'login'} 
             />
+          </div>
+        )}
+
+        {activeRoute === 'forgot-password' && (
+          <div className="py-8">
+            <ForgotPassword onNavigate={setCurrentRoute} />
           </div>
         )}
       </main>

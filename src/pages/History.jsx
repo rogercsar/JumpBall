@@ -28,7 +28,15 @@ export function History({ onNavigate }) {
 
   const fetchHistory = async () => {
     setLoading(true);
-    if (isSupabaseConfigured && supabase && user) {
+    const isRemoteUser = Boolean(
+      isSupabaseConfigured && 
+      supabase && 
+      user && 
+      !user.id?.startsWith('offline-') && 
+      !user.id?.startsWith('guest-')
+    );
+
+    if (isRemoteUser) {
       try {
         const { data, error } = await supabase
           .from('game_history')
@@ -56,8 +64,16 @@ export function History({ onNavigate }) {
   useEffect(() => {
     fetchHistory();
 
-    // Sincronização em tempo real com o Supabase Realtime
-    if (isSupabaseConfigured && supabase && user) {
+    const isRemoteUser = Boolean(
+      isSupabaseConfigured && 
+      supabase && 
+      user && 
+      !user.id?.startsWith('offline-') && 
+      !user.id?.startsWith('guest-')
+    );
+
+    // Sincronização em tempo real com o Supabase Realtime (apenas para contas conectadas na nuvem)
+    if (isRemoteUser) {
       const channel = supabase
         .channel('game_history_realtime')
         .on(

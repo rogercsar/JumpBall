@@ -92,85 +92,44 @@ export function Game({ onNavigate }) {
   }, [orientation.gamma, settings.gyroSensitivity, settings.gyroDeadzone, gameState]);
 
   // Skin ativa da bola
+  // Refs para evitar problemas de stale closure
+  const selectedStageRef = useRef(selectedStage);
+  useEffect(() => {
+    selectedStageRef.current = selectedStage;
+  }, [selectedStage]);
+
+  const profileRef = useRef(profile);
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+
+  // Skin ativa da bola
   const activeSkin = BALL_SKINS.find((s) => s.id === (profile?.ball_skin || 'neon-cyan')) || BALL_SKINS[0];
 
-  // Prepara a fase no modo 'ready' aguardando o clique em DAR PLAY
-  const startGame = useCallback((stage) => {
-    setSelectedStage(stage);
-    setGameState('ready');
-    setCurrentScore(0);
-    setCurrentHeight(0);
-    setLastGameResult(null);
-
-    // Timeout breve para o Canvas renderizar no DOM
-    setTimeout(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const engine = new GameEngine(
-        canvas,
-        stage,
-        activeSkin,
-        handleGameOver,
-        handleVictory,
-        (score, height) => {
-          setCurrentScore(score);
-          setCurrentHeight(height);
-        }
-      );
-
-      engineRef.current = engine;
-    }, 60);
-  }, [activeSkin]);
-
-  // Inicia a física e o movimento apenas quando o jogador clica em DAR PLAY
-  const handleStartPlay = async () => {
-    // Requisita permissão de giroscópio/acelerômetro no clique do usuário (essencial para iOS/Safari)
-    if (needsPermissionPrompt && !permissionGranted && requestOrientationPermission) {
-      try {
-        await requestOrientationPermission();
-      } catch (e) {
-        console.warn('Aviso de permissão ao iniciar:', e);
-      }
-    }
-
-    if (engineRef.current) {
-      setGameState('playing');
-      engineRef.current.start();
-    }
-  };
-
-  // Handlers de Fim de Jogo
-  const handleGameOver = useCallback((result) => {
-    setGameState('game_over');
-    setLastGameResult(result);
-    saveGameResult(result);
-  }, [selectedStage, user, settings.controlMode]);
-
-  const handleVictory = useCallback((result) => {
-    setGameState('victory');
-    setLastGameResult(result);
-    saveGameResult(result);
-
-    // Chuva de confetes
-    try {
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
-    } catch (e) { /* ignore */ }
-  }, [selectedStage, user, settings.controlMode]);
-
-  // Persistência de Score (Supabase + LocalStore + Netlify Functions)
-  const saveGameResult = async (result) => {
-    const stageNumber = selectedStage?.number || 1;
+  // Persistência de Score e Desbloqueio de Fases (Supabase + LocalStore)
+  const saveGameResult = async (result, currentStageObj) => {
+    const stageObj = currentStageObj || result?.stage || selectedStageRef.current || selectedStage;
+    const stageNumber = Number(stageObj?.number || stageObj?.id || 1);
     const scoreVal = Math.round(result.score || 0);
     const heightVal = Math.round(result.maxHeight || 0);
     const jumpsVal = Math.round(result.jumps || 0);
     const durationVal = Math.round(result.duration || 0);
     const controlModeVal = settings.controlMode || 'hybrid';
     const isWin = result.status === 'completed';
+
+    // Recupera o maior progresso registrado
+    const localProf = localStore.getProfile();
+    const currentCompleted = Math.max(
+      profileRef.current?.stages_completed || 0,
+      profile?.stages_completed || 0,
+      localProf.stages_completed || 0
+    );
+
+    // Se concluiu a fase, avança as fases concluídas garantindo o desbloqueio da próxima!
+    const newStagesCompleted = isWin ? Math.max(currentCompleted, stageNumber) : currentCompleted;
+    const newHighScore = Math.max(profileRef.current?.high_score || 0, localProf.high_score || 0, scoreVal);
+    const newTotalJumps = (profileRef.current?.total_jumps || localProf.total_jumps || 0) + jumpsVal;
+    const newGamesPlayed = (profileRef.current?.games_played || localProf.games_played || 0) + 1;
 
     const payload = {
       userId: user?.id || null,
@@ -189,31 +148,36 @@ export function Game({ onNavigate }) {
       control_mode: controlModeVal
     };
 
-    // 1. Atualiza imediatamente o perfil do jogador (desbloqueia a próxima fase no React e no banco)
-    const currentCompleted = profile?.stages_completed || 0;
-    const newStagesCompleted = isWin ? Math.max(currentCompleted, stageNumber) : currentCompleted;
-    const newHighScore = Math.max(profile?.high_score || 0, scoreVal);
-    const newTotalJumps = (profile?.total_jumps || 0) + jumpsVal;
-    const newGamesPlayed = (profile?.games_played || 0) + 1;
+    const updates = {
+      stages_completed: newStagesCompleted,
+      high_score: newHighScore,
+      total_jumps: newTotalJumps,
+      games_played: newGamesPlayed
+    };
 
+    // 1. Atualiza imediatamente o perfil do jogador no estado e storage
     if (updateProfile) {
       try {
-        await updateProfile({
-          stages_completed: newStagesCompleted,
-          high_score: newHighScore,
-          total_jumps: newTotalJumps,
-          games_played: newGamesPlayed
-        });
+        await updateProfile(updates);
       } catch (err) {
         console.warn('Aviso ao atualizar perfil:', err);
       }
+    } else {
+      localStore.saveProfile({ ...localProf, ...updates });
     }
 
-    // 2. Grava localmente de forma imediata (funciona offline e como visitante)
+    // 2. Grava localmente no histórico
     localStore.addHistory(payload);
 
-    // 3. Grava diretamente no banco Supabase se o usuário estiver autenticado
-    if (isSupabaseConfigured && supabase && user) {
+    // 3. Grava diretamente no banco Supabase se o usuário estiver autenticado na nuvem
+    const isRemoteUser = Boolean(
+      isSupabaseConfigured && 
+      supabase && 
+      user && 
+      !user.id?.startsWith('offline-') && 
+      !user.id?.startsWith('guest-')
+    );
+    if (isRemoteUser) {
       try {
         await supabase.from('game_history').insert([
           {
@@ -230,6 +194,70 @@ export function Game({ onNavigate }) {
       } catch (err) {
         console.warn('Aviso: Falha ao inserir no Supabase diretamente:', err);
       }
+    }
+  };
+
+  // Prepara a fase no modo 'ready' aguardando o clique em DAR PLAY
+  const startGame = useCallback((stage) => {
+    setSelectedStage(stage);
+    selectedStageRef.current = stage;
+    setGameState('ready');
+    setCurrentScore(0);
+    setCurrentHeight(0);
+    setLastGameResult(null);
+
+    // Timeout breve para o Canvas renderizar no DOM
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const engine = new GameEngine(
+        canvas,
+        stage,
+        activeSkin,
+        (result) => {
+          setGameState('game_over');
+          setLastGameResult(result);
+          saveGameResult(result, stage);
+        },
+        (result) => {
+          setGameState('victory');
+          setLastGameResult(result);
+          saveGameResult(result, stage);
+
+          // Chuva de confetes
+          try {
+            confetti({
+              particleCount: 120,
+              spread: 80,
+              origin: { y: 0.6 }
+            });
+          } catch (e) { /* ignore */ }
+        },
+        (score, height) => {
+          setCurrentScore(score);
+          setCurrentHeight(height);
+        }
+      );
+
+      engineRef.current = engine;
+    }, 60);
+  }, [activeSkin, user, settings.controlMode, updateProfile]);
+
+  // Inicia a física e o movimento apenas quando o jogador clica em DAR PLAY
+  const handleStartPlay = async () => {
+    // Requisita permissão de giroscópio/acelerômetro no clique do usuário (essencial para iOS/Safari)
+    if (needsPermissionPrompt && !permissionGranted && requestOrientationPermission) {
+      try {
+        await requestOrientationPermission();
+      } catch (e) {
+        console.warn('Aviso de permissão ao iniciar:', e);
+      }
+    }
+
+    if (engineRef.current) {
+      setGameState('playing');
+      engineRef.current.start();
     }
   };
 
