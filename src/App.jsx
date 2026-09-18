@@ -54,7 +54,11 @@ function AppContent() {
   const activeRoute = (!user && isProtectedRoute) ? 'login' : currentRoute;
 
   return (
-    <div className={`min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950 ${activeRoute !== 'game' ? 'pb-16 md:pb-0' : 'pb-0'}`}>
+    <div className={`bg-[#090d16] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950 ${
+      activeRoute === 'game' 
+        ? 'h-[100dvh] max-h-[100dvh] overflow-hidden' 
+        : 'min-h-screen pb-20 md:pb-0'
+    }`}>
       {/* Barra de Navegação Superior (com Início, Jogar, Histórico, Perfil, Ajustes e Botões de Entrar/Cadastrar) */}
       <Navbar
         currentRoute={activeRoute}
@@ -64,7 +68,7 @@ function AppContent() {
       />
 
       {/* Roteamento de Telas */}
-      <main className="flex-1">
+      <main className={`flex-1 ${activeRoute === 'game' ? 'h-full min-h-0 overflow-hidden flex flex-col' : ''}`}>
         {activeRoute === 'home' && (
           <Home
             onNavigate={setCurrentRoute}
@@ -111,17 +115,19 @@ function AppContent() {
         )}
       </main>
 
-      {/* Rodapé da Aplicação */}
-      <footer className="border-t border-slate-800/60 bg-slate-950/60 py-6 px-4 text-center text-xs text-slate-500">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-400">JumpBall Pro Runner</span>
+      {/* Rodapé da Aplicação (Ocultado durante o jogo para manter imersão total e evitar rolagem) */}
+      {activeRoute !== 'game' && (
+        <footer className="border-t border-slate-800/60 bg-slate-950/60 py-6 px-4 text-center text-xs text-slate-500">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-400">JumpBall Pro Runner</span>
+            </div>
+            <div className="text-slate-500 text-[11px]">
+              © {new Date().getFullYear()} JumpBall. Todos os direitos reservados.
+            </div>
           </div>
-          <div className="text-slate-500 text-[11px]">
-            © {new Date().getFullYear()} JumpBall. Todos os direitos reservados.
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

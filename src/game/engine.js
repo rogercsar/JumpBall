@@ -388,10 +388,9 @@ export class GameEngine {
     }
 
     // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera
-    while (this.highestPlatformY > this.cameraY - 300) {
-      const nextSpacing = 65 + Math.random() * 45;
-      const nextY = this.highestPlatformY - nextSpacing;
-      this.generatePlatformAt(nextY);
+    while (this.highestPlatformY > this.cameraY - 400) {
+      this.highestPlatformY -= Math.floor(Math.random() * 45 + 65);
+      this.generatePlatformAt(this.highestPlatformY);
     }
 
     // 9. Limpeza de Entidades Fora da Tela

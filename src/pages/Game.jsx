@@ -417,8 +417,8 @@ export function Game({ onNavigate }) {
 
   return (
     <div className={gameState === 'menu' 
-      ? "max-w-4xl mx-auto px-4 py-6 sm:py-8" 
-      : "w-full flex-1 flex flex-col items-center justify-center p-2 sm:p-4 min-h-[calc(100dvh-4.5rem)] max-h-[calc(100dvh-4.5rem)] overflow-hidden select-none"
+      ? "max-w-4xl mx-auto px-4 pt-4 pb-28 sm:py-8" 
+      : "w-full flex-1 flex flex-col items-center justify-center p-1 sm:p-2 h-full max-h-full overflow-hidden select-none touch-none overscroll-none"
     }>
       {/* 1. MENU DE SELEÇÃO DE FASES (10 Fases) */}
       {gameState === 'menu' && (
@@ -547,7 +547,7 @@ export function Game({ onNavigate }) {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center flex-1 min-h-0 max-h-[calc(100dvh-5.5rem)] sm:max-h-[calc(100dvh-5.8rem)] cursor-pointer touch-none select-none"
+            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center flex-1 min-h-0 max-h-[calc(100dvh-4.6rem)] md:max-h-[calc(100dvh-8rem)] cursor-pointer touch-none select-none"
           >
             <canvas
               id="gameCanvas"

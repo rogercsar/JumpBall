@@ -37,8 +37,9 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
 
   return (
     <>
-      {/* Barra de Navegação Superior (Desktop & Tablets) */}
-      <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
+      {/* Barra de Navegação Superior (Desktop & Tablets; no mobile é oculta durante o jogo para aproveitar 100% da tela) */}
+      <header className={`sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md ${currentRoute === 'game' ? 'hidden md:block' : 'block'
+        }`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo & Marca */}
           <div
@@ -52,9 +53,9 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
               <span className="text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">
                 JUMPBALL
               </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              {/*<span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                 PRO RUNNER
-              </span>
+              </span>*/}
             </div>
           </div>
 
@@ -69,8 +70,8 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${isActive
-                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm shadow-cyan-500/10'
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm shadow-cyan-500/10'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
                       }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -170,9 +171,9 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
         </div>
       </header>
 
-      {/* Barra de Navegação Inferior para Mobile (Ocultada durante a tela do jogo para não sobrepor os controles) */}
+      {/* Barra de Navegação Inferior para Mobile (Moderna com Safe Area e visual ergonômico) */}
       {user && currentRoute !== 'game' && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800/90 bg-slate-950/90 py-1.5 px-3 flex justify-around items-center">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800/90 bg-slate-950/95 backdrop-blur-xl pt-1.5 pb-[max(env(safe-area-inset-bottom),0.65rem)] px-3 flex justify-around items-center shadow-2xl">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentRoute === item.id;
@@ -180,13 +181,18 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
               <button
                 key={item.id}
                 onClick={() => setCurrentRoute(item.id)}
-                className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${isActive
-                    ? 'text-cyan-400 scale-105'
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-2xl transition-all duration-200 relative ${isActive
+                    ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 shadow-sm shadow-cyan-500/20 scale-105'
+                    : 'text-slate-400 hover:text-slate-200 active:scale-95'
                   }`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' : ''}`} />
+                <span className={`text-[10px] font-semibold tracking-tight ${isActive ? 'text-cyan-300 font-bold' : 'text-slate-400'}`}>
+                  {item.label}
+                </span>
+                {isActive && (
+                  <span className="absolute -bottom-1 w-4 h-0.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                )}
               </button>
             );
           })}
