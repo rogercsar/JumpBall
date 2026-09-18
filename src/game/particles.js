@@ -135,6 +135,37 @@ export class ParticleSystem {
     }
   }
 
+  // Faíscas elétricas de relâmpago
+  emitLightningBurst(x, y) {
+    for (let i = 0; i < 20; i++) {
+      this.emit(x, y, 1, {
+        color: Math.random() > 0.4 ? '#67e8f9' : '#ffffff',
+        size: Math.random() * 4 + 2,
+        speed: Math.random() * 6 + 2,
+        spread: Math.PI * 2,
+        baseAngle: 0,
+        life: 0.45,
+        gravity: 0.1
+      });
+    }
+  }
+
+  // Impacto de galhos, pedras ou ferro quebrando
+  emitDebrisImpact(x, y, color = '#78716c') {
+    for (let i = 0; i < 14; i++) {
+      this.emit(x, y, 1, {
+        color,
+        size: Math.random() * 5 + 2,
+        speed: Math.random() * 4 + 1.5,
+        spread: Math.PI * 2,
+        baseAngle: 0,
+        life: 0.6,
+        gravity: 0.25,
+        shape: 'rect'
+      });
+    }
+  }
+
   update(dt = 1) {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];

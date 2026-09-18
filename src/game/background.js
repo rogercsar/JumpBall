@@ -612,6 +612,50 @@ export class BackgroundRenderer {
         });
       }
     }
+
+    // 41. Rocha: Poeira de granito e cascalho mineral
+    else if (this.theme === 'rock') {
+      for (let i = 0; i < 34; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1.2,
+          speedY: Math.random() * 1.4 + 0.6,
+          speedX: (Math.random() - 0.5) * 0.8,
+          color: Math.random() > 0.5 ? 'rgba(168, 162, 158,' : 'rgba(120, 113, 108,'
+        });
+      }
+    }
+
+    // 42. Ferro: Fagulhas de solda e brasa de forja
+    else if (this.theme === 'iron') {
+      for (let i = 0; i < 36; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.8 + 1.2,
+          speedY: -(Math.random() * 1.5 + 0.5),
+          speedX: (Math.random() - 0.5) * 1.2,
+          pulse: Math.random() * Math.PI * 2,
+          glowColor: Math.random() > 0.4 ? '#f97316' : '#cbd5e1'
+        });
+      }
+    }
+
+    // 43. Madeira: Serragem dourada e lascas flutuando
+    else if (this.theme === 'wood') {
+      for (let i = 0; i < 32; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3.2 + 1.5,
+          speedY: Math.random() * 0.8 + 0.3,
+          speedX: (Math.random() - 0.5) * 0.6,
+          wobble: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? 'rgba(217, 119, 6,' : 'rgba(253, 230, 138,'
+        });
+      }
+    }
   }
 
   update(dt = 1) {
@@ -785,6 +829,15 @@ export class BackgroundRenderer {
         break;
       case 'quantum':
         this.drawQuantum(ctx, cameraY);
+        break;
+      case 'rock':
+        this.drawRock(ctx, cameraY);
+        break;
+      case 'iron':
+        this.drawIron(ctx, cameraY);
+        break;
+      case 'wood':
+        this.drawWood(ctx, cameraY);
         break;
       default:
         this.drawDefaultGrid(ctx, cameraY);
@@ -2207,6 +2260,80 @@ export class BackgroundRenderer {
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       ctx.stroke();
+    }
+  }
+
+  // 41. PEDREIRA DOS TITÃS DE ROCHA
+  drawRock(ctx, cameraY) {
+    const rockP = -cameraY * 0.08;
+    // Paredão rochoso com fissuras e blocos de granito
+    ctx.fillStyle = 'rgba(41, 37, 36, 0.65)';
+    ctx.beginPath();
+    ctx.moveTo(0, this.height);
+    for (let x = 0; x <= this.width; x += 35) {
+      const y = this.height - 240 + Math.sin(x * 0.04) * 35 + (rockP % 50);
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(this.width, this.height);
+    ctx.fill();
+
+    // Blocos de pedra maciça com contorno de cantaria
+    ctx.strokeStyle = 'rgba(120, 113, 108, 0.4)';
+    ctx.lineWidth = 2;
+    const bY = (-cameraY * 0.14) % 180;
+    for (let y = bY - 120; y < this.height + 120; y += 80) {
+      ctx.strokeRect(30, y, 90, 45);
+      ctx.strokeRect(this.width - 130, y + 30, 100, 50);
+    }
+  }
+
+  // 42. FUNDIÇÃO DE FERRO E AÇO
+  drawIron(ctx, cameraY) {
+    // Vigas I-Beam de ferro rebitadas e fornalhas em brasa
+    const ironP = (-cameraY * 0.12) % 140;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+    ctx.lineWidth = 3;
+
+    // Colunas de vigas de ferro verticais
+    ctx.fillRect(40, 0, 20, this.height);
+    ctx.strokeRect(40, 0, 20, this.height);
+    ctx.fillRect(this.width - 60, 0, 20, this.height);
+    ctx.strokeRect(this.width - 60, 0, 20, this.height);
+
+    // Vigas horizontais com rebites
+    for (let y = ironP - 100; y < this.height + 100; y += 120) {
+      ctx.fillRect(0, y, this.width, 16);
+      ctx.strokeRect(0, y, this.width, 16);
+      // Brilho alaranjado de metal aquecido
+      ctx.fillStyle = 'rgba(249, 115, 22, 0.2)';
+      ctx.fillRect(0, y + 5, this.width, 6);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    }
+  }
+
+  // 43. SERRARIA DOS TRONCOS DE MADEIRA
+  drawWood(ctx, cameraY) {
+    // Pilhas de toras de madeira e armações rústicas de carvalho
+    const woodP = (-cameraY * 0.1) % 160;
+    ctx.fillStyle = 'rgba(69, 26, 3, 0.65)';
+    ctx.strokeStyle = 'rgba(217, 119, 6, 0.35)';
+    ctx.lineWidth = 2;
+
+    // Pilhas de toras arredondadas nos cantos
+    for (let ty = woodP - 120; ty < this.height + 120; ty += 140) {
+      // Tronco horizontal
+      ctx.fillRect(0, ty, 110, 22);
+      ctx.strokeRect(0, ty, 110, 22);
+      // Corte transversal da tora com anéis de crescimento
+      ctx.beginPath();
+      ctx.arc(110, ty + 11, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Tora na direita
+      ctx.fillRect(this.width - 110, ty + 60, 110, 22);
+      ctx.strokeRect(this.width - 110, ty + 60, 110, 22);
     }
   }
 

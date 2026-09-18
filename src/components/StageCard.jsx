@@ -39,7 +39,10 @@ import {
   Ticket,
   Pyramid,
   Cog,
-  Infinity
+  Infinity,
+  Pickaxe,
+  Anvil,
+  Axe
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -78,7 +81,10 @@ const ICON_MAP = {
   Ticket,
   Pyramid,
   Cog,
-  Infinity
+  Infinity,
+  Pickaxe,
+  Anvil,
+  Axe
 };
 
 export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {

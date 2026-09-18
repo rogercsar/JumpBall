@@ -97,6 +97,10 @@ export class GameEngine {
     this.platforms = [];
     this.gems = [];
     this.magicBackpacks = [];
+    this.environmentalHazards = [];
+    this.activeLightning = null;
+    this.hazardSpawnTimer = 0;
+    this.lightningTimer = 0;
     this.spawnedBackpacksCount = 0;
     this.thrustSoundTimer = 0;
     this.highestPlatformY = this.height;
@@ -140,6 +144,10 @@ export class GameEngine {
     this.platforms = [];
     this.gems = [];
     this.magicBackpacks = [];
+    this.environmentalHazards = [];
+    this.activeLightning = null;
+    this.hazardSpawnTimer = 0;
+    this.lightningTimer = 0;
     this.spawnedBackpacksCount = 0;
 
     // Plataforma base inicial (mais larga no modo corrida para acomodar jogador e bot)
@@ -150,7 +158,8 @@ export class GameEngine {
       width: baseWidth,
       height: 16,
       type: 'standard',
-      vx: 0
+      vx: 0,
+      hasSpikes: false
     });
 
     let currentY = this.height - 130;
@@ -190,8 +199,17 @@ export class GameEngine {
       type: type,
       vx: vx,
       broken: false,
-      opacity: 1
+      opacity: 1,
+      hasSpikes: false
     };
+
+    // Chance de espinhos na plataforma baseada no tema ou desafios da fase
+    const spikeThemes = ['forest', 'autumn', 'spring', 'wood', 'rock', 'iron', 'volcano', 'steampunk', 'ninja', 'medieval', 'darkmatter'];
+    if (type === 'standard' && (spikeThemes.includes(this.stage.theme) || hazards.includes('spikes'))) {
+      if (Math.random() < 0.15) {
+        platform.hasSpikes = true;
+      }
+    }
 
     this.platforms.push(platform);
 
@@ -438,6 +456,14 @@ export class GameEngine {
                                this.ball.y + this.ball.radius <= p.y + p.height + 12;
 
         if (isCollidingX && wasAbove && isNowAtOrBelow) {
+          if (p.hasSpikes) {
+            this.takeDamage('spikes');
+            this.ball.vy = this.jumpForce * 0.75;
+            this.ball.stretchX = 0.8;
+            this.ball.stretchY = 1.2;
+            break;
+          }
+
           this.ball.y = p.y - this.ball.radius;
           this.jumpsCount++;
 
@@ -529,6 +555,9 @@ export class GameEngine {
         }
       }
     }
+
+    // 6.3. Atualizar Riscos e Inimigos Ambientais da Fase
+    this.updateEnvironmentalHazards(dt);
 
     // 6.5. Atualizar IA do Bot Oponente (se estiver no Modo Corrida)
     if (this.mode === 'race_ai' && this.botBall) {
@@ -749,6 +778,21 @@ export class GameEngine {
                                bot.y + bot.radius <= p.y + p.height + 12;
 
         if (isCollidingX && wasAbove && isNowAtOrBelow) {
+          if (p.hasSpikes) {
+            if (bot.invulnerableTimer <= 0) {
+              bot.lives--;
+              bot.invulnerableTimer = 2.0;
+              this.particles.emit(bot.x, bot.y, 16, { color: '#ef4444', size: 4, speed: 3.5, life: 0.7 });
+              soundEngine.playHazardHit();
+              if (bot.lives <= 0) {
+                this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
+                return;
+              }
+            }
+            bot.vy = this.jumpForce * 0.75;
+            break;
+          }
+
           bot.y = p.y - bot.radius;
 
           if (p.type === 'spring') {
@@ -870,6 +914,375 @@ export class GameEngine {
     this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y, '#38bdf8');
   }
 
+  takeDamage(source = 'hazard') {
+    if (this.invulnerableTimer > 0 || this.lives <= 0 || this.finished) return;
+
+    // Se o jogador estiver com a mochila mágica, perde a mochila imediatamente!
+    if (this.ball.hasMagicBackpack) {
+      this.ball.hasMagicBackpack = false;
+      this.ball.backpackFuel = 0;
+      this.ball.stretchX = 1.0;
+      this.ball.stretchY = 1.0;
+      soundEngine.playJetpackExhausted();
+      this.particles.emitBackpackSmoke(this.ball.x, this.ball.y);
+    }
+
+    // Perde 1 vida
+    this.lives--;
+    if (this.onLivesUpdate) {
+      this.onLivesUpdate(this.lives);
+    }
+
+    // SFX de dano e partículas de impacto
+    soundEngine.playHazardHit();
+    this.particles.emit(this.ball.x, this.ball.y, 22, {
+      color: '#ef4444',
+      size: 4.5,
+      speed: 4.5,
+      life: 0.8
+    });
+
+    if (this.lives <= 0) {
+      const deathNumber = this.maxLives;
+      this.deathMarkers.push({
+        x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
+        y: this.ball.y,
+        deathNumber
+      });
+      this.finishGame('game_over', { reason: 'lives_depleted', raceWinner: 'bot' });
+    } else {
+      this.invulnerableTimer = 2.0;
+      this.ball.vy = Math.min(this.ball.vy, this.jumpForce * 0.75);
+    }
+  }
+
+  updateEnvironmentalHazards(dt) {
+    const theme = this.stage.theme || 'default';
+
+    // 1. Spawning de Perigos Ambientais em Queda
+    this.hazardSpawnTimer = (this.hazardSpawnTimer || 0) + dt;
+    const spawnInterval = Math.max(160, 240 - (this.stage.number || 1) * 2);
+    if (this.hazardSpawnTimer >= spawnInterval) {
+      this.hazardSpawnTimer = 0;
+      this.spawnEnvironmentalHazard(theme);
+    }
+
+    // 2. Movimentação e Colisão dos Perigos em Queda
+    for (let i = this.environmentalHazards.length - 1; i >= 0; i--) {
+      const h = this.environmentalHazards[i];
+      h.x += h.vx * dt;
+      h.y += h.vy * dt;
+      h.angle += h.vRot * dt;
+
+      if (h.x < -20) h.x = this.width + 20;
+      else if (h.x > this.width + 20) h.x = -20;
+
+      // Colisão com o Jogador
+      const dist = Math.hypot(this.ball.x - h.x, this.ball.y - h.y);
+      if (dist < this.ball.radius + h.radius) {
+        this.particles.emitDebrisImpact(h.x, h.y, h.color);
+        this.takeDamage(h.type);
+        this.environmentalHazards.splice(i, 1);
+        continue;
+      }
+
+      // Colisão com Bot IA no Modo Corrida
+      if (this.botBall && this.botBall.lives > 0 && this.botBall.invulnerableTimer <= 0) {
+        const distBot = Math.hypot(this.botBall.x - h.x, this.botBall.y - h.y);
+        if (distBot < this.botBall.radius + h.radius) {
+          this.botBall.lives--;
+          this.botBall.invulnerableTimer = 2.0;
+          this.particles.emitDebrisImpact(h.x, h.y, h.color);
+          this.environmentalHazards.splice(i, 1);
+          if (this.botBall.lives <= 0) {
+            this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
+          }
+          continue;
+        }
+      }
+
+      // Limpeza se cair muito abaixo da tela
+      if (h.y > this.cameraY + this.height + 100) {
+        this.environmentalHazards.splice(i, 1);
+      }
+    }
+
+    // 3. Trovões no Cânion Trovejante e Fases de Tempestade
+    if (theme === 'storm' || theme === 'canyon') {
+      this.lightningTimer = (this.lightningTimer || 0) + dt;
+      if (!this.activeLightning && this.lightningTimer > 260) {
+        this.lightningTimer = 0;
+        const targetX = Math.random() * (this.width - 80) + 40;
+        this.activeLightning = {
+          state: 'telegraph',
+          x: targetX,
+          timer: 45
+        };
+        soundEngine.playHazardWarning();
+      }
+
+      if (this.activeLightning) {
+        this.activeLightning.timer -= dt;
+        if (this.activeLightning.state === 'telegraph' && this.activeLightning.timer <= 0) {
+          this.activeLightning.state = 'strike';
+          this.activeLightning.timer = 14;
+          soundEngine.playThunderStrike();
+          this.particles.emitLightningBurst(this.activeLightning.x, this.cameraY + this.height * 0.5);
+
+          // Checar se o jogador foi atingido pelo raio
+          const screenBallY = this.ball.y - this.cameraY;
+          if (Math.abs(this.ball.x - this.activeLightning.x) < 28 && screenBallY > 0 && screenBallY < this.height) {
+            this.takeDamage('lightning');
+          }
+
+          // Checar se o Bot foi atingido
+          if (this.botBall && this.botBall.lives > 0 && this.botBall.invulnerableTimer <= 0) {
+            const screenBotY = this.botBall.y - this.cameraY;
+            if (Math.abs(this.botBall.x - this.activeLightning.x) < 28 && screenBotY > 0 && screenBotY < this.height) {
+              this.botBall.lives--;
+              this.botBall.invulnerableTimer = 2.0;
+              this.particles.emitLightningBurst(this.botBall.x, this.botBall.y);
+              if (this.botBall.lives <= 0) {
+                this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
+              }
+            }
+          }
+        } else if (this.activeLightning.state === 'strike' && this.activeLightning.timer <= 0) {
+          this.activeLightning = null;
+        }
+      }
+    }
+  }
+
+  spawnEnvironmentalHazard(theme) {
+    let type = 'debris';
+    let color = '#94a3b8';
+    let radius = 13;
+    let vy = Math.random() * 1.5 + 3.0;
+
+    switch (theme) {
+      case 'forest':
+      case 'spring':
+      case 'autumn':
+      case 'wood':
+        type = 'branch';
+        color = '#854d0e';
+        radius = 14;
+        break;
+      case 'rock':
+      case 'volcano':
+        type = 'rock';
+        color = theme === 'volcano' ? '#f97316' : '#78716c';
+        radius = 15;
+        vy = Math.random() * 1.8 + 3.5;
+        break;
+      case 'iron':
+      case 'steampunk':
+        type = 'iron_bar';
+        color = '#f59e0b';
+        radius = 12;
+        vy = Math.random() * 1.6 + 3.8;
+        break;
+      case 'arctic':
+        type = 'icicle';
+        color = '#38bdf8';
+        radius = 12;
+        vy = Math.random() * 2.0 + 4.0;
+        break;
+      case 'ocean':
+      case 'underwater':
+        type = 'jellyfish';
+        color = '#e879f9';
+        radius = 13;
+        vy = Math.random() * 1.0 + 2.2;
+        break;
+      default:
+        type = 'debris';
+        color = '#a855f7';
+        radius = 12;
+        break;
+    }
+
+    this.environmentalHazards.push({
+      x: Math.random() * (this.width - 60) + 30,
+      y: this.cameraY - 40,
+      vx: (Math.random() - 0.5) * 1.2,
+      vy: vy,
+      radius: radius,
+      angle: Math.random() * Math.PI * 2,
+      vRot: (Math.random() - 0.5) * 0.08,
+      type: type,
+      color: color
+    });
+  }
+
+  drawEnvironmentalHazards(ctx) {
+    for (const h of this.environmentalHazards) {
+      const screenY = h.y - this.cameraY;
+      if (screenY < -40 || screenY > this.height + 40) continue;
+
+      ctx.save();
+      ctx.translate(h.x, screenY);
+      ctx.rotate(h.angle);
+
+      if (h.type === 'branch') {
+        // Galho de árvore caindo com folhas
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-14, 0);
+        ctx.quadraticCurveTo(0, 4, 14, -2);
+        ctx.stroke();
+
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-2, 2);
+        ctx.lineTo(6, 9);
+        ctx.stroke();
+
+        ctx.fillStyle = this.stage.theme === 'autumn' ? '#ea580c' : '#22c55e';
+        ctx.beginPath();
+        ctx.ellipse(8, 10, 5, 3, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-10, -4, 4, 2, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'rock') {
+        // Rocha / Bloco de pedra caindo
+        ctx.fillStyle = h.color;
+        ctx.strokeStyle = '#292524';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-12, -7);
+        ctx.lineTo(-3, -14);
+        ctx.lineTo(11, -8);
+        ctx.lineTo(14, 6);
+        ctx.lineTo(2, 13);
+        ctx.lineTo(-10, 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#44403c';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-3, -14);
+        ctx.lineTo(2, 0);
+        ctx.lineTo(14, 6);
+        ctx.stroke();
+      } else if (h.type === 'iron_bar') {
+        // Barra de ferro incandescente
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 10;
+        const grad = ctx.createLinearGradient(-15, -6, 15, 6);
+        grad.addColorStop(0, '#f97316');
+        grad.addColorStop(0.5, '#fef08a');
+        grad.addColorStop(1, '#ea580c');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#9a3412';
+        ctx.lineWidth = 1.5;
+        this.roundRect(ctx, -14, -6, 28, 12, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#7c2d12';
+        ctx.beginPath();
+        ctx.arc(-8, 0, 2, 0, Math.PI * 2);
+        ctx.arc(8, 0, 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'icicle') {
+        // Estalactite de gelo afiada
+        ctx.fillStyle = 'rgba(186, 230, 253, 0.9)';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-7, -13);
+        ctx.lineTo(7, -13);
+        ctx.lineTo(0, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (h.type === 'jellyfish') {
+        // Água-viva
+        ctx.fillStyle = 'rgba(232, 121, 249, 0.85)';
+        ctx.beginPath();
+        ctx.arc(0, -4, 10, Math.PI, 0, false);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#f472b6';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-6, -4); ctx.quadraticCurveTo(-7, 4, -4, 10);
+        ctx.moveTo(0, -4); ctx.quadraticCurveTo(2, 5, 0, 12);
+        ctx.moveTo(6, -4); ctx.quadraticCurveTo(8, 4, 5, 10);
+        ctx.stroke();
+      } else {
+        // Destroço padrão
+        ctx.fillStyle = h.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, h.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    // Desenhar Trovão / Relâmpago (Cânion Trovejante)
+    if (this.activeLightning) {
+      const lx = this.activeLightning.x;
+      if (this.activeLightning.state === 'telegraph') {
+        ctx.save();
+        const pulse = (Math.sin(Date.now() * 0.02) + 1) * 0.5;
+        ctx.strokeStyle = `rgba(234, 179, 8, ${0.4 + pulse * 0.5})`;
+        ctx.lineWidth = 3 + pulse * 2;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.moveTo(lx, 0);
+        ctx.lineTo(lx, this.height);
+        ctx.stroke();
+
+        ctx.fillStyle = '#eab308';
+        ctx.shadowColor = '#eab308';
+        ctx.shadowBlur = 12;
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡', lx, 32);
+
+        ctx.fillStyle = 'rgba(234, 179, 8, 0.9)';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillText('ALERTA DE RAIO', lx, 46);
+        ctx.restore();
+      } else if (this.activeLightning.state === 'strike') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        ctx.shadowColor = '#a855f7';
+        ctx.shadowBlur = 25;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        let currY = 0;
+        let currX = lx;
+        ctx.moveTo(currX, currY);
+        while (currY < this.height) {
+          currY += Math.random() * 35 + 25;
+          currX += (Math.random() - 0.5) * 36;
+          ctx.lineTo(currX, currY);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#c084fc';
+        ctx.lineWidth = 14;
+        ctx.globalAlpha = 0.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+
   finishGame(status, details = {}) {
     if (this.finished) return;
     this.finished = true;
@@ -982,6 +1395,29 @@ export class GameEngine {
           ctx.fill();
         }
       }
+
+      // Desenhar espinhos afiados sobre a plataforma
+      if (p.hasSpikes) {
+        const spikeCount = Math.max(3, Math.floor(p.width / 14));
+        const spikeW = p.width / spikeCount;
+
+        const isNature = ['forest', 'autumn', 'spring', 'wood'].includes(this.stage.theme);
+        ctx.fillStyle = isNature ? '#15803d' : '#ef4444';
+        ctx.strokeStyle = isNature ? '#86efac' : '#fee2e2';
+        ctx.lineWidth = 1.2;
+
+        for (let i = 0; i < spikeCount; i++) {
+          const sx = p.x + i * spikeW;
+          ctx.beginPath();
+          ctx.moveTo(sx, screenY);
+          ctx.lineTo(sx + spikeW / 2, screenY - 9);
+          ctx.lineTo(sx + spikeW, screenY);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
       ctx.restore();
     }
 
@@ -1130,6 +1566,9 @@ export class GameEngine {
 
     // 4. Desenhar Partículas
     this.particles.draw(ctx, this.cameraY);
+
+    // 4.5. Desenhar Inimigos e Perigos Ambientais da Cena
+    this.drawEnvironmentalHazards(ctx);
 
     // 5. Desenhar a Bola do Jogador
     const ballScreenY = this.ball.y - this.cameraY;

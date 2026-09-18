@@ -347,10 +347,10 @@ export function Home({ onNavigate }) {
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-lg sm:text-xl font-bold text-white">Trajetória Cósmica ({STAGES.length} Fases até 40.000m)</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Trajetória Cósmica ({STAGES.length} Fases até 43.000m)</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Olimpo, Futebol, Caravela, Primavera, Outono, Heróis, Placa-Mãe, Música, Internet, Geometria, Cubo Mágico e muito mais!
+              Olimpo, Futebol, Piratas, Heróis, Música, Rocha, Ferro, Madeira e muito mais!
             </p>
           </div>
           <div className="flex items-center gap-2">

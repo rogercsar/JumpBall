@@ -377,6 +377,80 @@ class SoundEngine {
     osc.start(now);
     osc.stop(now + 0.25);
   }
+
+  // Efeito de Trovão / Queda de Relâmpago
+  playThunderStrike() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+
+    // Onda quadrada grave + ruído de descarga
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.55);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.7, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.58);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.6);
+  }
+
+  // Efeito de Aviso Prévio do Perigo (Telegraph de Relâmpago ou Queda)
+  playHazardWarning() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.setValueAtTime(1174, now + 0.08);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.18);
+  }
+
+  // Efeito de Impacto / Dano Sofrido por Perigo da Cena
+  playHazardHit() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(240, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.28);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.6, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.32);
+  }
 }
 
 export const soundEngine = new SoundEngine();
