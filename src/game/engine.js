@@ -242,10 +242,13 @@ export class GameEngine {
       this.invulnerableTimer = Math.max(0, this.invulnerableTimer - dt * 0.0166);
     }
 
-    // 1. Entrada Horizontal (Giroscópio + Teclado + Toque)
+    // 1. Entrada Horizontal (Giroscópio + Teclado + Toque na Tela)
     let moveInput = this.tiltX;
-    if (this.keys.left || this.touchDirection < 0) moveInput = -1;
-    if (this.keys.right || this.touchDirection > 0) moveInput = 1;
+    if (this.keys.left) moveInput = -1;
+    if (this.keys.right) moveInput = 1;
+    if (this.touchDirection !== 0) {
+      moveInput = Math.max(-1, Math.min(1, this.touchDirection));
+    }
 
     const accel = 0.85 * (this.stage.speedFactor || 1);
     this.ball.vx += moveInput * accel * dt;

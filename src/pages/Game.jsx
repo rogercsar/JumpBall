@@ -26,7 +26,6 @@ import { useDialog } from '../contexts/DialogContext';
 import { useDeviceOrientation } from '../hooks/useDeviceOrientation';
 import { useMediaPipeHands } from '../hooks/useMediaPipeHands';
 import { CameraPreview } from '../components/CameraPreview';
-import { TouchControls } from '../components/TouchControls';
 import { StageCard } from '../components/StageCard';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 
@@ -45,6 +44,77 @@ export function Game({ onNavigate }) {
 
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
+
+  // Estado e Controle de Toque Direto na Tela do Jogo
+  const [activeTouchSide, setActiveTouchSide] = useState(null); // 'left' | 'right' | null
+  const touchStateRef = useRef({
+    activePointerId: null,
+    startX: 0,
+    startY: 0,
+    lastTapTime: 0
+  });
+
+  const handlePointerDown = (e) => {
+    if (gameState !== 'playing') return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) { /* ignore */ }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    const now = Date.now();
+
+    // Toque duplo rápido (Double Tap em < 300ms) aciona Super Pulo
+    if (now - touchStateRef.current.lastTapTime < 300) {
+      engineRef.current?.triggerGestureJump();
+      touchStateRef.current.lastTapTime = 0;
+    } else {
+      touchStateRef.current.lastTapTime = now;
+    }
+
+    touchStateRef.current.activePointerId = e.pointerId;
+    touchStateRef.current.startX = clientX;
+    touchStateRef.current.startY = clientY;
+
+    // Metade esquerda -> move esquerda (-1); Metade direita -> move direita (1)
+    const relX = (clientX - rect.left) / rect.width;
+    const side = relX < 0.5 ? 'left' : 'right';
+    setActiveTouchSide(side);
+    engineRef.current?.setTouch(side === 'left' ? -1 : 1);
+  };
+
+  const handlePointerMove = (e) => {
+    if (gameState !== 'playing') return;
+    if (touchStateRef.current.activePointerId !== e.pointerId) return;
+
+    // Deslizar para cima (Swipe Up) dispara Super Salto
+    const deltaY = touchStateRef.current.startY - e.clientY;
+    if (deltaY > 45) {
+      engineRef.current?.triggerGestureJump();
+      touchStateRef.current.startY = e.clientY;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relX = (e.clientX - rect.left) / rect.width;
+    const side = relX < 0.5 ? 'left' : 'right';
+    setActiveTouchSide(side);
+
+    // Controle analógico suave durante arrasto do dedo na tela
+    const normDir = Math.max(-1, Math.min(1, (relX - 0.5) * 2.2));
+    engineRef.current?.setTouch(normDir);
+  };
+
+  const handlePointerUp = (e) => {
+    if (touchStateRef.current.activePointerId === e.pointerId) {
+      touchStateRef.current.activePointerId = null;
+      setActiveTouchSide(null);
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch (err) { /* ignore */ }
+      engineRef.current?.setTouch(0);
+    }
+  };
 
   // Pausa o jogo imediatamente se qualquer modal de diálogo estiver aberto
   useEffect(() => {
@@ -401,7 +471,7 @@ export function Game({ onNavigate }) {
 
       {/* 2. TELA DO JOGO (CANVAS + HUD + CONTROLES) */}
       {gameState !== 'menu' && (
-        <div className="w-full max-w-[420px] flex flex-col items-center justify-center h-full max-h-full">
+        <div className="w-full max-w-[480px] flex flex-col items-center justify-center h-full max-h-full py-0.5">
           {/* Top Bar / HUD do Jogo */}
           <div className="w-full mb-1.5 flex items-center justify-between glass-panel px-3 py-1.5 rounded-2xl border border-slate-800 shrink-0">
             <div className="flex items-center gap-2">
@@ -471,13 +541,44 @@ export function Game({ onNavigate }) {
             </div>
           </div>
 
-          {/* Viewport do Canvas do Jogo */}
-          <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center flex-1 min-h-0 max-h-[calc(100dvh-13.5rem)] sm:max-h-[calc(100dvh-12rem)]">
+          {/* Viewport do Canvas do Jogo com Controle de Toque na Tela */}
+          <div 
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center flex-1 min-h-0 max-h-[calc(100dvh-5.5rem)] sm:max-h-[calc(100dvh-5.8rem)] cursor-pointer touch-none select-none"
+          >
             <canvas
               id="gameCanvas"
               ref={canvasRef}
-              className="w-auto h-full max-h-full aspect-[440/720] block object-contain"
+              className="w-auto h-full max-h-full aspect-[440/720] block object-contain pointer-events-none"
             />
+
+            {/* Feedback Visual Sutil de Toque nas Laterais */}
+            {gameState === 'playing' && (
+              <>
+                <div 
+                  className={`absolute inset-y-0 left-0 w-1/3 pointer-events-none transition-opacity duration-150 flex items-center justify-start pl-3 z-10 ${
+                    activeTouchSide === 'left' ? 'opacity-100 bg-gradient-to-r from-cyan-500/10 to-transparent' : 'opacity-0'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-lg shadow-cyan-500/20 animate-pulse">
+                    ◀
+                  </div>
+                </div>
+
+                <div 
+                  className={`absolute inset-y-0 right-0 w-1/3 pointer-events-none transition-opacity duration-150 flex items-center justify-end pr-3 z-10 ${
+                    activeTouchSide === 'right' ? 'opacity-100 bg-gradient-to-l from-cyan-500/10 to-transparent' : 'opacity-0'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-lg shadow-cyan-500/20 animate-pulse">
+                    ▶
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Overlay Inicial de Prontidão: O jogo só inicia a física após o clique em DAR PLAY */}
             {gameState === 'ready' && (
@@ -659,19 +760,9 @@ export function Game({ onNavigate }) {
             )}
           </div>
 
-          {/* Controles de Toque na Tela (Mobile & Fallback) */}
-          <div className="w-full shrink-0 flex justify-center">
-            <TouchControls
-              onTouchLeft={() => engineRef.current?.setTouch(-1)}
-              onTouchRight={() => engineRef.current?.setTouch(1)}
-              onTouchJump={() => engineRef.current?.triggerGestureJump()}
-              onRelease={() => engineRef.current?.setTouch(0)}
-            />
-          </div>
-
-          {/* Dica de Teclas Desktop */}
-          <div className="mt-1 text-center text-[10px] text-slate-500 hidden sm:block shrink-0">
-            Use as setas <strong>← →</strong> ou <strong>A D</strong> para mover • <strong>Espaço</strong> para Super Salto
+          {/* Dica de Controles (Touch na Tela e Teclado) */}
+          <div className="mt-1 text-center text-[10px] text-slate-500 shrink-0 select-none">
+            Toque nas laterais para mover • 2 toques rápidos para Super Salto (ou setas ← → / Espaço)
           </div>
 
           {/* PiP da Câmera com MediaPipe Hands */}
