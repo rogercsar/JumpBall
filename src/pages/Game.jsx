@@ -445,7 +445,7 @@ export function Game({ onNavigate }) {
                 <h1 className="text-2xl sm:text-3xl font-black text-white">Seleção de Fases</h1>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Escolha uma das 10 fases cósmicas e suba até a meta de altura
+                Explore as 20 fases temáticas e desafie os limites até os 20.000m
               </p>
             </div>
 

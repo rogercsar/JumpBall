@@ -13,7 +13,16 @@ import {
   Cloud, 
   Cpu, 
   Sparkles,
-  ArrowUp
+  ArrowUp,
+  Droplets,
+  Feather,
+  CloudRain,
+  Wind,
+  Compass,
+  Landmark,
+  SunMedium,
+  Orbit,
+  Atom
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -26,7 +35,16 @@ const ICON_MAP = {
   Gem,
   Cloud,
   Cpu,
-  Sparkles
+  Sparkles,
+  Droplets,
+  Feather,
+  CloudRain,
+  Wind,
+  Compass,
+  Landmark,
+  SunMedium,
+  Orbit,
+  Atom
 };
 
 export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {
