@@ -661,7 +661,7 @@ export class GameEngine {
 
   // Lógica da Inteligência Artificial do Bot na Corrida
   updateBot(dt) {
-    if (!this.botBall || this.botBall.lives <= 0) return;
+    if (!this.botBall) return;
     const bot = this.botBall;
 
     // Timer do escudo de respawn do bot
@@ -780,14 +780,10 @@ export class GameEngine {
         if (isCollidingX && wasAbove && isNowAtOrBelow) {
           if (p.hasSpikes) {
             if (bot.invulnerableTimer <= 0) {
-              bot.lives--;
+              bot.lives = Math.max(1, bot.lives - 1);
               bot.invulnerableTimer = 2.0;
               this.particles.emit(bot.x, bot.y, 16, { color: '#ef4444', size: 4, speed: 3.5, life: 0.7 });
               soundEngine.playHazardHit();
-              if (bot.lives <= 0) {
-                this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
-                return;
-              }
             }
             bot.vy = this.jumpForce * 0.75;
             break;
@@ -820,26 +816,19 @@ export class GameEngine {
       }
     }
 
-    // Verificação de queda do Bot
+    // Verificação de queda do Bot: respawna para manter a corrida ativa até o topo!
     if (bot.y > this.cameraY + this.height + 60) {
-      if (bot.lives > 1) {
-        bot.lives--;
-        this.particles.emit(bot.x, this.cameraY + this.height - 30, 18, {
-          color: '#a855f7',
-          size: 4,
-          speed: 3.5,
-          life: 0.7
-        });
-        this.respawnBot();
-      } else {
-        // Bot perdeu todas as vidas: o jogador vence a corrida por eliminação!
-        bot.lives = 0;
-        this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
-        return;
-      }
+      bot.lives = Math.max(1, bot.lives - 1);
+      this.particles.emit(bot.x, this.cameraY + this.height - 30, 18, {
+        color: '#a855f7',
+        size: 4,
+        speed: 3.5,
+        life: 0.7
+      });
+      this.respawnBot();
     }
 
-    // Verificação de Vitória do Bot na corrida
+    // Verificação de Vitória do Bot na corrida (somente quando cruzar a meta de altura!)
     const goalY = -this.stage.targetHeight + (this.height - 120);
     if (bot.maxHeightReached >= this.stage.targetHeight || bot.y <= goalY + bot.radius) {
       this.finishGame('race_bot_won', { raceWinner: 'bot', raceReason: 'bot_reached_goal' });
@@ -847,13 +836,13 @@ export class GameEngine {
     }
   }
 
-  // Respawn do Bot em plataforma segura
+  // Respawn do Bot em plataforma segura visível
   respawnBot() {
     if (!this.botBall) return;
     const visiblePlatforms = this.platforms.filter((p) => {
       if (p.broken) return false;
       const screenY = p.y - this.cameraY;
-      return screenY >= 90 && screenY <= this.height - 90;
+      return screenY >= 140 && screenY <= this.height - 90;
     });
 
     let targetPlat = null;
@@ -861,14 +850,28 @@ export class GameEngine {
       visiblePlatforms.sort((a, b) => b.y - a.y);
       targetPlat = visiblePlatforms[0];
     } else {
-      targetPlat = this.platforms[0] || { x: this.width / 2, y: this.height - 60, width: 100 };
+      // Se não houver plataforma segura no campo de visão, cria uma plataforma segura
+      const safePlat = {
+        x: Math.max(30, Math.min(this.width - 130, this.width / 2 - 50)),
+        y: this.cameraY + this.height - 130,
+        width: 100,
+        height: 16,
+        type: 'standard',
+        vx: 0,
+        broken: false,
+        opacity: 1,
+        hasSpikes: false
+      };
+      this.platforms.push(safePlat);
+      targetPlat = safePlat;
     }
 
     this.botBall.x = targetPlat.x + targetPlat.width / 2;
     this.botBall.y = targetPlat.y - this.botBall.radius - 2;
     this.botBall.vx = 0;
-    this.botBall.vy = this.jumpForce * 1.05;
-    this.botBall.invulnerableTimer = 2.0;
+    this.botBall.vy = this.jumpForce * 1.12;
+    this.botBall.invulnerableTimer = 2.5;
+    this.botBall.targetPlatform = null;
   }
 
   respawnPlayer() {
@@ -987,16 +990,13 @@ export class GameEngine {
       }
 
       // Colisão com Bot IA no Modo Corrida
-      if (this.botBall && this.botBall.lives > 0 && this.botBall.invulnerableTimer <= 0) {
+      if (this.botBall && this.botBall.invulnerableTimer <= 0) {
         const distBot = Math.hypot(this.botBall.x - h.x, this.botBall.y - h.y);
         if (distBot < this.botBall.radius + h.radius) {
-          this.botBall.lives--;
+          this.botBall.lives = Math.max(1, this.botBall.lives - 1);
           this.botBall.invulnerableTimer = 2.0;
           this.particles.emitDebrisImpact(h.x, h.y, h.color);
           this.environmentalHazards.splice(i, 1);
-          if (this.botBall.lives <= 0) {
-            this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
-          }
           continue;
         }
       }
@@ -1036,15 +1036,12 @@ export class GameEngine {
           }
 
           // Checar se o Bot foi atingido
-          if (this.botBall && this.botBall.lives > 0 && this.botBall.invulnerableTimer <= 0) {
+          if (this.botBall && this.botBall.invulnerableTimer <= 0) {
             const screenBotY = this.botBall.y - this.cameraY;
             if (Math.abs(this.botBall.x - this.activeLightning.x) < 28 && screenBotY > 0 && screenBotY < this.height) {
-              this.botBall.lives--;
+              this.botBall.lives = Math.max(1, this.botBall.lives - 1);
               this.botBall.invulnerableTimer = 2.0;
               this.particles.emitLightningBurst(this.botBall.x, this.botBall.y);
-              if (this.botBall.lives <= 0) {
-                this.finishGame('completed', { raceWinner: 'player', raceReason: 'bot_eliminated' });
-              }
             }
           }
         } else if (this.activeLightning.state === 'strike' && this.activeLightning.timer <= 0) {
