@@ -9,6 +9,7 @@ export class BackgroundRenderer {
     this.height = height;
     this.stage = stage;
     this.theme = stage.theme || 'forest';
+    this.isMobile = typeof navigator !== 'undefined' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (typeof window !== 'undefined' && window.innerWidth < 768));
 
     this.time = 0;
     this.particles = [];
@@ -1266,7 +1267,7 @@ export class BackgroundRenderer {
     // Olhos / Runas no Totem que brilham
     ctx.fillStyle = '#a3e635';
     ctx.shadowColor = '#84cc16';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = this.isMobile ? 0 : 10;
     ctx.fillRect(20, totemY + 30, 7, 7);
     ctx.fillRect(31, totemY + 30, 7, 7);
     ctx.fillRect(22, totemY + 65, 14, 4);
@@ -1435,7 +1436,7 @@ export class BackgroundRenderer {
     const crysAlpha = Math.sin(this.time * 2) * 0.3 + 0.7;
     ctx.fillStyle = `rgba(165, 180, 252, ${crysAlpha})`;
     ctx.shadowColor = '#818cf8';
-    ctx.shadowBlur = 15;
+    ctx.shadowBlur = this.isMobile ? 0 : 15;
     ctx.beginPath();
     ctx.moveTo(islandX, islandY - 60);
     ctx.lineTo(islandX + 10, islandY - 45);
@@ -1615,7 +1616,7 @@ export class BackgroundRenderer {
     // Borda de Fótons (Photon Ring) extremamente brilhante
     ctx.strokeStyle = '#ffffff';
     ctx.shadowColor = '#f43f5e';
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = this.isMobile ? 0 : 18;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(cx, cy, 47, 0, Math.PI * 2);
@@ -2365,7 +2366,7 @@ export class BackgroundRenderer {
         const alpha = Math.sin(p.pulse) * 0.35 + 0.65;
         ctx.fillStyle = p.color ? `${p.color} ${alpha})` : (p.glowColor || '#ffffff');
         ctx.shadowColor = p.glowColor || '#22c55e';
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = this.isMobile ? 0 : 8;
         ctx.beginPath();
         ctx.arc(p.x, py, p.size, 0, Math.PI * 2);
         ctx.fill();

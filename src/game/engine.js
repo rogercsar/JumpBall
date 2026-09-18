@@ -127,9 +127,13 @@ export class GameEngine {
   }
 
   initCanvas() {
-    const dpr = window.devicePixelRatio || 1;
-    this.canvas.width = this.width * dpr;
-    this.canvas.height = this.height * dpr;
+    this.isMobile = typeof navigator !== 'undefined' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (typeof window !== 'undefined' && window.innerWidth < 768));
+    const rawDpr = window.devicePixelRatio || 1;
+    // Otimização Mobile: limita DPR a no máximo 1.6x no mobile para não sobrecarregar GPU móvel
+    const dpr = this.isMobile ? Math.min(rawDpr, 1.6) : Math.min(rawDpr, 2.0);
+    this.dpr = dpr;
+    this.canvas.width = Math.round(this.width * dpr);
+    this.canvas.height = Math.round(this.height * dpr);
     this.canvas.style.aspectRatio = `${this.width} / ${this.height}`;
     this.canvas.style.maxWidth = '100%';
     this.canvas.style.maxHeight = '100%';
@@ -138,6 +142,8 @@ export class GameEngine {
     this.canvas.style.objectFit = 'contain';
 
     this.ctx.scale(dpr, dpr);
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'low';
   }
 
   initInitialPlatforms() {
@@ -438,9 +444,7 @@ export class GameEngine {
       const diff = currentHeight - this.maxHeightReached;
       this.maxHeightReached = currentHeight;
       this.score += diff;
-      if (this.onScoreUpdate) {
-        this.onScoreUpdate(this.score, this.maxHeightReached);
-      }
+      this.hasPendingScoreUpdate = true;
     }
 
     // 4. Colisão da Bola com Plataformas (Apenas quando estiver caindo: vy > 0)
@@ -562,9 +566,19 @@ export class GameEngine {
     // 6.5. Atualizar IA do Bot Oponente (se estiver no Modo Corrida)
     if (this.mode === 'race_ai' && this.botBall) {
       this.updateBot(dt);
+      this.hasPendingRaceUpdate = true;
+    }
 
-      // Notificar estatísticas de duelo de corrida
-      if (this.onRaceUpdate) {
+    // 6.8. Throttling de Notificações para React (a cada ~8 frames ≈ 130ms) para máxima fluidez a 60 FPS no mobile
+    this.uiThrottleTimer = (this.uiThrottleTimer || 0) + dt;
+    if (this.uiThrottleTimer >= 8) {
+      this.uiThrottleTimer = 0;
+      if (this.onScoreUpdate && this.hasPendingScoreUpdate) {
+        this.hasPendingScoreUpdate = false;
+        this.onScoreUpdate(this.score, this.maxHeightReached);
+      }
+      if (this.onRaceUpdate && this.hasPendingRaceUpdate && this.botBall) {
+        this.hasPendingRaceUpdate = false;
         const pHeight = Math.max(0, this.maxHeightReached);
         const bHeight = Math.max(0, this.botBall.maxHeightReached);
         const diff = pHeight - bHeight;
@@ -1171,7 +1185,7 @@ export class GameEngine {
       } else if (h.type === 'iron_bar') {
         // Barra de ferro incandescente
         ctx.shadowColor = '#f97316';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = this.isMobile ? 0 : 10;
         const grad = ctx.createLinearGradient(-15, -6, 15, 6);
         grad.addColorStop(0, '#f97316');
         grad.addColorStop(0.5, '#fef08a');
@@ -1242,7 +1256,7 @@ export class GameEngine {
 
         ctx.fillStyle = '#eab308';
         ctx.shadowColor = '#eab308';
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = this.isMobile ? 0 : 12;
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('⚡', lx, 32);
@@ -1257,7 +1271,7 @@ export class GameEngine {
         ctx.fillRect(0, 0, this.width, this.height);
 
         ctx.shadowColor = '#a855f7';
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = this.isMobile ? 0 : 25;
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 6;
         ctx.beginPath();
@@ -1431,7 +1445,7 @@ export class GameEngine {
 
       ctx.fillStyle = '#facc15';
       ctx.shadowColor = '#facc15';
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = this.isMobile ? 0 : 10;
       ctx.beginPath();
       ctx.arc(0, 0, g.radius, 0, Math.PI * 2);
       ctx.fill();
@@ -1455,7 +1469,7 @@ export class GameEngine {
 
       // Glow pulsante dourado e ciano
       ctx.shadowColor = '#f59e0b';
-      ctx.shadowBlur = 14;
+      ctx.shadowBlur = this.isMobile ? 0 : 14;
 
       // Asas / Propulsores laterais estilizados
       ctx.fillStyle = '#0284c7';
@@ -1527,7 +1541,7 @@ export class GameEngine {
 
         // Glow vermelho de perigo
         ctx.shadowColor = '#ef4444';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = this.isMobile ? 0 : 15;
 
         // Placa holográfica
         ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
@@ -1577,7 +1591,7 @@ export class GameEngine {
 
       // Glow da mochila
       ctx.shadowColor = '#f59e0b';
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = this.isMobile ? 0 : 12;
 
       // Asas do jetpack
       ctx.fillStyle = '#0284c7';
@@ -1641,7 +1655,7 @@ export class GameEngine {
 
     // Glow externo
     ctx.shadowColor = this.skin.glow;
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = this.isMobile ? 0 : 18;
 
     // Gradiente esférico 3D
     const ballGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.ball.radius);
@@ -1664,7 +1678,7 @@ export class GameEngine {
       ctx.save();
       const shieldPulse = 1 + Math.sin(Date.now() * 0.012) * 0.08;
       ctx.shadowColor = '#38bdf8';
-      ctx.shadowBlur = 18;
+      ctx.shadowBlur = this.isMobile ? 0 : 18;
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -1730,7 +1744,7 @@ export class GameEngine {
       ctx.strokeStyle = fuelPct < 25 ? '#ef4444' : '#0ea5e9';
       ctx.lineWidth = 1.5;
       ctx.shadowColor = fuelPct < 25 ? '#ef4444' : '#38bdf8';
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = this.isMobile ? 0 : 10;
       this.roundRect(ctx, -95, -13, 190, 26, 8);
       ctx.fill();
       ctx.stroke();
@@ -1757,7 +1771,7 @@ export class GameEngine {
 
         // Glow externo do Bot
         ctx.shadowColor = this.botBall.skin.glow;
-        ctx.shadowBlur = 18;
+        ctx.shadowBlur = this.isMobile ? 0 : 18;
 
         // Gradiente do Bot
         const botGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.botBall.radius);
@@ -1778,7 +1792,7 @@ export class GameEngine {
         // Visor óptico cibernético de IA
         ctx.fillStyle = '#38bdf8';
         ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = this.isMobile ? 0 : 8;
         ctx.fillRect(-6, -3, 12, 5);
 
         ctx.restore();
@@ -1808,7 +1822,7 @@ export class GameEngine {
           ctx.translate(clampedX, 24);
           ctx.fillStyle = 'rgba(168, 85, 247, 0.95)';
           ctx.shadowColor = '#c084fc';
-          ctx.shadowBlur = 12;
+          ctx.shadowBlur = this.isMobile ? 0 : 12;
           this.roundRect(ctx, -42, -12, 84, 24, 6);
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
@@ -1826,7 +1840,7 @@ export class GameEngine {
           ctx.translate(clampedX, this.height - 24);
           ctx.fillStyle = 'rgba(168, 85, 247, 0.95)';
           ctx.shadowColor = '#c084fc';
-          ctx.shadowBlur = 12;
+          ctx.shadowBlur = this.isMobile ? 0 : 12;
           this.roundRect(ctx, -42, -12, 84, 24, 6);
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
@@ -1850,7 +1864,7 @@ export class GameEngine {
     if (goalScreenY > -60 && goalScreenY < this.height + 60) {
       ctx.save();
       ctx.shadowColor = '#facc15';
-      ctx.shadowBlur = 14;
+      ctx.shadowBlur = this.isMobile ? 0 : 14;
 
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 4;

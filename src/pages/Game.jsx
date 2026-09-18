@@ -96,6 +96,7 @@ export function Game({ onNavigate }) {
     // Metade esquerda -> move esquerda (-1); Metade direita -> move direita (1)
     const relX = (clientX - rect.left) / rect.width;
     const side = relX < 0.5 ? 'left' : 'right';
+    touchStateRef.current.activeSide = side;
     setActiveTouchSide(side);
     engineRef.current?.setTouch(side === 'left' ? -1 : 1);
   };
@@ -114,9 +115,14 @@ export function Game({ onNavigate }) {
     const rect = e.currentTarget.getBoundingClientRect();
     const relX = (e.clientX - rect.left) / rect.width;
     const side = relX < 0.5 ? 'left' : 'right';
-    setActiveTouchSide(side);
 
-    // Controle analógico suave durante arrasto do dedo na tela
+    // Otimização Mobile: Só dispara setState do React se o lado realmente mudar, evitando centenas de re-renders!
+    if (touchStateRef.current.activeSide !== side) {
+      touchStateRef.current.activeSide = side;
+      setActiveTouchSide(side);
+    }
+
+    // Controle analógico direto para a engine (sem overhead de React)
     const normDir = Math.max(-1, Math.min(1, (relX - 0.5) * 2.2));
     engineRef.current?.setTouch(normDir);
   };
@@ -124,6 +130,7 @@ export function Game({ onNavigate }) {
   const handlePointerUp = (e) => {
     if (touchStateRef.current.activePointerId === e.pointerId) {
       touchStateRef.current.activePointerId = null;
+      touchStateRef.current.activeSide = null;
       setActiveTouchSide(null);
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
