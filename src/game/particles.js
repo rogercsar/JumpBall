@@ -62,6 +62,18 @@ export class ParticleSystem {
     });
   }
 
+  // Rastro contínuo da bola em queda ou ascensão veloz
+  emitTrail(x, y, color = '#38bdf8') {
+    this.emit(x + (Math.random() - 0.5) * 6, y + (Math.random() - 0.5) * 6, 1, {
+      color,
+      size: 3,
+      speed: 0.8,
+      spread: Math.PI * 2,
+      life: 0.35,
+      gravity: 0.02
+    });
+  }
+
   // Efeito de plataforma quebrando
   emitPlatformCrumble(x, y, width, height, color = '#ef4444') {
     for (let i = 0; i < 15; i++) {

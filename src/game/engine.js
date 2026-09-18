@@ -3,7 +3,7 @@ import { ParticleSystem } from './particles';
 import { BackgroundRenderer } from './background';
 
 export class GameEngine {
-  constructor(canvas, stage, skin, onGameOver, onVictory, onScoreUpdate) {
+  constructor(canvas, stage, skin, onGameOver, onVictory, onScoreUpdate, onLivesUpdate) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.stage = stage;
@@ -11,6 +11,7 @@ export class GameEngine {
     this.onGameOver = onGameOver;
     this.onVictory = onVictory;
     this.onScoreUpdate = onScoreUpdate;
+    this.onLivesUpdate = onLivesUpdate;
 
     // Dimensões lógicas
     this.width = 440;
@@ -21,6 +22,12 @@ export class GameEngine {
     this.running = false;
     this.paused = false;
     this.animationId = null;
+
+    // Sistema de 3 Vidas, Marcadores de Morte e Escudo de Respawn
+    this.maxLives = 3;
+    this.lives = 3;
+    this.deathMarkers = [];
+    this.invulnerableTimer = 0;
 
     // Estado da Bola (inicialmente repousando na plataforma base)
     this.ball = {
@@ -230,6 +237,11 @@ export class GameEngine {
     // 0. Atualizar partículas de fundo e efeitos dinâmicos
     this.background.update(dt);
 
+    // Atualizar timer do escudo de respawn
+    if (this.invulnerableTimer > 0) {
+      this.invulnerableTimer = Math.max(0, this.invulnerableTimer - dt * 0.0166);
+    }
+
     // 1. Entrada Horizontal (Giroscópio + Teclado + Toque)
     let moveInput = this.tiltX;
     if (this.keys.left || this.touchDirection < 0) moveInput = -1;
@@ -254,18 +266,23 @@ export class GameEngine {
       this.ball.x = -this.ball.radius;
     }
 
-    // 2. Gravidade e Entrada Vertical
+    // 2. Física Vertical (Gravidade)
     this.ball.vy += this.gravity * dt;
     this.ball.y += this.ball.vy * dt;
 
-    // Normalizar elasticidade visual (squash & stretch)
-    this.ball.stretchX += (1 - this.ball.stretchX) * 0.15 * dt;
-    this.ball.stretchY += (1 - this.ball.stretchY) * 0.15 * dt;
+    // Recuperação suave do formato esférico da bola
+    this.ball.stretchX += (1 - this.ball.stretchX) * 0.12 * dt;
+    this.ball.stretchY += (1 - this.ball.stretchY) * 0.12 * dt;
 
-    // 3. Super Pulo Disparado por Gesto MediaPipe ou Tecla Espaço
+    // Partículas de rastro contínuo com a cor da skin
+    if (Math.abs(this.ball.vy) > 2) {
+      this.particles.emitTrail(this.ball.x, this.ball.y, this.skin.trail);
+    }
+
+    // 2.5 Super Pulo Disparado por Gesto MediaPipe ou Tecla Espaço
     if (this.gestureSuperJumpTriggered) {
       this.gestureSuperJumpTriggered = false;
-      this.ball.vy = this.jumpForce * 1.45; // 45% mais forte
+      this.ball.vy = this.jumpForce * 1.45;
       this.ball.stretchX = 0.7;
       this.ball.stretchY = 1.4;
       this.jumpsCount++;
@@ -273,29 +290,37 @@ export class GameEngine {
       this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.glow);
     }
 
-    // 4. Colisão da Bola com Plataformas (apenas quando caindo vy > 0)
-    if (this.ball.vy > 0) {
-      const ballBottom = this.ball.y + this.ball.radius;
-      const prevBallBottom = ballBottom - this.ball.vy * dt;
+    // 3. Atualizar Altura e Pontuação
+    const currentHeightMeters = Math.max(0, Math.floor((this.height - 76 - this.ball.y) / 10));
+    if (currentHeightMeters > this.maxHeightReached) {
+      const diff = currentHeightMeters - this.maxHeightReached;
+      this.maxHeightReached = currentHeightMeters;
+      this.score += diff * 10;
+      if (this.onScoreUpdate) {
+        this.onScoreUpdate(this.score, this.maxHeightReached);
+      }
+    }
 
-      for (let i = 0; i < this.platforms.length; i++) {
-        const p = this.platforms[i];
+    // 4. Colisão da Bola com Plataformas (Apenas quando estiver caindo: vy > 0)
+    if (this.ball.vy > 0) {
+      for (const p of this.platforms) {
         if (p.broken) continue;
 
-        if (
-          this.ball.x + this.ball.radius * 0.6 >= p.x &&
-          this.ball.x - this.ball.radius * 0.6 <= p.x + p.width &&
-          ballBottom >= p.y &&
-          prevBallBottom <= p.y + p.height + 4
-        ) {
-          // Aterrissou na plataforma!
+        const isCollidingX = this.ball.x + this.ball.radius * 0.7 > p.x &&
+                             this.ball.x - this.ball.radius * 0.7 < p.x + p.width;
+
+        const wasAbove = (this.ball.y - this.ball.vy * dt) <= p.y + 4;
+        const isNowAtOrBelow = this.ball.y + this.ball.radius >= p.y &&
+                               this.ball.y + this.ball.radius <= p.y + p.height + 12;
+
+        if (isCollidingX && wasAbove && isNowAtOrBelow) {
           this.ball.y = p.y - this.ball.radius;
           this.jumpsCount++;
 
           if (p.type === 'spring') {
-            this.ball.vy = this.jumpForce * 1.5;
-            this.ball.stretchX = 0.65;
-            this.ball.stretchY = 1.45;
+            this.ball.vy = this.jumpForce * 1.65;
+            this.ball.stretchX = 0.6;
+            this.ball.stretchY = 1.6;
             soundEngine.playSpring();
             this.particles.emitSuperJumpBurst(this.ball.x, p.y, '#facc15');
           } else if (p.type === 'fragile') {
@@ -359,24 +384,14 @@ export class GameEngine {
       this.cameraY += (targetY - this.cameraY) * 0.12 * dt;
     }
 
-    // 8. Cálculo de Altura e Pontuação
-    const currentHeight = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
-    if (currentHeight > this.maxHeightReached) {
-      const diff = currentHeight - this.maxHeightReached;
-      this.score += diff;
-      this.maxHeightReached = currentHeight;
-      if (this.onScoreUpdate) {
-        this.onScoreUpdate(this.score, this.maxHeightReached);
-      }
+    // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera
+    while (this.highestPlatformY > this.cameraY - 300) {
+      const nextSpacing = 65 + Math.random() * 45;
+      const nextY = this.highestPlatformY - nextSpacing;
+      this.generatePlatformAt(nextY);
     }
 
-    // 9. Geração Procedural de Novas Plataformas no topo
-    while (this.highestPlatformY > this.cameraY - 400) {
-      this.highestPlatformY -= Math.floor(Math.random() * 45 + 65);
-      this.generatePlatformAt(this.highestPlatformY);
-    }
-
-    // Limpar plataformas e gemas que ficaram muito abaixo da tela
+    // 9. Limpeza de Entidades Fora da Tela
     this.platforms = this.platforms.filter((p) => p.y < this.cameraY + this.height + 150);
     this.gems = this.gems.filter((g) => !g.collected && g.y < this.cameraY + this.height + 150);
 
@@ -389,10 +404,90 @@ export class GameEngine {
       return;
     }
 
-    // 12. Verificação de Game Over (Caiu abaixo da câmera visível)
+    // 12. Verificação de Queda / Sistema de 3 Vidas
     if (this.ball.y > this.cameraY + this.height + 60) {
-      this.finishGame('game_over');
+      if (this.lives > 1) {
+        // Registra o marcador holográfico no local exato onde a bola caiu
+        const deathNumber = (this.maxLives - this.lives) + 1;
+        this.deathMarkers.push({
+          x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
+          y: this.cameraY + this.height - 25,
+          deathNumber
+        });
+
+        // Decrementa 1 vida
+        this.lives--;
+        if (this.onLivesUpdate) {
+          this.onLivesUpdate(this.lives);
+        }
+
+        // SFX de perda de vida e partículas vermelhes
+        soundEngine.playLoseLife();
+        this.particles.emit(this.ball.x, this.cameraY + this.height - 30, 24, {
+          color: '#ef4444',
+          size: 4.5,
+          speed: 4,
+          life: 0.8
+        });
+
+        // Respawn seguro com escudo
+        this.respawnPlayer();
+      } else {
+        // 3ª morte: Game Over definitivo
+        const deathNumber = this.maxLives;
+        this.deathMarkers.push({
+          x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
+          y: this.cameraY + this.height - 25,
+          deathNumber
+        });
+        this.lives = 0;
+        if (this.onLivesUpdate) {
+          this.onLivesUpdate(0);
+        }
+        this.finishGame('game_over');
+      }
     }
+  }
+
+  respawnPlayer() {
+    // Procura a plataforma mais baixa visível na tela que não esteja quebrada
+    const visiblePlatforms = this.platforms.filter((p) => {
+      if (p.broken) return false;
+      const screenY = p.y - this.cameraY;
+      return screenY >= 80 && screenY <= this.height - 80;
+    });
+
+    let targetPlat = null;
+    if (visiblePlatforms.length > 0) {
+      visiblePlatforms.sort((a, b) => b.y - a.y);
+      targetPlat = visiblePlatforms[0];
+    } else {
+      // Se não houver plataforma segura no campo de visão, cria uma plataforma de segurança
+      const safePlat = {
+        x: this.width / 2 - 55,
+        y: this.cameraY + this.height - 140,
+        width: 110,
+        height: 16,
+        type: 'standard',
+        vx: 0
+      };
+      this.platforms.push(safePlat);
+      targetPlat = safePlat;
+    }
+
+    // Reposiciona a bola com precisão
+    this.ball.x = targetPlat.x + targetPlat.width / 2;
+    this.ball.y = targetPlat.y - this.ball.radius - 2;
+    this.ball.vx = 0;
+    this.ball.vy = this.jumpForce * 1.08;
+    this.ball.stretchX = 1.35;
+    this.ball.stretchY = 0.65;
+
+    // Concede 2.5s de escudo de energia
+    this.invulnerableTimer = 2.5;
+
+    soundEngine.playRespawn();
+    this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y, '#38bdf8');
   }
 
   finishGame(status) {
@@ -535,6 +630,52 @@ export class GameEngine {
       ctx.restore();
     }
 
+    // 3.5. Desenhar Marcadores de Morte ("Onde Morreu")
+    for (const marker of this.deathMarkers) {
+      const screenY = marker.y - this.cameraY;
+      if (screenY > -60 && screenY < this.height + 60) {
+        ctx.save();
+        ctx.translate(marker.x, screenY);
+
+        const pulse = 1 + Math.sin(Date.now() * 0.006 + marker.deathNumber) * 0.08;
+        ctx.scale(pulse, pulse);
+
+        // Glow vermelho de perigo
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 15;
+
+        // Placa holográfica
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        this.roundRect(ctx, -24, -26, 48, 28, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // Ícone de Caveira
+        ctx.fillStyle = '#fee2e2';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💀', 0, -13);
+
+        // Rótulo da morte
+        ctx.fillStyle = '#f87171';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`Morte #${marker.deathNumber}`, 0, -2);
+
+        // Feixe vertical apontando para a queda
+        ctx.strokeStyle = '#ef4444';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(0, 3);
+        ctx.lineTo(0, 20);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
     // 4. Desenhar Partículas
     this.particles.draw(ctx, this.cameraY);
 
@@ -564,6 +705,29 @@ export class GameEngine {
     ctx.strokeStyle = this.skin.glow;
     ctx.lineWidth = 2;
     ctx.stroke();
+
+    // Escudo de Energia Protetor pós-respawn
+    if (this.invulnerableTimer > 0) {
+      ctx.save();
+      const shieldPulse = 1 + Math.sin(Date.now() * 0.012) * 0.08;
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 18;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, (this.ball.radius + 7) * shieldPulse, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Anel rotativo pontilhado
+      ctx.rotate(Date.now() * 0.003);
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, (this.ball.radius + 12) * shieldPulse, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     ctx.restore();
 

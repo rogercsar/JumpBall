@@ -249,6 +249,58 @@ class SoundEngine {
       osc.stop(startTime + 0.4);
     });
   }
+
+  // Efeito ao Perder 1 Vida
+  playLoseLife() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.55, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.38);
+  }
+
+  // Efeito de Respawn / Ativação de Escudo
+  playRespawn() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const notes = [349.23, 440.0, 587.33, 783.99]; // F4, A4, D5, G5
+
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const startTime = now + idx * 0.08;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(this.sfxVolume * 0.35, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.28);
+    });
+  }
 }
 
 export const soundEngine = new SoundEngine();

@@ -14,7 +14,8 @@ import {
   Camera, 
   Volume2, 
   VolumeX,
-  ChevronRight
+  ChevronRight,
+  Heart
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
 import { STAGES, BALL_SKINS } from '../game/stages';
@@ -39,6 +40,7 @@ export function Game({ onNavigate }) {
   const [gameState, setGameState] = useState('menu');
   const [currentScore, setCurrentScore] = useState(0);
   const [currentHeight, setCurrentHeight] = useState(0);
+  const [currentLives, setCurrentLives] = useState(3);
   const [lastGameResult, setLastGameResult] = useState(null);
 
   const canvasRef = useRef(null);
@@ -204,6 +206,7 @@ export function Game({ onNavigate }) {
     setGameState('ready');
     setCurrentScore(0);
     setCurrentHeight(0);
+    setCurrentLives(3);
     setLastGameResult(null);
 
     // Timeout breve para o Canvas renderizar no DOM
@@ -237,6 +240,9 @@ export function Game({ onNavigate }) {
         (score, height) => {
           setCurrentScore(score);
           setCurrentHeight(height);
+        },
+        (lives) => {
+          setCurrentLives(lives);
         }
       );
 
@@ -398,13 +404,32 @@ export function Game({ onNavigate }) {
         <div className="w-full max-w-[420px] flex flex-col items-center justify-center h-full max-h-full">
           {/* Top Bar / HUD do Jogo */}
           <div className="w-full mb-1.5 flex items-center justify-between glass-panel px-3 py-1.5 rounded-2xl border border-slate-800 shrink-0">
-            <button
-              onClick={handleExitGame}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              title="Menu de Fases"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExitGame}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Menu de Fases"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+
+              {/* Contador de 3 Vidas */}
+              <div 
+                className="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded-xl border border-slate-800 shadow-inner"
+                title={`${currentLives} vidas restantes`}
+              >
+                {[1, 2, 3].map((heartNum) => (
+                  <Heart
+                    key={heartNum}
+                    className={`w-3.5 h-3.5 transition-all duration-300 ${
+                      heartNum <= currentLives
+                        ? 'text-rose-500 fill-rose-500 drop-shadow-[0_0_6px_rgba(244,63,94,0.7)] animate-pulse'
+                        : 'text-slate-600 fill-slate-800/40 opacity-30 scale-75'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
 
             <div className="text-center">
               <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block leading-none mb-0.5">
@@ -557,6 +582,10 @@ export function Game({ onNavigate }) {
                   <div className="flex justify-between">
                     <span className="text-slate-400">Total de Saltos:</span>
                     <span className="font-bold text-slate-200">{lastGameResult?.jumps}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-slate-800/60">
+                    <span className="text-slate-400">Vidas Perdidas:</span>
+                    <span className="font-bold text-rose-400">3 / 3 vidas</span>
                   </div>
                 </div>
 
