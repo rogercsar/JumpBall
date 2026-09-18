@@ -9,16 +9,19 @@ import {
   RotateCcw, 
   PlayCircle,
   HelpCircle,
-  Check
+  Check,
+  Layers
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useDialog } from '../contexts/DialogContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { soundEngine } from '../game/audio';
 import { TiltMeter } from '../components/TiltMeter';
 
 export function Settings({ orientation, requestOrientationPermission, permissionGranted, needsPermissionPrompt, calibrate }) {
   const { settings, updateSettings } = useSettings();
   const { showAlert, showConfirm } = useDialog();
+  const { profile, resetStageProgress } = useAuth();
   const [simulatedGamma, setSimulatedGamma] = useState(0);
   const [savedBadge, setSavedBadge] = useState(false);
 
@@ -101,6 +104,26 @@ export function Settings({ orientation, requestOrientationPermission, permission
     });
   };
 
+  const handleResetStages = async () => {
+    const confirmed = await showConfirm({
+      title: 'Resetar Fases Liberadas?',
+      message: 'Tem certeza que deseja zerar todas as fases liberadas? Você começará novamente a partir da Fase 1, mas todo o seu histórico de partidas e recordes será mantido intacto.',
+      variant: 'warning',
+      confirmText: 'Sim, Resetar Fases',
+      cancelText: 'Cancelar'
+    });
+
+    if (confirmed) {
+      await resetStageProgress();
+      showAlert({
+        title: 'Fases Zeradas!',
+        message: 'Todas as fases voltaram ao início (apenas Fase 1 liberada). Seu histórico completo de partidas continua salvo!',
+        variant: 'success'
+      });
+    }
+  };
+
+  const stagesCompleted = profile?.stages_completed || 0;
   const activeGamma = orientation?.gamma !== 0 ? orientation.gamma : simulatedGamma;
 
   return (
@@ -345,6 +368,44 @@ export function Settings({ orientation, requestOrientationPermission, permission
               className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
             />
           </div>
+        </div>
+      </div>
+
+      {/* 5. SEÇÃO DE PROGRESSO DAS FASES (RESETAR FASES E MANTER HISTÓRICO) */}
+      <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4 bg-gradient-to-b from-slate-900/60 to-slate-950/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-sm">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-white">Progresso das Fases</h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">
+                  {stagesCompleted} / 20 Fases Liberadas
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Zere todas as fases para iniciar sua subida novamente a partir da Fase 1
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleResetStages}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 border border-rose-500/30 text-rose-300 hover:text-rose-200 font-bold text-xs transition-all shadow-md self-start sm:self-auto cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Resetar Fases</span>
+          </button>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-start gap-3 text-xs text-slate-400">
+          <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            Ao resetar, apenas a <strong>Fase 1 (Floresta Esmeralda)</strong> ficará liberada para jogar novamente. 
+            <span className="text-slate-300 font-medium"> Todo o seu histórico de partidas anteriores, recordes de pontuação e estatísticas continuarão salvos e preservados!</span>
+          </p>
         </div>
       </div>
     </div>

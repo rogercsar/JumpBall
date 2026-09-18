@@ -89,7 +89,7 @@ export function AuthProvider({ children }) {
           const mergedProfile = {
             ...localProf,
             ...sessProf,
-            stages_completed: Math.max(localProf.stages_completed || 0, sessProf.stages_completed || 0),
+            stages_completed: sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0),
             high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0),
             total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0),
             games_played: Math.max(localProf.games_played || 0, sessProf.games_played || 0)
@@ -122,23 +122,29 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .maybeSingle();
 
-      // Busca redundante: maior stage_id completado na tabela game_history
-      let maxStageFromHistory = 0;
-      try {
-        const { data: histData } = await supabase
-          .from('game_history')
-          .select('stage_id')
-          .eq('user_id', userId)
-          .eq('status', 'completed');
-        if (histData && histData.length > 0) {
-          maxStageFromHistory = Math.max(...histData.map(h => Number(h.stage_id) || 0));
+      const local = localStore.getProfile();
+      // Se profiles no banco já tem stages_completed registrado (mesmo 0), respeita esse valor.
+      // Apenas se for nulo/indefinido faz fallback para o histórico ou local.
+      let resolvedStage = 0;
+      if (data && data.stages_completed !== null && data.stages_completed !== undefined) {
+        resolvedStage = Number(data.stages_completed);
+      } else {
+        let maxStageFromHistory = 0;
+        try {
+          const { data: histData } = await supabase
+            .from('game_history')
+            .select('stage_id')
+            .eq('user_id', userId)
+            .eq('status', 'completed');
+          if (histData && histData.length > 0) {
+            maxStageFromHistory = Math.max(...histData.map(h => Number(h.stage_id) || 0));
+          }
+        } catch (hErr) {
+          /* ignore */
         }
-      } catch (hErr) {
-        /* ignore */
+        resolvedStage = Math.max(maxStageFromHistory, local.stages_completed || 0);
       }
 
-      const local = localStore.getProfile();
-      const bestStage = Math.max(data?.stages_completed || 0, maxStageFromHistory, local.stages_completed || 0);
       const bestHighScore = Math.max(data?.high_score || 0, local.high_score || 0);
       const bestTotalJumps = Math.max(data?.total_jumps || 0, local.total_jumps || 0);
       const bestGamesPlayed = Math.max(data?.games_played || 0, local.games_played || 0);
@@ -146,7 +152,7 @@ export function AuthProvider({ children }) {
       const merged = {
         ...(data || {}),
         id: userId,
-        stages_completed: bestStage,
+        stages_completed: resolvedStage,
         high_score: bestHighScore,
         total_jumps: bestTotalJumps,
         games_played: bestGamesPlayed
@@ -159,7 +165,7 @@ export function AuthProvider({ children }) {
       try {
         await supabase.from('profiles').upsert({
           id: userId,
-          stages_completed: bestStage,
+          stages_completed: resolvedStage,
           high_score: bestHighScore,
           total_jumps: bestTotalJumps,
           updated_at: new Date().toISOString()
@@ -349,7 +355,7 @@ export function AuthProvider({ children }) {
     const updated = { 
       ...current, 
       ...updates,
-      stages_completed: Math.max(current.stages_completed || 0, updates.stages_completed !== undefined ? updates.stages_completed : 0),
+      stages_completed: updates.stages_completed !== undefined ? updates.stages_completed : (current.stages_completed || 0),
       high_score: Math.max(current.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
       total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (current.total_jumps || 0),
       games_played: (updates.games_played !== undefined) ? updates.games_played : (current.games_played || 0)
@@ -389,6 +395,45 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         console.error('Erro ao sincronizar perfil com o Supabase:', err);
+      }
+    }
+  };
+
+  // Resetar progresso das fases (zera stages_completed para 0, mantendo todo o histórico de partidas intacto)
+  const resetStageProgress = async () => {
+    const local = localStore.getProfile();
+    const current = profile ? { ...local, ...profile } : local;
+    const updated = {
+      ...current,
+      stages_completed: 0
+    };
+    setProfile(updated);
+    localStore.saveProfile(updated);
+
+    // Atualiza cache local da sessão
+    const saved = localStorage.getItem(LOCAL_SESSION_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        parsed.profile = updated;
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(parsed));
+      } catch (e) { /* ignore */ }
+    }
+
+    if (supabase && isSupabaseConfigured && user && !isGuest && !user.id?.startsWith('offline-') && !user.id?.startsWith('guest-')) {
+      try {
+        const { error: upErr } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: user.id, 
+            stages_completed: 0, 
+            updated_at: new Date().toISOString() 
+          }, { onConflict: 'id' });
+        if (upErr) {
+          console.error('Erro ao sincronizar reset de fases com o Supabase:', upErr);
+        }
+      } catch (err) {
+        console.error('Erro ao sincronizar reset de fases com o Supabase:', err);
       }
     }
   };
@@ -463,6 +508,7 @@ export function AuthProvider({ children }) {
         loginAsGuest,
         logout,
         updateProfile,
+        resetStageProgress,
         resetPassword,
         updateUserPassword,
         refreshProfile: () => user && fetchProfile(user.id)
@@ -488,6 +534,7 @@ export function useAuth() {
       loginAsGuest: () => {},
       logout: async () => {},
       updateProfile: async () => {},
+      resetStageProgress: async () => {},
       resetPassword: async () => ({ success: false }),
       updateUserPassword: async () => ({ success: false }),
       refreshProfile: () => {}
