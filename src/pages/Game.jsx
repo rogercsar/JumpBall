@@ -40,8 +40,10 @@ import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 export const ENDLESS_STAGE = {
   id: 'endless',
   number: 999,
+  title: 'Sobrevivência do Magma',
   name: 'Sobrevivência do Magma',
   theme: 'volcano',
+  icon: 'Flame',
   targetHeight: 999999,
   gravity: 0.34,
   jumpForce: -11.8,
@@ -50,7 +52,11 @@ export const ENDLESS_STAGE = {
   speedFactor: 1.1,
   hazards: ['moving', 'springs', 'spikes'],
   platformColor: '#ea580c',
-  bgGradient: ['#1c0505', '#450a0a']
+  platformBorder: '#fdba74',
+  ballGlow: '#f97316',
+  bgGradient: ['#1c0505', '#450a0a', '#7f1d1d'],
+  description: 'Sobreviva ao magma ascendente! Alcance a maior altitude possível antes que a lava suba.',
+  mechanic: 'Magma ascendente contínuo e geração infinita de plataformas.'
 };
 
 export function Game({ onNavigate }) {

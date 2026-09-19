@@ -700,9 +700,17 @@ export class BackgroundRenderer {
   draw(ctx, cameraY) {
     // 1. Gradiente Base Dinâmico
     const bgGrad = ctx.createLinearGradient(0, 0, 0, this.height);
-    bgGrad.addColorStop(0, this.stage.bgGradient[0]);
-    bgGrad.addColorStop(0.5, this.stage.bgGradient[1]);
-    bgGrad.addColorStop(1, this.stage.bgGradient[2]);
+    const grad = (Array.isArray(this.stage?.bgGradient) && this.stage.bgGradient.length >= 2)
+      ? this.stage.bgGradient
+      : ['#020617', '#0f172a', '#1e293b'];
+
+    const color0 = grad[0] || '#020617';
+    const color1 = grad[1] || color0;
+    const color2 = grad[2] || color1;
+
+    bgGrad.addColorStop(0, color0);
+    bgGrad.addColorStop(0.5, color1);
+    bgGrad.addColorStop(1, color2);
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, this.width, this.height);
 
