@@ -62,111 +62,124 @@ export function Home({ onNavigate }) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-8">
-      {/* 1. HERO BANNER PRINCIPAL DO JOGO */}
-      <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 border border-slate-800/90 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900/90 shadow-2xl">
+      {/* 1. HERO BANNER PRINCIPAL DO JOGO (DASHBOARD OTIMIZADO) */}
+      <section className="relative overflow-hidden rounded-3xl glass-panel p-4 sm:p-6 lg:p-7 border border-slate-800/90 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900/90 shadow-2xl">
         {/* Efeitos de iluminação cósmica no fundo */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-rose-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-transparent to-transparent pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="text-center lg:text-left space-y-4 max-w-xl">
-            {/* Tag da Temporada e Patente */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-black uppercase tracking-wider shadow-sm">
-                <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                RUMO AOS {maxAltitude.toLocaleString()}M
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="text-center lg:text-left space-y-3.5 max-w-xl flex-1">
+            {/* Tag da Temporada, Patente e XP Integrado (Mais Compactos) */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[10px] font-black uppercase tracking-wider shadow-sm">
+                <Flame className="w-3 h-3 text-amber-400 animate-pulse" />
+                {maxAltitude.toLocaleString()}M
               </span>
 
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border ${rank.border} text-xs font-bold text-slate-200 shadow-sm`}>
-                <RankIcon className="w-3.5 h-3.5 text-amber-400" />
-                <span>{rank.title} • Nível {playerLevel}</span>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/80 border ${rank.border} text-[10px] font-bold text-slate-200 shadow-sm`}>
+                <RankIcon className="w-3 h-3 text-amber-400" />
+                <span>{rank.title} • Nv. {playerLevel}</span>
+              </span>
+
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/90 border border-slate-800 text-[10px] font-bold text-cyan-400">
+                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                <span>{playerXP.toLocaleString()} XP</span>
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white">
-              {user ? (
-                <>
-                  Pronto para o salto, <span className={`bg-gradient-to-r ${rank.gradient} bg-clip-text text-transparent`}>{profile?.username || 'Piloto'}</span>?
-                </>
-              ) : (
-                <>
-                  JUMPBALL <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">TITAN {Math.round(maxAltitude / 1000)}K</span>
-                </>
-              )}
-            </h1>
+            {/* Saudação e Título (Tamanho Reduzido) */}
+            <div>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight text-white leading-tight">
+                {user ? (
+                  <>
+                    Pronto para o salto, <span className={`bg-gradient-to-r ${rank.gradient} bg-clip-text text-transparent`}>{profile?.username || 'Piloto'}</span>?
+                  </>
+                ) : (
+                  <>
+                    JUMPBALL <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">TITAN {Math.round(maxAltitude / 1000)}K</span>
+                  </>
+                )}
+              </h1>
+              <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
+                Desafie {STAGES.length} biomas cósmicos, salte plataformas e dispute o topo do ranking.
+              </p>
+            </div>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Desafie {STAGES.length} biomas cósmicos extremos, salte sobre plataformas móveis, desvie de perigos e alcance o ápice da jornada a {maxAltitude.toLocaleString()} metros de altitude!
-            </p>
-
-            {/* Barra de XP do Nível Gamer */}
-            <div className="bg-slate-900/90 rounded-2xl p-3 border border-slate-800/80 max-w-md">
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-semibold text-slate-400">Progresso de Patente</span>
-                <span className="font-bold text-cyan-400">{playerXP.toLocaleString()} XP • {currentLevelProgress}%</span>
+            {/* Barra de Progresso de Nível Gamer Compacta */}
+            <div className="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800/80 max-w-sm mx-auto lg:mx-0">
+              <div className="flex items-center justify-between text-[11px] mb-1">
+                <span className="font-semibold text-slate-400">Evolução da Patente</span>
+                <span className="font-bold text-cyan-400">{currentLevelProgress}%</span>
               </div>
-              <div className="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden p-0.5">
+              <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden p-[1px]">
                 <div
-                  className="bg-gradient-to-r from-cyan-500 to-rose-500 h-full rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                  className="bg-gradient-to-r from-cyan-500 to-rose-500 h-full rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
                   style={{ width: `${currentLevelProgress}%` }}
                 />
               </div>
             </div>
 
-            {/* Botões de Ação Principais */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
-              <button
-                onClick={() => onNavigate('game')}
-                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-base flex items-center gap-2.5 shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 active:scale-95 transition-all"
-              >
-                <Play className="w-5 h-5 fill-current" />
-                <span>INICIAR JOGO</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('game')}
-                className="px-6 py-4 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm flex items-center gap-2.5 shadow-xl shadow-rose-500/25 hover:shadow-rose-500/45 hover:scale-105 active:scale-95 transition-all border border-rose-400/30"
-              >
-                <Swords className="w-4 h-4 animate-pulse" />
-                <span>DUELO 1V1 (PVP)</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('profile')}
-                className="px-5 py-4 rounded-2xl glass-card text-slate-200 hover:text-white font-bold text-sm flex items-center gap-2 border border-slate-700/80 hover:border-cyan-500/40 hover:bg-slate-800/80 transition-all active:scale-95 shadow-md"
-              >
-                <Palette className="w-4 h-4 text-cyan-400" />
-                <span>Mudar Esfera</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('ranking')}
-                className="px-5 py-4 rounded-2xl glass-card text-amber-300 hover:text-amber-200 font-bold text-sm flex items-center gap-2 border border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-950/20 transition-all active:scale-95 shadow-md"
-              >
-                <Trophy className="w-4 h-4 text-amber-400" />
-                <span>Top 10 Ranking</span>
-              </button>
-
-              {!user && (
+            {/* BOTÕES DE AÇÃO: PRINCIPAIS E RÁPIDOS */}
+            <div className="space-y-2 pt-1">
+              {/* Nível 1: Modos de Jogo (Mesmo Tamanho Padronizado) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full sm:max-w-sm">
                 <button
-                  onClick={() => onNavigate('login')}
-                  className="px-5 py-4 rounded-2xl bg-slate-900 text-slate-300 hover:text-white font-bold text-sm flex items-center gap-2 border border-slate-800 hover:border-slate-700 transition-all active:scale-95"
+                  onClick={() => onNavigate('game')}
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                 >
-                  <LogIn className="w-4 h-4 text-slate-400" />
-                  <span>Entrar / Salvar</span>
+                  <Play className="w-4 h-4 fill-current shrink-0" />
+                  <span>INICIAR JOGO</span>
                 </button>
-              )}
+
+                <button
+                  onClick={() => onNavigate('game')}
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/35 hover:scale-[1.02] active:scale-95 transition-all border border-rose-400/30 cursor-pointer"
+                >
+                  <Swords className="w-4 h-4 animate-pulse shrink-0" />
+                  <span>DUELO 1V1 (PVP)</span>
+                </button>
+              </div>
+
+              {/* Nível 2: Atalhos Rápidos */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <button
+                  onClick={() => onNavigate('ranking')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-300 hover:text-amber-200 font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 hover:border-amber-500/50 transition-all active:scale-95 shadow-sm"
+                >
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Top 10 Ranking</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('profile')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 hover:border-cyan-500/40 transition-all active:scale-95 shadow-sm"
+                >
+                  <Palette className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Hangar de Esferas</span>
+                </button>
+
+                {!user && (
+                  <button
+                    onClick={() => onNavigate('login')}
+                    className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-800 hover:border-slate-700 transition-all active:scale-95"
+                  >
+                    <LogIn className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Entrar</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* 2. HANGAR DA ESFERA (PREVIEW INTERATIVO) */}
-          <div className="relative flex flex-col items-center justify-center p-4 bg-slate-900/40 rounded-3xl border border-slate-800/60 shadow-xl">
+          {/* 2. HANGAR DA ESFERA (COMPACTO E INTERATIVO) */}
+          <div className="relative flex flex-col items-center justify-center p-3.5 sm:p-4 bg-slate-900/50 rounded-2xl border border-slate-800/80 shadow-xl shrink-0 w-full sm:w-64">
             <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400/80 mb-2">
-              ESFERA ATIVA NO HANGAR
+              Esfera Ativa no Hangar
             </span>
 
-            <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center">
+            <div className="relative w-28 h-28 rounded-full flex items-center justify-center">
               {/* Aura pulsante de energia */}
               <div
                 className="absolute inset-0 rounded-full animate-pulse-glow"
@@ -175,32 +188,40 @@ export function Home({ onNavigate }) {
                 }}
               />
 
-              {/* Esfera 3D com sombra e iluminação interna */}
+              {/* Esfera 3D compacta */}
               <div
-                className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-110 cursor-pointer active:scale-95"
+                className="relative w-20 h-20 rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer active:scale-95"
                 onClick={() => onNavigate('profile')}
                 title="Personalizar Esfera no Hangar"
                 style={{
                   background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${currentSkin.primary} 45%, ${currentSkin.trail} 100%)`,
-                  boxShadow: `0 0 45px ${currentSkin.glow}, inset -6px -6px 18px rgba(0,0,0,0.6)`
+                  boxShadow: `0 0 35px ${currentSkin.glow}, inset -5px -5px 14px rgba(0,0,0,0.6)`
                 }}
               >
-                <div className="w-7 h-7 rounded-full bg-white/45 blur-xs absolute top-4 left-6" />
+                <div className="w-5 h-5 rounded-full bg-white/45 blur-xs absolute top-2.5 left-4" />
               </div>
             </div>
 
-            <div className="mt-2 text-center space-y-2">
-              <h3 className="text-base font-black text-white">{currentSkin.name}</h3>
+            <div className="mt-2 text-center space-y-2 w-full">
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="text-xs font-black text-white">{currentSkin.name}</span>
+                <button
+                  onClick={() => onNavigate('profile')}
+                  className="text-[10px] text-cyan-400 hover:underline font-semibold"
+                >
+                  (Mudar)
+                </button>
+              </div>
 
               {/* Mini Seletor Rápido de Skins no Próprio Dashboard */}
-              <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-slate-800">
-                {BALL_SKINS.map((skin) => (
+              <div className="flex items-center justify-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
+                {BALL_SKINS.slice(0, 6).map((skin) => (
                   <button
                     key={skin.id}
                     onClick={() => handleQuickEquipSkin(skin.id)}
                     title={skin.name}
-                    className={`w-6 h-6 rounded-full transition-transform ${currentSkin.id === skin.id
-                        ? 'scale-125 ring-2 ring-white shadow-lg'
+                    className={`w-5 h-5 rounded-full transition-transform ${currentSkin.id === skin.id
+                        ? 'scale-125 ring-2 ring-white shadow-md'
                         : 'opacity-60 hover:opacity-100 hover:scale-110'
                       }`}
                     style={{
@@ -371,10 +392,10 @@ export function Home({ onNavigate }) {
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-lg sm:text-xl font-bold text-white">Trajetória Cósmica ({STAGES.length} Fases até 43.000m)</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Trajetória Cósmica ({STAGES.length} Fases até {maxAltitude.toLocaleString('pt-BR')}m)</h2>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Olimpo, Futebol, Piratas, Heróis, Música, Rocha, Ferro, Madeira e muito mais!
+              Heróis de Aço, Dragão Solar, Singularidade, Arcade Retrô e o Ápice Cósmico a 50.000m!
             </p>
           </div>
           <div className="flex items-center gap-2">

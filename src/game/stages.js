@@ -821,14 +821,192 @@ export const STAGES = [
     description: 'Pilhas imensas de toras de madeira de lei, vigas de carvalho maciço e pontes rústicas suspensas.',
     hazards: ['spikes', 'fragile', 'moving'],
     mechanic: 'Troncos pesados despencando e plataformas de madeira com lascas afiadas.'
+  },
+  {
+    id: 44,
+    number: 44,
+    title: 'Coliseu dos Heróis de Aço',
+    theme: 'heroes',
+    icon: 'Shield',
+    targetHeight: 44000,
+    gravity: 0.33,
+    jumpForce: -12.5,
+    speedFactor: 2.1,
+    wind: 0,
+    bgGradient: ['#1e1b4b', '#312e81', '#4338ca'],
+    platformColor: '#6366f1',
+    platformBorder: '#a5b4fc',
+    ballGlow: '#818cf8',
+    description: 'A arena dos maiores campeões da galáxia! Estandartes heróicos, símbolos titânicos e desafios de pura bravura.',
+    hazards: ['moving', 'springs', 'conveyor'],
+    mechanic: 'Plataformas de alta propulsão heróica e escudos de energia luminosa.'
+  },
+  {
+    id: 45,
+    number: 45,
+    title: 'Covil do Dragão Solar',
+    theme: 'dragon',
+    icon: 'Flame',
+    targetHeight: 45000,
+    gravity: 0.36,
+    jumpForce: -12.8,
+    speedFactor: 2.2,
+    wind: 0.15,
+    bgGradient: ['#450a0a', '#7f1d1d', '#991b1b'],
+    platformColor: '#ef4444',
+    platformBorder: '#fca5a5',
+    ballGlow: '#f87171',
+    description: 'Chamas estelares e sopros incandescentes do dragão solar que vigia os portais dimensionais superiores.',
+    hazards: ['spikes', 'fragile', 'moving'],
+    mechanic: 'Baforadas de plasma estelar e plataformas incandescentes que testam seus reflexos.'
+  },
+  {
+    id: 46,
+    number: 46,
+    title: 'Singularidade do Vazio Cósmico',
+    theme: 'singularity',
+    icon: 'Atom',
+    targetHeight: 46000,
+    gravity: 0.38,
+    jumpForce: -13.2,
+    speedFactor: 2.3,
+    wind: -0.2,
+    bgGradient: ['#050505', '#111827', '#1f2937'],
+    platformColor: '#a855f7',
+    platformBorder: '#e9d5ff',
+    ballGlow: '#c084fc',
+    description: 'O horizonte de eventos de um buraco negro supermassivo. Distorções ópticas gravitacionais atraindo tudo ao centro.',
+    hazards: ['moving', 'conveyor', 'fragile'],
+    mechanic: 'Gravidade distorcida e vórtices com vento cósmico oscilante.'
+  },
+  {
+    id: 47,
+    number: 47,
+    title: 'Muralha do Arcade Retrô',
+    theme: 'arcade',
+    icon: 'Gamepad2',
+    targetHeight: 47000,
+    gravity: 0.30,
+    jumpForce: -12.6,
+    speedFactor: 2.35,
+    wind: 0,
+    bgGradient: ['#022c22', '#064e3b', '#047857'],
+    platformColor: '#10b981',
+    platformBorder: '#6ee7b7',
+    ballGlow: '#34d399',
+    description: 'Um labirinto nostálgico pixelado com telas CRT, efeitos glitch e plataformas que parecem saídas de clássicos dos anos 80.',
+    hazards: ['springs', 'moving', 'conveyor'],
+    mechanic: 'Super saltos de bitscore e esteiras de alta aceleração digital.'
+  },
+  {
+    id: 48,
+    number: 48,
+    title: 'Santuário de Aurora Boreal',
+    theme: 'aurora',
+    icon: 'Sparkles',
+    targetHeight: 48000,
+    gravity: 0.29,
+    jumpForce: -12.7,
+    speedFactor: 2.2,
+    wind: 0.1,
+    bgGradient: ['#042f2e', '#115e59', '#0d9488'],
+    platformColor: '#14b8a6',
+    platformBorder: '#99f6e4',
+    ballGlow: '#2dd4bf',
+    description: 'Cortinas etéreas de luz esmeralda e turquesa ondulando nos confins da estratosfera orbital.',
+    hazards: ['fragile', 'springs', 'moving'],
+    mechanic: 'Ondulações gravitacionais de aurora e molas de impulso quântico.'
+  },
+  {
+    id: 49,
+    number: 49,
+    title: 'Vórtice do Tempo Infinito',
+    theme: 'cosmos',
+    icon: 'Infinity',
+    targetHeight: 49000,
+    gravity: 0.27,
+    jumpForce: -13.0,
+    speedFactor: 2.45,
+    wind: 0,
+    bgGradient: ['#172554', '#1e3a8a', '#1d4ed8'],
+    platformColor: '#3b82f6',
+    platformBorder: '#93c5fd',
+    ballGlow: '#60a5fa',
+    description: 'A penúltima fronteira! Linhas temporais se cruzando em constelações brilhantes rumo à marca de 50.000m.',
+    hazards: ['spikes', 'moving', 'conveyor', 'springs'],
+    mechanic: 'Múltiplos obstáculos dinâmicos em ritmo acelerado na reta final.'
+  },
+  {
+    id: 50,
+    number: 50,
+    title: 'O Ápice Cósmico Supremo',
+    theme: 'quantum',
+    icon: 'Crown',
+    targetHeight: 50000,
+    gravity: 0.24,
+    jumpForce: -13.6,
+    speedFactor: 2.5,
+    wind: 0,
+    bgGradient: ['#000000', '#18181b', '#27272a'],
+    platformColor: '#f59e0b',
+    platformBorder: '#fde68a',
+    ballGlow: '#fbbf24',
+    description: 'O cume monumental do JumpBall! 50.000m de ascensão lendária onde apenas os maiores mestres do universo conseguem triunfar!',
+    hazards: ['moving', 'springs', 'fragile', 'conveyor', 'spikes'],
+    mechanic: 'A prova definitiva de agilidade com todas as mecânicas combinadas em perfeita sincronia.'
   }
 ];
 
 export const BALL_SKINS = [
-  { id: 'neon-cyan', name: 'Esfera Neon', primary: '#06b6d4', glow: '#22d3ee', trail: '#0891b2' },
-  { id: 'plasma-pink', name: 'Pulso Plasma', primary: '#f43f5e', glow: '#fb7185', trail: '#e11d48' },
-  { id: 'solar-gold', name: 'Sol de Hélio', primary: '#eab308', glow: '#fde047', trail: '#ca8a04' },
-  { id: 'matrix-green', name: 'Córtex Matrix', primary: '#22c55e', glow: '#86efac', trail: '#16a34a' },
-  { id: 'cosmic-purple', name: 'Nebulosa Roxa', primary: '#a855f7', glow: '#d8b4fe', trail: '#9333ea' },
-  { id: 'fireball', name: 'Meteoro Ígneo', primary: '#f97316', glow: '#fdba74', trail: '#ea580c' }
+  // 6 Skins Iniciais (Desbloqueadas para todos os jogadores)
+  { id: 'neon-cyan', name: 'Esfera Neon', primary: '#06b6d4', glow: '#22d3ee', trail: '#0891b2', unlockStage: 0, category: 'starter' },
+  { id: 'plasma-pink', name: 'Pulso Plasma', primary: '#f43f5e', glow: '#fb7185', trail: '#e11d48', unlockStage: 0, category: 'starter' },
+  { id: 'solar-gold', name: 'Sol de Hélio', primary: '#eab308', glow: '#fde047', trail: '#ca8a04', unlockStage: 0, category: 'starter' },
+  { id: 'matrix-green', name: 'Córtex Matrix', primary: '#22c55e', glow: '#86efac', trail: '#16a34a', unlockStage: 0, category: 'starter' },
+  { id: 'cosmic-purple', name: 'Nebulosa Roxa', primary: '#a855f7', glow: '#d8b4fe', trail: '#9333ea', unlockStage: 0, category: 'starter' },
+  { id: 'fireball', name: 'Meteoro Ígneo', primary: '#f97316', glow: '#fdba74', trail: '#ea580c', unlockStage: 0, category: 'starter' },
+
+  // Fase 15 (Exército e Táticas Especiais)
+  { id: 'army-camo', name: 'Camuflagem Militar', primary: '#4d7c0f', glow: '#84cc16', trail: '#365314', unlockStage: 15, category: 'army' },
+  { id: 'tactical-specops', name: 'Força Especial Tática', primary: '#1e293b', glow: '#64748b', trail: '#0f172a', unlockStage: 15, category: 'army' },
+
+  // Fase 16 (Heróis Lendários)
+  { id: 'iron-hero', name: 'Homem de Ferro', primary: '#b91c1c', glow: '#facc15', trail: '#7f1d1d', unlockStage: 16, category: 'heroes' },
+  { id: 'spider-hero', name: 'Homem-Aranha', primary: '#dc2626', glow: '#38bdf8', trail: '#1d4ed8', unlockStage: 16, category: 'heroes' },
+
+  // Fase 17 (Heróis)
+  { id: 'super-steel', name: 'Superman', primary: '#2563eb', glow: '#ef4444', trail: '#eab308', unlockStage: 17, category: 'heroes' },
+  { id: 'dark-bat', name: 'Batman', primary: '#18181b', glow: '#eab308', trail: '#09090b', unlockStage: 17, category: 'heroes' },
+
+  // Fase 18 (Heróis)
+  { id: 'thunder-god', name: 'Thor', primary: '#64748b', glow: '#60a5fa', trail: '#38bdf8', unlockStage: 18, category: 'heroes' },
+  { id: 'captain-shield', name: 'Capitão América', primary: '#1d4ed8', glow: '#ef4444', trail: '#f8fafc', unlockStage: 18, category: 'heroes' },
+
+  // Fase 19 (Heróis)
+  { id: 'wolverine-claw', name: 'Wolverine', primary: '#eab308', glow: '#3b82f6', trail: '#854d0e', unlockStage: 19, category: 'heroes' },
+  { id: 'gamma-titan', name: 'Hulk Titã', primary: '#15803d', glow: '#4ade80', trail: '#166534', unlockStage: 19, category: 'heroes' },
+
+  // Fase 20 (Heróis)
+  { id: 'vibranium-panther', name: 'Pantera Negra', primary: '#09090b', glow: '#c084fc', trail: '#6b21a8', unlockStage: 20, category: 'heroes' },
+  { id: 'speed-lightning', name: 'Flash Velocista', primary: '#dc2626', glow: '#fde047', trail: '#ca8a04', unlockStage: 20, category: 'heroes' },
+
+  // Fase 21 (Heróis)
+  { id: 'red-mercenary', name: 'Deadpool', primary: '#e11d48', glow: '#475569', trail: '#881337', unlockStage: 21, category: 'heroes' },
+  { id: 'mystic-supreme', name: 'Doutor Estranho', primary: '#c2410c', glow: '#4ade80', trail: '#4338ca', unlockStage: 21, category: 'heroes' },
+
+  // Fase 22 (Astronautas & Exploração Espacial)
+  { id: 'apollo-astronaut', name: 'Astronauta Apollo', primary: '#f8fafc', glow: '#fde047', trail: '#94a3b8', unlockStage: 22, category: 'space' },
+  { id: 'void-cosmonaut', name: 'Cosmonauta do Vazio', primary: '#0f172a', glow: '#06b6d4', trail: '#0284c7', unlockStage: 22, category: 'space' },
+
+  // Fase 23 (Táticas Especiais)
+  { id: 'stealth-pilot', name: 'Piloto Stealth', primary: '#334155', glow: '#f59e0b', trail: '#1e293b', unlockStage: 23, category: 'army' },
+  { id: 'cyber-shinobi', name: 'Ninja Cibernético', primary: '#581c87', glow: '#22c55e', trail: '#3b0764', unlockStage: 23, category: 'heroes' },
+
+  // Fase 24 (Guerreiros Lendários)
+  { id: 'spartan-gladiator', name: 'Gladiador Espartano', primary: '#92400e', glow: '#f59e0b', trail: '#78350f', unlockStage: 24, category: 'heroes' },
+  { id: 'solar-ronin', name: 'Samurai Solar', primary: '#be123c', glow: '#fbbf24', trail: '#881337', unlockStage: 24, category: 'heroes' },
+
+  // Fase 25 (Lendárias Cósmicas)
+  { id: 'space-corsair', name: 'Corsário Espacial', primary: '#1e1b4b', glow: '#10b981', trail: '#0f172a', unlockStage: 25, category: 'space' },
+  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', unlockStage: 25, category: 'heroes' }
 ];

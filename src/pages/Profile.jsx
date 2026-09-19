@@ -18,7 +18,8 @@ import {
   RotateCw,
   Gamepad2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Lock
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDialog } from '../contexts/DialogContext';
@@ -44,6 +45,8 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
 
   const currentSkinId = profile?.ball_skin || 'neon-cyan';
   const activeSkin = BALL_SKINS.find(s => s.id === currentSkinId) || BALL_SKINS[0];
+  const stagesCompleted = Math.max(profile?.stages_completed || 0, localStore.getProfile()?.stages_completed || 0);
+  const [skinCategory, setSkinCategory] = useState('all'); // 'all' | 'heroes' | 'army' | 'space' | 'starter'
 
   const fetchHistory = async () => {
     setHistoryLoading(true);
@@ -133,10 +136,23 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
 
   const handleSelectSkin = async (skinId) => {
     const chosenSkin = BALL_SKINS.find(s => s.id === skinId);
+    if (!chosenSkin) return;
+
+    const isUnlocked = !chosenSkin.unlockStage || stagesCompleted >= chosenSkin.unlockStage;
+    if (!isUnlocked) {
+      showAlert({
+        title: '🔒 Skin Bloqueada',
+        message: `A skin "${chosenSkin.name}" é desbloqueada ao vencer a Fase ${chosenSkin.unlockStage}! Conquiste as fases no modo solo para liberar essa esfera especial.`,
+        variant: 'warning',
+        confirmText: 'Entendido'
+      });
+      return;
+    }
+
     await updateProfile({ ball_skin: skinId });
     showAlert({
       title: 'Esfera Equipada',
-      message: `A skin "${chosenSkin?.name || skinId}" foi equipada na sua bola de salto!`,
+      message: `A skin "${chosenSkin.name}" foi equipada na sua bola de salto!`,
       variant: 'success',
       confirmText: 'Jogar com ela'
     });
@@ -335,42 +351,109 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
       {/* 4. ABA 1: GARAGEM DE SKINS */}
       {activeTab === 'skins' && (
         <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-6 animate-fade-in">
-          <div className="flex items-center gap-2">
-            <Palette className="w-5 h-5 text-cyan-400" />
-            <div>
-              <h2 className="text-lg font-bold text-white">Personalização da Esfera</h2>
-              <p className="text-xs text-slate-400">Escolha o visual, a cor de iluminação e o rastro da sua bola de salto</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Palette className="w-5 h-5 text-cyan-400" />
+              <div>
+                <h2 className="text-lg font-bold text-white">Garagem de Esferas ({BALL_SKINS.length})</h2>
+                <p className="text-xs text-slate-400">Desbloqueie visuais de heróis, forças táticas e cosmonautas avançando pelas fases!</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-black text-xs shadow-sm">
+                {BALL_SKINS.filter(s => !s.unlockStage || stagesCompleted >= s.unlockStage).length} / {BALL_SKINS.length} Liberadas
+              </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {BALL_SKINS.map((skin) => {
+          {/* Filtros de Categoria de Skins */}
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
+            {[
+              { id: 'all', label: 'Todas', count: BALL_SKINS.length },
+              { id: 'heroes', label: 'Heróis', count: BALL_SKINS.filter(s => s.category === 'heroes').length },
+              { id: 'army', label: 'Militar & Tática', count: BALL_SKINS.filter(s => s.category === 'army').length },
+              { id: 'space', label: 'Espaço', count: BALL_SKINS.filter(s => s.category === 'space').length },
+              { id: 'starter', label: 'Iniciais', count: BALL_SKINS.filter(s => s.category === 'starter').length }
+            ].map(cat => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSkinCategory(cat.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  skinCategory === cat.id
+                    ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20 font-black'
+                    : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <span>{cat.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                  skinCategory === cat.id ? 'bg-slate-950/20 text-slate-950 font-black' : 'bg-slate-800 text-slate-400 font-semibold'
+                }`}>
+                  {cat.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Grid de Skins */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+            {BALL_SKINS.filter(s => skinCategory === 'all' || s.category === skinCategory).map((skin) => {
               const isSelected = activeSkin.id === skin.id;
+              const isUnlocked = !skin.unlockStage || stagesCompleted >= skin.unlockStage;
+
               return (
                 <button
                   key={skin.id}
                   onClick={() => handleSelectSkin(skin.id)}
-                  className={`flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all ${
+                  className={`flex flex-col items-center gap-2.5 p-3.5 rounded-2xl border transition-all text-center relative overflow-hidden group ${
                     isSelected
-                      ? 'bg-cyan-500/10 border-cyan-400 shadow-lg shadow-cyan-500/20 scale-105'
-                      : 'glass-card border-slate-800 hover:border-slate-700'
+                      ? 'bg-cyan-500/10 border-cyan-400 shadow-lg shadow-cyan-500/25 scale-105 ring-2 ring-cyan-400/40'
+                      : !isUnlocked
+                        ? 'bg-slate-950/50 border-slate-800/80 opacity-70 hover:opacity-90 hover:border-amber-500/40'
+                        : 'glass-card border-slate-800 hover:border-slate-700 hover:scale-[1.02]'
                   }`}
                 >
-                  {/* Visual da Bola */}
-                  <div 
-                    className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform"
-                    style={{
-                      background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${skin.primary} 45%, ${skin.trail} 100%)`,
-                      boxShadow: `0 0 18px ${skin.glow}`
-                    }}
-                  >
-                    <div className="w-2.5 h-2.5 rounded-full bg-white/40 blur-xs" />
+                  {/* Badge de Bloqueio com Fase Requerida */}
+                  {!isUnlocked && (
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-bold flex items-center gap-0.5 shadow-sm">
+                      <Lock className="w-2.5 h-2.5" />
+                      <span>Fase {skin.unlockStage}</span>
+                    </div>
+                  )}
+
+                  {/* Visual da Bola com Gradiente Fiel */}
+                  <div className="relative mt-1">
+                    <div 
+                      className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform ${
+                        !isUnlocked ? 'filter grayscale-[30%] brightness-90' : 'group-hover:scale-105'
+                      }`}
+                      style={{
+                        background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${skin.primary} 45%, ${skin.trail} 100%)`,
+                        boxShadow: isUnlocked ? `0 0 18px ${skin.glow}` : '0 0 8px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/40 blur-xs absolute top-2 left-3" />
+                      {!isUnlocked && (
+                        <div className="w-7 h-7 rounded-full bg-slate-950/80 backdrop-blur-xs border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-md">
+                          <Lock className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="text-center">
-                    <span className="text-xs font-bold text-slate-200 block">{skin.name}</span>
-                    <span className={`text-[10px] font-semibold ${isSelected ? 'text-cyan-400' : 'text-slate-500'}`}>
-                      {isSelected ? 'Equipado' : 'Selecionar'}
+                  <div className="w-full">
+                    <span className="text-xs font-bold text-slate-200 block truncate" title={skin.name}>
+                      {skin.name}
+                    </span>
+                    <span className={`text-[10px] font-semibold block mt-0.5 ${
+                      isSelected 
+                        ? 'text-cyan-400 font-bold' 
+                        : !isUnlocked 
+                          ? 'text-amber-400/90' 
+                          : 'text-slate-500'
+                    }`}>
+                      {isSelected ? 'Equipado' : !isUnlocked ? `🔒 Fase ${skin.unlockStage}` : 'Selecionar'}
                     </span>
                   </div>
                 </button>
