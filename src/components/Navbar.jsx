@@ -1,7 +1,6 @@
 import {
   Gamepad2,
   User,
-  History,
   Settings as SettingsIcon,
   LogIn,
   LogOut,
@@ -32,7 +31,6 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
     { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'game', label: 'Jogar', icon: Gamepad2 },
     { id: 'ranking', label: 'Ranking', icon: Trophy },
-    { id: 'history', label: 'Histórico', icon: History },
     { id: 'profile', label: 'Perfil', icon: User },
     { id: 'settings', label: 'Ajustes', icon: SettingsIcon }
   ];

@@ -7,7 +7,6 @@ import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { Game } from './pages/Game';
 import { Profile } from './pages/Profile';
-import { History } from './pages/History';
 import { Settings } from './pages/Settings';
 import { Ranking } from './pages/Ranking';
 import { Login } from './pages/Login';
@@ -35,7 +34,7 @@ function AppContent() {
   } = useDeviceOrientation();
 
   // 1. Tela de Carregamento da Sessão (somente se estiver tentando acessar diretamente uma rota protegida)
-  if (loading && ['game', 'profile', 'history'].includes(currentRoute)) {
+  if (loading && ['game', 'profile'].includes(currentRoute)) {
     return (
       <div className="min-h-screen bg-[#090d16] flex flex-col items-center justify-center space-y-4 select-none">
         <div className="relative w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-400 via-sky-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-cyan-500/30 animate-pulse">
@@ -51,7 +50,7 @@ function AppContent() {
   }
 
   // Se o usuário não está autenticado e tentar acessar uma rota restrita, redireciona para login
-  const isProtectedRoute = ['game', 'profile', 'history'].includes(currentRoute);
+  const isProtectedRoute = ['game', 'profile'].includes(currentRoute);
   const activeRoute = (!user && isProtectedRoute) ? 'login' : currentRoute;
 
   return (
@@ -60,7 +59,7 @@ function AppContent() {
         ? 'h-[100dvh] max-h-[100dvh] overflow-hidden' 
         : 'min-h-screen pb-20 md:pb-0'
     }`}>
-      {/* Barra de Navegação Superior (com Início, Jogar, Histórico, Perfil, Ajustes e Botões de Entrar/Cadastrar) */}
+      {/* Barra de Navegação Superior */}
       <Navbar
         currentRoute={activeRoute}
         setCurrentRoute={setCurrentRoute}
@@ -83,11 +82,11 @@ function AppContent() {
         )}
 
         {activeRoute === 'profile' && (
-          <Profile onNavigate={setCurrentRoute} />
+          <Profile onNavigate={setCurrentRoute} initialTab="skins" />
         )}
 
         {activeRoute === 'history' && (
-          <History onNavigate={setCurrentRoute} />
+          <Profile onNavigate={setCurrentRoute} initialTab="history" />
         )}
 
         {activeRoute === 'ranking' && (
