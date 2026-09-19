@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-  Play, 
-  Trophy, 
-  Sparkles, 
+import {
+  Play,
+  Trophy,
+  Sparkles,
   ArrowRight,
   UserPlus,
   LogIn,
@@ -74,7 +74,7 @@ export function Home({ onNavigate }) {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-black uppercase tracking-wider shadow-sm">
                 <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                TEMPORADA 1: RUMO AOS {maxAltitude.toLocaleString()}M
+                RUMO AOS {maxAltitude.toLocaleString()}M
               </span>
 
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border ${rank.border} text-xs font-bold text-slate-200 shadow-sm`}>
@@ -106,7 +106,7 @@ export function Home({ onNavigate }) {
                 <span className="font-bold text-cyan-400">{playerXP.toLocaleString()} XP • {currentLevelProgress}%</span>
               </div>
               <div className="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden p-0.5">
-                <div 
+                <div
                   className="bg-gradient-to-r from-cyan-500 to-rose-500 h-full rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(6,182,212,0.8)]"
                   style={{ width: `${currentLevelProgress}%` }}
                 />
@@ -131,6 +131,14 @@ export function Home({ onNavigate }) {
                 <span>Mudar Esfera</span>
               </button>
 
+              <button
+                onClick={() => onNavigate('ranking')}
+                className="px-5 py-4 rounded-2xl glass-card text-amber-300 hover:text-amber-200 font-bold text-sm flex items-center gap-2 border border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-950/20 transition-all active:scale-95 shadow-md"
+              >
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <span>Top 10 Ranking</span>
+              </button>
+
               {!user && (
                 <button
                   onClick={() => onNavigate('login')}
@@ -151,7 +159,7 @@ export function Home({ onNavigate }) {
 
             <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center">
               {/* Aura pulsante de energia */}
-              <div 
+              <div
                 className="absolute inset-0 rounded-full animate-pulse-glow"
                 style={{
                   background: `radial-gradient(circle, ${currentSkin.glow} 0%, rgba(6,182,212,0.12) 70%, transparent 100%)`
@@ -159,7 +167,7 @@ export function Home({ onNavigate }) {
               />
 
               {/* Esfera 3D com sombra e iluminação interna */}
-              <div 
+              <div
                 className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-110 cursor-pointer active:scale-95"
                 onClick={() => onNavigate('profile')}
                 title="Personalizar Esfera no Hangar"
@@ -182,11 +190,10 @@ export function Home({ onNavigate }) {
                     key={skin.id}
                     onClick={() => handleQuickEquipSkin(skin.id)}
                     title={skin.name}
-                    className={`w-6 h-6 rounded-full transition-transform ${
-                      currentSkin.id === skin.id 
-                        ? 'scale-125 ring-2 ring-white shadow-lg' 
+                    className={`w-6 h-6 rounded-full transition-transform ${currentSkin.id === skin.id
+                        ? 'scale-125 ring-2 ring-white shadow-lg'
                         : 'opacity-60 hover:opacity-100 hover:scale-110'
-                    }`}
+                      }`}
                     style={{
                       background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${skin.primary} 50%, ${skin.trail} 100%)`
                     }}
@@ -201,9 +208,16 @@ export function Home({ onNavigate }) {
       {/* 3. CARDS DE ESTATÍSTICAS GAMER (BATTLE STATS) */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Recorde */}
-        <div className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-amber-950/10 shadow-lg">
+        <div 
+          onClick={() => onNavigate('ranking')}
+          className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-amber-950/10 shadow-lg cursor-pointer hover:scale-[1.02]"
+          title="Ver Classificação Global no Ranking"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Recorde Máximo</span>
+            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+              <span>Recorde Máximo</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-bold border border-amber-500/20">Ver Top 10</span>
+            </span>
             <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
               <Trophy className="w-4 h-4" />
             </div>
@@ -229,8 +243,8 @@ export function Home({ onNavigate }) {
               {stagesCompleted} <span className="text-xs font-bold text-cyan-400/70">/ {STAGES.length}</span>
             </div>
             <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div 
-                className="bg-cyan-500 h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" 
+              <div
+                className="bg-cyan-500 h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -284,11 +298,10 @@ export function Home({ onNavigate }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Missão 1 */}
-          <div className={`p-4 rounded-2xl border transition-all ${
-            stagesCompleted >= 1 
-              ? 'bg-emerald-950/20 border-emerald-500/40' 
+          <div className={`p-4 rounded-2xl border transition-all ${stagesCompleted >= 1
+              ? 'bg-emerald-950/20 border-emerald-500/40'
               : 'glass-card border-slate-800/80'
-          }`}>
+            }`}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">PRIMEIRA VITÓRIA</span>
               {stagesCompleted >= 1 ? (
@@ -304,11 +317,10 @@ export function Home({ onNavigate }) {
           </div>
 
           {/* Missão 2 */}
-          <div className={`p-4 rounded-2xl border transition-all ${
-            totalJumps >= 100 
-              ? 'bg-emerald-950/20 border-emerald-500/40' 
+          <div className={`p-4 rounded-2xl border transition-all ${totalJumps >= 100
+              ? 'bg-emerald-950/20 border-emerald-500/40'
               : 'glass-card border-slate-800/80'
-          }`}>
+            }`}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-sky-400">SALTEADOR DE ELITE</span>
               {totalJumps >= 100 ? (
@@ -324,11 +336,10 @@ export function Home({ onNavigate }) {
           </div>
 
           {/* Missão 3 */}
-          <div className={`p-4 rounded-2xl border transition-all ${
-            highScore >= 5000 
-              ? 'bg-emerald-950/20 border-emerald-500/40' 
+          <div className={`p-4 rounded-2xl border transition-all ${highScore >= 5000
+              ? 'bg-emerald-950/20 border-emerald-500/40'
               : 'glass-card border-slate-800/80'
-          }`}>
+            }`}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">PONTUAÇÃO DE OURO</span>
               {highScore >= 5000 ? (
@@ -373,19 +384,18 @@ export function Home({ onNavigate }) {
             const isUnlocked = stage.number <= (stagesCompleted + 1);
             const isFinished = stage.number <= stagesCompleted;
             return (
-              <div 
+              <div
                 key={stage.id}
                 onClick={() => isUnlocked && onNavigate('game')}
-                className={`p-3.5 rounded-2xl border transition-all text-left relative overflow-hidden ${
-                  isFinished 
+                className={`p-3.5 rounded-2xl border transition-all text-left relative overflow-hidden ${isFinished
                     ? 'bg-emerald-950/20 border-emerald-500/40 text-slate-200 hover:scale-[1.02] cursor-pointer'
-                    : isUnlocked 
+                    : isUnlocked
                       ? 'glass-card border-cyan-500/50 shadow-sm shadow-cyan-500/10 hover:scale-[1.02] cursor-pointer'
                       : 'bg-slate-950/40 border-slate-800/50 opacity-60 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 {/* Gradiente temático sutil */}
-                <div 
+                <div
                   className="absolute inset-0 opacity-10 pointer-events-none"
                   style={{
                     background: `linear-gradient(135deg, ${stage.bgGradient[0]} 0%, ${stage.bgGradient[2]} 100%)`

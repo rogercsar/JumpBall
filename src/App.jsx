@@ -9,6 +9,7 @@ import { Game } from './pages/Game';
 import { Profile } from './pages/Profile';
 import { History } from './pages/History';
 import { Settings } from './pages/Settings';
+import { Ranking } from './pages/Ranking';
 import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
 
@@ -87,6 +88,10 @@ function AppContent() {
 
         {activeRoute === 'history' && (
           <History onNavigate={setCurrentRoute} />
+        )}
+
+        {activeRoute === 'ranking' && (
+          <Ranking onNavigate={setCurrentRoute} />
         )}
 
         {activeRoute === 'settings' && (

@@ -8,7 +8,8 @@ import {
   UserPlus,
   Smartphone,
   Camera,
-  LayoutDashboard
+  LayoutDashboard,
+  Trophy
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSettings } from '../contexts/SettingsContext';
@@ -20,7 +21,7 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
   const { showConfirm, showAlert } = useDialog();
 
   const handleNavClick = (routeId) => {
-    if (!user && routeId !== 'home') {
+    if (!user && !['home', 'ranking'].includes(routeId)) {
       setCurrentRoute('login');
       return;
     }
@@ -30,6 +31,7 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
   const navItems = [
     { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'game', label: 'Jogar', icon: Gamepad2 },
+    { id: 'ranking', label: 'Ranking', icon: Trophy },
     { id: 'history', label: 'Histórico', icon: History },
     { id: 'profile', label: 'Perfil', icon: User },
     { id: 'settings', label: 'Ajustes', icon: SettingsIcon }

@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  ArrowLeft, 
-  Trophy, 
-  Skull, 
-  Zap, 
-  Sparkles, 
-  Layers, 
-  Smartphone, 
-  Camera, 
-  Volume2, 
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  ArrowLeft,
+  Trophy,
+  Skull,
+  Zap,
+  Sparkles,
+  Layers,
+  Smartphone,
+  Camera,
+  Volume2,
   VolumeX,
   ChevronRight,
   Heart,
@@ -274,10 +274,10 @@ export function Game({ onNavigate }) {
 
     // 3. Grava diretamente no banco Supabase se o usuário estiver autenticado na nuvem
     const isRemoteUser = Boolean(
-      isSupabaseConfigured && 
-      supabase && 
-      user && 
-      !user.id?.startsWith('offline-') && 
+      isSupabaseConfigured &&
+      supabase &&
+      user &&
+      !user.id?.startsWith('offline-') &&
       !user.id?.startsWith('guest-')
     );
     if (isRemoteUser) {
@@ -477,9 +477,9 @@ export function Game({ onNavigate }) {
   }, []);
 
   return (
-    <div 
-      className={gameState === 'menu' 
-        ? "w-full h-full min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain" 
+    <div
+      className={gameState === 'menu'
+        ? "w-full h-full min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
         : "w-full flex-1 flex flex-col items-center justify-start p-0.5 sm:p-1.5 h-full max-h-full overflow-hidden select-none touch-none overscroll-none"
       }
       style={gameState === 'menu' ? { WebkitOverflowScrolling: 'touch' } : undefined}
@@ -517,25 +517,23 @@ export function Game({ onNavigate }) {
               <button
                 type="button"
                 onClick={() => setGameMode('solo')}
-                className={`flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                  gameMode === 'solo'
-                    ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-slate-950 shadow-md shadow-cyan-500/20 font-black'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all ${gameMode === 'solo'
+                  ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-slate-950 shadow-md shadow-cyan-500/20 font-black'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
-                <span>🏃 Modo Solo (Individual)</span>
+                <span>Modo Solo (Individual)</span>
               </button>
               <button
                 type="button"
                 onClick={() => setGameMode('race_ai')}
-                className={`flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                  gameMode === 'race_ai'
-                    ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-md shadow-purple-500/30 font-black'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all ${gameMode === 'race_ai'
+                  ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-md shadow-purple-500/30 font-black'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 <Bot className="w-4 h-4" />
-                <span>⚡ Corrida vs Máquina (1v1)</span>
+                <span>Corrida vs Máquina</span>
               </button>
             </div>
 
@@ -554,11 +552,10 @@ export function Game({ onNavigate }) {
                       key={diff.id}
                       type="button"
                       onClick={() => setAiDifficulty(diff.id)}
-                      className={`px-3 py-1 rounded-lg transition-all ${
-                        aiDifficulty === diff.id
-                          ? 'bg-purple-500 text-white font-black shadow-sm'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
+                      className={`px-3 py-1 rounded-lg transition-all ${aiDifficulty === diff.id
+                        ? 'bg-purple-500 text-white font-black shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                        }`}
                     >
                       {diff.label}
                     </button>
@@ -609,57 +606,52 @@ export function Game({ onNavigate }) {
               </button>
 
               {/* Contador de 3 Vidas */}
-              <div 
+              <div
                 className="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded-xl border border-slate-800 shadow-inner"
                 title={`${currentLives} vidas restantes`}
               >
                 {[1, 2, 3].map((heartNum) => (
                   <Heart
                     key={heartNum}
-                    className={`w-3.5 h-3.5 transition-all duration-300 ${
-                      heartNum <= currentLives
-                        ? 'text-rose-500 fill-rose-500 drop-shadow-[0_0_6px_rgba(244,63,94,0.7)] animate-pulse'
-                        : 'text-slate-600 fill-slate-800/40 opacity-30 scale-75'
-                    }`}
+                    className={`w-3.5 h-3.5 transition-all duration-300 ${heartNum <= currentLives
+                      ? 'text-rose-500 fill-rose-500 drop-shadow-[0_0_6px_rgba(244,63,94,0.7)] animate-pulse'
+                      : 'text-slate-600 fill-slate-800/40 opacity-30 scale-75'
+                      }`}
                   />
                 ))}
               </div>
 
               {/* Mini Medidor de Impulso ao lado das Vidas */}
-              <div 
-                className={`flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-xl border transition-all duration-200 shadow-inner ${
-                  boostEnergy >= 95 
-                    ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_8px_rgba(251,191,36,0.25)]' 
-                    : 'border-slate-800'
-                }`}
+              <div
+                className={`flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-xl border transition-all duration-200 shadow-inner ${boostEnergy >= 95
+                  ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_8px_rgba(251,191,36,0.25)]'
+                  : 'border-slate-800'
+                  }`}
                 title={`Carga de Impulso: ${boostEnergy}%`}
               >
-                <Zap className={`w-3.5 h-3.5 shrink-0 transition-all ${
-                  boostEnergy >= 95 
-                    ? 'text-amber-400 fill-amber-400 animate-pulse drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]' 
-                    : boostEnergy > 20 
-                      ? 'text-cyan-400' 
-                      : 'text-slate-500'
-                }`} />
+                <Zap className={`w-3.5 h-3.5 shrink-0 transition-all ${boostEnergy >= 95
+                  ? 'text-amber-400 fill-amber-400 animate-pulse drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]'
+                  : boostEnergy > 20
+                    ? 'text-cyan-400'
+                    : 'text-slate-500'
+                  }`} />
                 <div className="w-10 sm:w-14 h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800/80 p-[0.5px]">
                   <div
-                    className={`h-full rounded-full transition-all duration-150 ${
-                      boostEnergy >= 95
-                        ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 shadow-[0_0_8px_rgba(244,63,94,0.7)] animate-pulse'
-                        : boostEnergy > 25
-                          ? 'bg-gradient-to-r from-cyan-500 to-sky-400'
-                          : 'bg-gradient-to-r from-slate-600 to-slate-500'
-                    }`}
+                    className={`h-full rounded-full transition-all duration-150 ${boostEnergy >= 95
+                      ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 shadow-[0_0_8px_rgba(244,63,94,0.7)] animate-pulse'
+                      : boostEnergy > 25
+                        ? 'bg-gradient-to-r from-cyan-500 to-sky-400'
+                        : 'bg-gradient-to-r from-slate-600 to-slate-500'
+                      }`}
                     style={{ width: `${boostEnergy}%` }}
                   />
                 </div>
-                <span className={`text-[10px] font-mono font-bold leading-none shrink-0 ${
-                  boostEnergy >= 95 
-                    ? 'text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]' 
-                    : boostEnergy > 20 
-                      ? 'text-cyan-300' 
-                      : 'text-slate-500'
-                }`}>
+                <span className={`text-[10px] font-mono font-bold leading-none shrink-0 ${boostEnergy >= 95
+                  ? 'text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]'
+                  : boostEnergy > 20
+                    ? 'text-cyan-300'
+                    : 'text-slate-500'
+                  }`}>
                   {boostEnergy}%
                 </span>
               </div>
@@ -756,7 +748,7 @@ export function Game({ onNavigate }) {
           </div>
 
           {/* Viewport do Canvas do Jogo com Controle de Toque na Tela (100% da Área Disponível) */}
-          <div 
+          <div
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -772,20 +764,18 @@ export function Game({ onNavigate }) {
             {/* Feedback Visual Sutil de Toque nas Laterais */}
             {gameState === 'playing' && (
               <>
-                <div 
-                  className={`absolute inset-y-0 left-0 w-1/3 pointer-events-none transition-opacity duration-150 flex items-center justify-start pl-3 z-10 ${
-                    activeTouchSide === 'left' ? 'opacity-100 bg-gradient-to-r from-cyan-500/10 to-transparent' : 'opacity-0'
-                  }`}
+                <div
+                  className={`absolute inset-y-0 left-0 w-1/3 pointer-events-none transition-opacity duration-150 flex items-center justify-start pl-3 z-10 ${activeTouchSide === 'left' ? 'opacity-100 bg-gradient-to-r from-cyan-500/10 to-transparent' : 'opacity-0'
+                    }`}
                 >
                   <div className="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-lg shadow-cyan-500/20 animate-pulse">
                     ◀
                   </div>
                 </div>
 
-                <div 
-                  className={`absolute inset-y-0 right-0 w-1/3 pointer-events-none transition-opacity duration-150 flex items-center justify-end pr-3 z-10 ${
-                    activeTouchSide === 'right' ? 'opacity-100 bg-gradient-to-l from-cyan-500/10 to-transparent' : 'opacity-0'
-                  }`}
+                <div
+                  className={`absolute inset-y-0 right-0 w-1/3 pointer-events-none transition-opacity duration-150 flex items-center justify-end pr-3 z-10 ${activeTouchSide === 'right' ? 'opacity-100 bg-gradient-to-l from-cyan-500/10 to-transparent' : 'opacity-0'
+                    }`}
                 >
                   <div className="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-lg shadow-cyan-500/20 animate-pulse">
                     ▶
@@ -797,11 +787,10 @@ export function Game({ onNavigate }) {
             {/* Overlay Inicial de Prontidão: O jogo só inicia a física após o clique em DAR PLAY */}
             {gameState === 'ready' && (
               <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in z-20">
-                <div className={`w-16 h-16 rounded-3xl ${
-                  gameMode === 'race_ai' 
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30 shadow-purple-500/20' 
-                    : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-cyan-500/20'
-                } flex items-center justify-center shadow-2xl animate-pulse`}>
+                <div className={`w-16 h-16 rounded-3xl ${gameMode === 'race_ai'
+                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30 shadow-purple-500/20'
+                  : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-cyan-500/20'
+                  } flex items-center justify-center shadow-2xl animate-pulse`}>
                   {gameMode === 'race_ai' ? (
                     <Bot className="w-8 h-8" />
                   ) : (
@@ -810,9 +799,8 @@ export function Game({ onNavigate }) {
                 </div>
 
                 <div>
-                  <span className={`text-[10px] uppercase font-bold tracking-widest block ${
-                    gameMode === 'race_ai' ? 'text-purple-400' : 'text-cyan-400'
-                  }`}>
+                  <span className={`text-[10px] uppercase font-bold tracking-widest block ${gameMode === 'race_ai' ? 'text-purple-400' : 'text-cyan-400'
+                    }`}>
                     {gameMode === 'race_ai' ? `Corrida 1v1 vs Máquina • ${aiDifficulty.toUpperCase()}` : 'Modo Individual'}
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
@@ -843,11 +831,10 @@ export function Game({ onNavigate }) {
                 <div className="flex flex-col gap-2.5 w-60 pt-2">
                   <button
                     onClick={handleStartPlay}
-                    className={`w-full py-4 rounded-2xl ${
-                      gameMode === 'race_ai'
-                        ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 hover:from-purple-400 hover:to-rose-400 text-white shadow-purple-500/30'
-                        : 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/30'
-                    } font-black text-base flex items-center justify-center gap-2 shadow-xl hover:scale-105 active:scale-95 transition-all`}
+                    className={`w-full py-4 rounded-2xl ${gameMode === 'race_ai'
+                      ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 hover:from-purple-400 hover:to-rose-400 text-white shadow-purple-500/30'
+                      : 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/30'
+                      } font-black text-base flex items-center justify-center gap-2 shadow-xl hover:scale-105 active:scale-95 transition-all`}
                   >
                     <Play className="w-5 h-5 fill-current" />
                     <span>LARGADA / PLAY</span>
@@ -902,8 +889,8 @@ export function Game({ onNavigate }) {
 
                 <div>
                   <span className="text-xs uppercase font-bold text-rose-400 tracking-wider">
-                    {lastGameResult?.isRace 
-                      ? (lastGameResult?.winner === 'bot' ? 'A Máquina Alcançou a Meta Primeiro!' : 'Queda no Percurso!') 
+                    {lastGameResult?.isRace
+                      ? (lastGameResult?.winner === 'bot' ? 'A Máquina Alcançou a Meta Primeiro!' : 'Queda no Percurso!')
                       : 'A gravidade venceu!'}
                   </span>
                   <h2 className="text-3xl font-black text-white">
@@ -941,11 +928,10 @@ export function Game({ onNavigate }) {
                 <div className="flex flex-col gap-2.5 w-56">
                   <button
                     onClick={() => startGame(selectedStage)}
-                    className={`py-3.5 rounded-2xl ${
-                      lastGameResult?.isRace
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 shadow-purple-500/25'
-                        : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25'
-                    } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2`}
+                    className={`py-3.5 rounded-2xl ${lastGameResult?.isRace
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 shadow-purple-500/25'
+                      : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25'
+                      } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2`}
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span>{lastGameResult?.isRace ? 'REVANCHE IMEDIATA' : 'TENTAR NOVAMENTE'}</span>
