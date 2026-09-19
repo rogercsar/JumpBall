@@ -1,80 +1,594 @@
-// Configurações Musicais Procedurais para cada bioma / tema de fase
+// Tabela de frequências harmônicas padrão (Hz)
+const N = {
+  C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.00, A2: 110.00, B2: 123.47,
+  C3: 130.81, Cs3: 138.59, D3: 146.83, Eb3: 155.56, E3: 164.81, F3: 174.61, Fs3: 185.00, G3: 196.00, Ab3: 207.65, A3: 220.00, Bb3: 233.08, B3: 246.94,
+  C4: 261.63, Cs4: 277.18, D4: 293.66, Eb4: 311.13, E4: 329.63, F4: 349.23, Fs4: 369.99, G4: 392.00, Ab4: 415.30, A4: 440.00, Bb4: 466.16, B4: 493.88,
+  C5: 523.25, Cs5: 554.37, D5: 587.33, Eb5: 622.25, E5: 659.25, F5: 698.46, Fs5: 739.99, G5: 783.99, Ab5: 830.61, A5: 880.00, Bb5: 932.33, B5: 987.77,
+  C6: 1046.50, D6: 1174.66, E6: 1318.51,
+  _: 0 // Pausa musical / repouso
+};
+
+// Banco rico de Temas Musicais Procedurais com Múltiplas Variações
 const BGM_THEMES = {
-  nature: {
-    bpm: 104,
-    filterFreq: 1400,
-    bassOsc: 'triangle',
-    leadOsc: 'sine',
-    bassEnvelope: { attack: 0.05, decay: 0.35, sustain: 0.4, release: 0.2 },
-    leadEnvelope: { attack: 0.04, decay: 0.18, sustain: 0.25, release: 0.15 },
-    bassNotes: [130.81, 0, 98.00, 0, 110.00, 0, 87.31, 0, 130.81, 0, 98.00, 0, 110.00, 0, 87.31, 0], // C3, G2, A2, F2
-    leadNotes: [523.25, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33, 523.25, 659.25, 783.99, 1046.5, 880.00, 783.99, 659.25, 587.33, 523.25]
+  nature_pastoral: {
+    variations: [
+      {
+        bpm: 104,
+        filterFreq: 1400,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.05, decay: 0.35, sustain: 0.4, release: 0.2 },
+        leadEnvelope: { attack: 0.04, decay: 0.18, sustain: 0.25, release: 0.15 },
+        bassNotes: [N.C3, N._, N.G2, N._, N.A2, N._, N.F2, N._, N.C3, N._, N.G2, N._, N.A2, N._, N.F2, N._],
+        leadNotes: [N.C5, N.E5, N.G5, N.A5, N.G5, N.E5, N.D5, N.C5, N.E5, N.G5, N.C6, N.A5, N.G5, N.E5, N.D5, N.C5]
+      },
+      {
+        bpm: 110,
+        filterFreq: 1550,
+        bassOsc: 'sine',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.04, decay: 0.3, sustain: 0.35, release: 0.18 },
+        leadEnvelope: { attack: 0.03, decay: 0.16, sustain: 0.22, release: 0.12 },
+        bassNotes: [N.G2, N._, N.D3, N._, N.E3, N._, N.C3, N._, N.G2, N._, N.B2, N._, N.C3, N._, N.D3, N._],
+        leadNotes: [N.G4, N.B4, N.D5, N.G5, N.Fs5, N.D5, N.B4, N.A4, N.B4, N.D5, N.E5, N.D5, N.B4, N.G4, N.A4, N.G4]
+      }
+    ]
   },
-  oriental: {
-    bpm: 114,
-    filterFreq: 1800,
-    bassOsc: 'sawtooth',
-    leadOsc: 'triangle',
-    bassEnvelope: { attack: 0.03, decay: 0.22, sustain: 0.3, release: 0.1 },
-    leadEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.2, release: 0.1 },
-    bassNotes: [146.83, 146.83, 155.56, 146.83, 146.83, 146.83, 155.56, 146.83, 146.83, 146.83, 155.56, 146.83, 196.00, 185.00, 155.56, 146.83], // D3, Eb3, G3
-    leadNotes: [293.66, 311.13, 369.99, 392.00, 440.00, 392.00, 369.99, 311.13, 293.66, 369.99, 440.00, 466.16, 440.00, 392.00, 369.99, 293.66]
+
+  nature_tribal: {
+    variations: [
+      {
+        bpm: 118,
+        filterFreq: 1650,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.03, decay: 0.24, sustain: 0.3, release: 0.1 },
+        leadEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.2, release: 0.1 },
+        bassNotes: [N.D3, N.D3, N._, N.D3, N.F3, N._, N.G3, N._, N.D3, N.D3, N._, N.C3, N.D3, N._, N.A2, N._],
+        leadNotes: [N.D4, N.F4, N.G4, N.A4, N.C5, N.A4, N.G4, N.F4, N.D4, N.F4, N.D4, N.C4, N.D4, N.G4, N.F4, N.D4]
+      },
+      {
+        bpm: 122,
+        filterFreq: 1750,
+        bassOsc: 'square',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.2, sustain: 0.28, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.18, release: 0.08 },
+        bassNotes: [N.A2, N.A2, N.C3, N._, N.D3, N.D3, N.F3, N._, N.A2, N.A2, N.G2, N._, N.A2, N.C3, N.D3, N._],
+        leadNotes: [N.A4, N.C5, N.D5, N.E5, N.G5, N.E5, N.D5, N.C5, N.A4, N.G4, N.A4, N.C5, N.D5, N.C5, N.A4, N.G4]
+      }
+    ]
   },
-  ocean: {
-    bpm: 92,
-    filterFreq: 950,
-    bassOsc: 'sine',
-    leadOsc: 'sine',
-    bassEnvelope: { attack: 0.08, decay: 0.4, sustain: 0.5, release: 0.3 },
-    leadEnvelope: { attack: 0.06, decay: 0.28, sustain: 0.3, release: 0.25 },
-    bassNotes: [87.31, 0, 130.81, 0, 98.00, 0, 146.83, 0, 87.31, 0, 130.81, 0, 98.00, 0, 146.83, 0], // F2, C3, G2, D3
-    leadNotes: [523.25, 392.00, 440.00, 659.25, 587.33, 440.00, 523.25, 698.46, 659.25, 523.25, 392.00, 440.00, 587.33, 523.25, 440.00, 392.00]
+
+  desert_oriental: {
+    variations: [
+      {
+        bpm: 112,
+        filterFreq: 1800,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.03, decay: 0.22, sustain: 0.3, release: 0.1 },
+        leadEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.2, release: 0.1 },
+        bassNotes: [N.D3, N.D3, N.Eb3, N.D3, N.D3, N.D3, N.Eb3, N.D3, N.D3, N.D3, N.Eb3, N.D3, N.G3, N.Fs3, N.Eb3, N.D3],
+        leadNotes: [N.D4, N.Eb4, N.Fs4, N.G4, N.A4, N.G4, N.Fs4, N.Eb4, N.D4, N.Fs4, N.A4, N.Bb4, N.A4, N.G4, N.Fs4, N.D4]
+      },
+      {
+        bpm: 116,
+        filterFreq: 1900,
+        bassOsc: 'triangle',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.04, decay: 0.26, sustain: 0.32, release: 0.12 },
+        leadEnvelope: { attack: 0.03, decay: 0.16, sustain: 0.22, release: 0.12 },
+        bassNotes: [N.E3, N.E3, N.F3, N.E3, N.B2, N.B2, N.C3, N.B2, N.E3, N.E3, N.F3, N.E3, N.G3, N.F3, N.E3, N.B2],
+        leadNotes: [N.E4, N.F4, N.Ab4, N.B4, N.C5, N.B4, N.Ab4, N.F4, N.E4, N.B4, N.C5, N.D5, N.C5, N.B4, N.Ab4, N.E4]
+      }
+    ]
   },
-  storm_rock: {
-    bpm: 130,
-    filterFreq: 1600,
-    bassOsc: 'sawtooth',
-    leadOsc: 'sawtooth',
-    bassEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.4, release: 0.08 },
-    leadEnvelope: { attack: 0.02, decay: 0.12, sustain: 0.25, release: 0.08 },
-    bassNotes: [110.00, 110.00, 130.81, 146.83, 82.41, 82.41, 98.00, 110.00, 110.00, 110.00, 130.81, 146.83, 164.81, 146.83, 130.81, 110.00],
-    leadNotes: [440.00, 523.25, 587.33, 659.25, 587.33, 523.25, 440.00, 392.00, 440.00, 523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 440.00]
+
+  desert_caravan: {
+    variations: [
+      {
+        bpm: 124,
+        filterFreq: 1700,
+        bassOsc: 'sawtooth',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.02, decay: 0.18, sustain: 0.32, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.12, sustain: 0.2, release: 0.08 },
+        bassNotes: [N.C3, N.C3, N.Eb3, N.C3, N.G2, N.G2, N.Bb2, N.G2, N.C3, N.C3, N.Eb3, N.C3, N.Ab2, N.Bb2, N.C3, N._],
+        leadNotes: [N.C4, N.Eb4, N.G4, N.Ab4, N.G4, N.Eb4, N.F4, N.D4, N.Eb4, N.G4, N.C5, N.Bb4, N.Ab4, N.G4, N.F4, N.Eb4]
+      },
+      {
+        bpm: 108,
+        filterFreq: 1500,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.05, decay: 0.3, sustain: 0.35, release: 0.15 },
+        leadEnvelope: { attack: 0.04, decay: 0.2, sustain: 0.25, release: 0.15 },
+        bassNotes: [N.G2, N._, N.D3, N._, N.Eb3, N._, N.C3, N._, N.G2, N._, N.Bb2, N._, N.C3, N._, N.D3, N._],
+        leadNotes: [N.G4, N.Bb4, N.D5, N.Eb5, N.D5, N.Bb4, N.C5, N.A4, N.Bb4, N.D5, N.G5, N.F5, N.Eb5, N.D5, N.C5, N.Bb4]
+      }
+    ]
   },
-  crystal_ice: {
-    bpm: 100,
-    filterFreq: 2400,
-    bassOsc: 'triangle',
-    leadOsc: 'sine',
-    bassEnvelope: { attack: 0.04, decay: 0.3, sustain: 0.3, release: 0.2 },
-    leadEnvelope: { attack: 0.01, decay: 0.15, sustain: 0.15, release: 0.3 },
-    bassNotes: [164.81, 0, 123.47, 0, 130.81, 0, 98.00, 0, 164.81, 0, 123.47, 0, 130.81, 0, 98.00, 0],
-    leadNotes: [783.99, 987.77, 1318.51, 1174.66, 987.77, 783.99, 880.00, 659.25, 783.99, 1046.5, 1318.51, 1174.66, 987.77, 880.00, 783.99, 659.25]
+
+  ocean_ambient: {
+    variations: [
+      {
+        bpm: 92,
+        filterFreq: 950,
+        bassOsc: 'sine',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.08, decay: 0.4, sustain: 0.5, release: 0.3 },
+        leadEnvelope: { attack: 0.06, decay: 0.28, sustain: 0.3, release: 0.25 },
+        bassNotes: [N.F2, N._, N.C3, N._, N.G2, N._, N.D3, N._, N.F2, N._, N.C3, N._, N.G2, N._, N.D3, N._],
+        leadNotes: [N.C5, N.G4, N.A4, N.E5, N.D5, N.A4, N.C5, N.F5, N.E5, N.C5, N.G4, N.A4, N.D5, N.C5, N.A4, N.G4]
+      },
+      {
+        bpm: 96,
+        filterFreq: 1050,
+        bassOsc: 'sine',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.07, decay: 0.38, sustain: 0.45, release: 0.28 },
+        leadEnvelope: { attack: 0.05, decay: 0.25, sustain: 0.28, release: 0.22 },
+        bassNotes: [N.C3, N._, N.G2, N._, N.A2, N._, N.E2, N._, N.F2, N._, N.C3, N._, N.G2, N._, N.C3, N._],
+        leadNotes: [N.E5, N.D5, N.C5, N.G4, N.A4, N.C5, N.E5, N.G5, N.A5, N.G5, N.E5, N.C5, N.D5, N.E5, N.D5, N.C5]
+      }
+    ]
   },
-  cyber_arcade: {
-    bpm: 124,
-    filterFreq: 1900,
-    bassOsc: 'square',
-    leadOsc: 'square',
-    bassEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.35, release: 0.06 },
-    leadEnvelope: { attack: 0.01, decay: 0.10, sustain: 0.22, release: 0.06 },
-    bassNotes: [146.83, 146.83, 174.61, 196.00, 110.00, 110.00, 130.81, 146.83, 146.83, 146.83, 174.61, 196.00, 220.00, 196.00, 174.61, 146.83],
-    leadNotes: [587.33, 698.46, 880.00, 1046.5, 880.00, 698.46, 783.99, 659.25, 698.46, 587.33, 698.46, 783.99, 880.00, 1046.5, 1174.66, 880.00]
+
+  water_rush: {
+    variations: [
+      {
+        bpm: 114,
+        filterFreq: 1350,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.04, decay: 0.28, sustain: 0.35, release: 0.15 },
+        leadEnvelope: { attack: 0.03, decay: 0.18, sustain: 0.22, release: 0.12 },
+        bassNotes: [N.D3, N._, N.A2, N._, N.Bb2, N._, N.F2, N._, N.G2, N._, N.D3, N._, N.A2, N._, N.D3, N._],
+        leadNotes: [N.D5, N.F5, N.A5, N.G5, N.F5, N.D5, N.E5, N.C5, N.D5, N.A4, N.Bb4, N.D5, N.F5, N.E5, N.D5, N.A4]
+      },
+      {
+        bpm: 106,
+        filterFreq: 1200,
+        bassOsc: 'sine',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.05, decay: 0.32, sustain: 0.4, release: 0.2 },
+        leadEnvelope: { attack: 0.03, decay: 0.2, sustain: 0.25, release: 0.16 },
+        bassNotes: [N.A2, N._, N.E3, N._, N.F3, N._, N.D3, N._, N.A2, N._, N.E3, N._, N.G3, N._, N.A3, N._],
+        leadNotes: [N.A4, N.C5, N.E5, N.D5, N.C5, N.A4, N.B4, N.G4, N.A4, N.E5, N.G5, N.A5, N.G5, N.E5, N.D5, N.A4]
+      }
+    ]
   },
-  cosmic: {
-    bpm: 96,
-    filterFreq: 1200,
-    bassOsc: 'sawtooth',
-    leadOsc: 'triangle',
-    bassEnvelope: { attack: 0.06, decay: 0.45, sustain: 0.45, release: 0.25 },
-    leadEnvelope: { attack: 0.05, decay: 0.26, sustain: 0.3, release: 0.3 },
-    bassNotes: [130.81, 0, 98.00, 0, 103.83, 0, 116.54, 0, 130.81, 0, 98.00, 0, 103.83, 0, 116.54, 0], // C3, G2, Ab2, Bb2
-    leadNotes: [392.00, 523.25, 622.25, 783.99, 698.46, 622.25, 587.33, 466.16, 523.25, 622.25, 783.99, 932.33, 830.61, 783.99, 698.46, 622.25]
+
+  storm_thunder: {
+    variations: [
+      {
+        bpm: 132,
+        filterFreq: 1650,
+        bassOsc: 'sawtooth',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.4, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.12, sustain: 0.25, release: 0.08 },
+        bassNotes: [N.E2, N.E2, N.G2, N.A2, N.E2, N.E2, N.D2, N.E2, N.E2, N.E2, N.G2, N.A2, N.B2, N.A2, N.G2, N.E2],
+        leadNotes: [N.E4, N.G4, N.A4, N.B4, N.A4, N.G4, N.E4, N.D4, N.E4, N.G4, N.B4, N.D5, N.B4, N.A4, N.G4, N.E4]
+      },
+      {
+        bpm: 136,
+        filterFreq: 1750,
+        bassOsc: 'square',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.35, release: 0.07 },
+        leadEnvelope: { attack: 0.01, decay: 0.11, sustain: 0.22, release: 0.07 },
+        bassNotes: [N.A2, N.A2, N.C3, N.D3, N.A2, N.A2, N.G2, N.A2, N.A2, N.A2, N.C3, N.D3, N.E3, N.D3, N.C3, N.A2],
+        leadNotes: [N.A4, N.C5, N.D5, N.E5, N.D5, N.C5, N.A4, N.G4, N.A4, N.C5, N.E5, N.G5, N.E5, N.D5, N.C5, N.A4]
+      }
+    ]
+  },
+
+  volcano_metal: {
+    variations: [
+      {
+        bpm: 128,
+        filterFreq: 1600,
+        bassOsc: 'sawtooth',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.42, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.12, sustain: 0.24, release: 0.07 },
+        bassNotes: [N.D2, N.D2, N.F2, N.G2, N.D2, N.D2, N.C2, N.Cs2, N.D2, N.D2, N.F2, N.G2, N.Ab2, N.G2, N.F2, N.D2],
+        leadNotes: [N.D4, N.F4, N.G4, N.Ab4, N.G4, N.F4, N.D4, N.C4, N.D4, N.F4, N.G4, N.C5, N.Ab4, N.G4, N.F4, N.D4]
+      },
+      {
+        bpm: 125,
+        filterFreq: 1550,
+        bassOsc: 'square',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.18, sustain: 0.38, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.13, sustain: 0.22, release: 0.08 },
+        bassNotes: [N.C2, N.C2, N.Eb2, N.F2, N.C2, N.C2, N.Bb1, N.B1, N.C2, N.C2, N.Eb2, N.F2, N.Fs2, N.F2, N.Eb2, N.C2],
+        leadNotes: [N.C4, N.Eb4, N.F4, N.Fs4, N.F4, N.Eb4, N.C4, N.Bb3, N.C4, N.Eb4, N.F4, N.Bb4, N.Fs4, N.F4, N.Eb4, N.C4]
+      }
+    ]
+  },
+
+  crystal_dream: {
+    variations: [
+      {
+        bpm: 102,
+        filterFreq: 2400,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.04, decay: 0.3, sustain: 0.3, release: 0.2 },
+        leadEnvelope: { attack: 0.01, decay: 0.15, sustain: 0.15, release: 0.3 },
+        bassNotes: [N.E3, N._, N.B2, N._, N.C3, N._, N.G2, N._, N.E3, N._, N.B2, N._, N.C3, N._, N.G2, N._],
+        leadNotes: [N.G5, N.B5, N.E6, N.D6, N.B5, N.G5, N.A5, N.E5, N.G5, N.C6, N.E6, N.D6, N.B5, N.A5, N.G5, N.E5]
+      },
+      {
+        bpm: 98,
+        filterFreq: 2600,
+        bassOsc: 'sine',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.06, decay: 0.35, sustain: 0.35, release: 0.25 },
+        leadEnvelope: { attack: 0.01, decay: 0.18, sustain: 0.18, release: 0.35 },
+        bassNotes: [N.B2, N._, N.Fs3, N._, N.G3, N._, N.D3, N._, N.B2, N._, N.E3, N._, N.Fs3, N._, N.B2, N._],
+        leadNotes: [N.Fs5, N.A5, N.D6, N.Cs6, N.A5, N.Fs5, N.G5, N.D5, N.Fs5, N.B5, N.D6, N.Cs6, N.B5, N.A5, N.Fs5, N.D5]
+      }
+    ]
+  },
+
+  winter_chill: {
+    variations: [
+      {
+        bpm: 90,
+        filterFreq: 1800,
+        bassOsc: 'sine',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.06, decay: 0.36, sustain: 0.4, release: 0.25 },
+        leadEnvelope: { attack: 0.03, decay: 0.22, sustain: 0.2, release: 0.25 },
+        bassNotes: [N.C3, N._, N.G2, N._, N.Ab2, N._, N.Eb2, N._, N.F2, N._, N.C3, N._, N.G2, N._, N.C3, N._],
+        leadNotes: [N.Eb5, N.D5, N.C5, N.G4, N.Ab4, N.C5, N.Eb5, N.G5, N.F5, N.Eb5, N.D5, N.C5, N.D5, N.Eb5, N.D5, N.C5]
+      },
+      {
+        bpm: 100,
+        filterFreq: 2100,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.04, decay: 0.28, sustain: 0.35, release: 0.18 },
+        leadEnvelope: { attack: 0.02, decay: 0.17, sustain: 0.18, release: 0.22 },
+        bassNotes: [N.D3, N._, N.A2, N._, N.Bb2, N._, N.F2, N._, N.G2, N._, N.D3, N._, N.A2, N._, N.D3, N._],
+        leadNotes: [N.F5, N.A5, N.D6, N.C6, N.A5, N.F5, N.G5, N.E5, N.F5, N.A5, N.C6, N.Bb5, N.A5, N.G5, N.F5, N.E5]
+      }
+    ]
+  },
+
+  sky_floating: {
+    variations: [
+      {
+        bpm: 98,
+        filterFreq: 1700,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.05, decay: 0.35, sustain: 0.4, release: 0.2 },
+        leadEnvelope: { attack: 0.04, decay: 0.22, sustain: 0.24, release: 0.2 },
+        bassNotes: [N.F2, N._, N.C3, N._, N.D3, N._, N.Bb2, N._, N.F2, N._, N.C3, N._, N.G2, N._, N.C3, N._],
+        leadNotes: [N.A4, N.C5, N.F5, N.G5, N.A5, N.G5, N.F5, N.D5, N.C5, N.F5, N.A5, N.C6, N.Bb5, N.A5, N.G5, N.F5]
+      },
+      {
+        bpm: 106,
+        filterFreq: 1850,
+        bassOsc: 'sine',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.04, decay: 0.3, sustain: 0.35, release: 0.18 },
+        leadEnvelope: { attack: 0.03, decay: 0.18, sustain: 0.2, release: 0.15 },
+        bassNotes: [N.G2, N._, N.D3, N._, N.E3, N._, N.C3, N._, N.G2, N._, N.D3, N._, N.A2, N._, N.D3, N._],
+        leadNotes: [N.B4, N.D5, N.G5, N.A5, N.B5, N.A5, N.G5, N.E5, N.D5, N.G5, N.B5, N.D6, N.C6, N.B5, N.A5, N.G5]
+      }
+    ]
+  },
+
+  synthwave_neon: {
+    variations: [
+      {
+        bpm: 122,
+        filterFreq: 2100,
+        bassOsc: 'square',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.38, release: 0.06 },
+        leadEnvelope: { attack: 0.02, decay: 0.12, sustain: 0.24, release: 0.08 },
+        bassNotes: [N.Fs2, N.Fs2, N.A2, N.B2, N.Fs2, N.Fs2, N.E2, N.Fs2, N.D2, N.D2, N.Fs2, N.A2, N.E2, N.E2, N.Gs2, N.B2],
+        leadNotes: [N.Fs4, N.A4, N.Cs5, N.E5, N.Cs5, N.A4, N.B4, N.Gs4, N.A4, N.Cs5, N.Fs5, N.E5, N.Cs5, N.B4, N.A4, N.Gs4]
+      },
+      {
+        bpm: 126,
+        filterFreq: 2200,
+        bassOsc: 'sawtooth',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.36, release: 0.06 },
+        leadEnvelope: { attack: 0.01, decay: 0.10, sustain: 0.22, release: 0.06 },
+        bassNotes: [N.D3, N.D3, N.F3, N.G3, N.D3, N.D3, N.C3, N.D3, N.Bb2, N.Bb2, N.D3, N.F3, N.C3, N.C3, N.E3, N.G3],
+        leadNotes: [N.D5, N.F5, N.A5, N.C6, N.A5, N.F5, N.G5, N.E5, N.F5, N.A5, N.D6, N.C6, N.A5, N.G5, N.F5, N.E5]
+      }
+    ]
+  },
+
+  digital_data: {
+    variations: [
+      {
+        bpm: 120,
+        filterFreq: 2000,
+        bassOsc: 'square',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.01, decay: 0.12, sustain: 0.3, release: 0.05 },
+        leadEnvelope: { attack: 0.01, decay: 0.08, sustain: 0.2, release: 0.05 },
+        bassNotes: [N.C3, N.C3, N.G2, N.G2, N.A2, N.A2, N.F2, N.F2, N.C3, N.C3, N.G2, N.G2, N.A2, N.A2, N.Bb2, N.B2],
+        leadNotes: [N.C5, N.G4, N.C5, N.E5, N.G5, N.E5, N.D5, N.B4, N.C5, N.A4, N.C5, N.F5, N.A5, N.G5, N.F5, N.D5]
+      },
+      {
+        bpm: 128,
+        filterFreq: 2150,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.32, release: 0.06 },
+        leadEnvelope: { attack: 0.01, decay: 0.10, sustain: 0.2, release: 0.06 },
+        bassNotes: [N.G2, N.G2, N.D3, N.D3, N.Eb3, N.Eb3, N.C3, N.C3, N.G2, N.G2, N.Bb2, N.Bb2, N.C3, N.C3, N.D3, N.D3],
+        leadNotes: [N.G4, N.Bb4, N.D5, N.G5, N.F5, N.D5, N.Eb5, N.C5, N.D5, N.Bb4, N.C5, N.Eb5, N.G5, N.F5, N.Eb5, N.D5]
+      }
+    ]
+  },
+
+  chiptune_retro: {
+    variations: [
+      {
+        bpm: 130,
+        filterFreq: 2300,
+        bassOsc: 'square',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.01, decay: 0.12, sustain: 0.35, release: 0.05 },
+        leadEnvelope: { attack: 0.01, decay: 0.09, sustain: 0.22, release: 0.05 },
+        bassNotes: [N.C3, N.C3, N.E3, N.G3, N.F2, N.F2, N.A2, N.C3, N.G2, N.G2, N.B2, N.D3, N.C3, N.G2, N.C3, N._],
+        leadNotes: [N.C5, N.E5, N.G5, N.C6, N.A5, N.F5, N.G5, N.E5, N.F5, N.D5, N.E5, N.C5, N.D5, N.B4, N.C5, N._]
+      },
+      {
+        bpm: 134,
+        filterFreq: 2400,
+        bassOsc: 'square',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.01, decay: 0.11, sustain: 0.32, release: 0.05 },
+        leadEnvelope: { attack: 0.01, decay: 0.08, sustain: 0.2, release: 0.05 },
+        bassNotes: [N.F2, N.F2, N.A2, N.C3, N.Bb2, N.Bb2, N.D3, N.F3, N.C3, N.C3, N.E3, N.G3, N.F2, N.C3, N.F2, N._],
+        leadNotes: [N.F5, N.A5, N.C6, N.A5, N.Bb5, N.G5, N.A5, N.F5, N.G5, N.E5, N.F5, N.D5, N.E5, N.C5, N.F5, N._]
+      }
+    ]
+  },
+
+  puzzle_mystery: {
+    variations: [
+      {
+        bpm: 114,
+        filterFreq: 1800,
+        bassOsc: 'triangle',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.03, decay: 0.22, sustain: 0.32, release: 0.1 },
+        leadEnvelope: { attack: 0.01, decay: 0.12, sustain: 0.2, release: 0.08 },
+        bassNotes: [N.A2, N._, N.E3, N._, N.F3, N._, N.C3, N._, N.D3, N._, N.A2, N._, N.B2, N._, N.E3, N._],
+        leadNotes: [N.A4, N.C5, N.E5, N.B4, N.C5, N.E5, N.A5, N.G5, N.F5, N.D5, N.E5, N.C5, N.D5, N.B4, N.A4, N.E4]
+      },
+      {
+        bpm: 118,
+        filterFreq: 1900,
+        bassOsc: 'square',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.18, sustain: 0.28, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.18, release: 0.1 },
+        bassNotes: [N.E3, N._, N.B2, N._, N.C3, N._, N.G2, N._, N.A2, N._, N.E3, N._, N.Fs2, N._, N.B2, N._],
+        leadNotes: [N.E5, N.G5, N.B5, N.Fs5, N.G5, N.B5, N.E6, N.D6, N.C6, N.A5, N.B5, N.G5, N.A5, N.Fs5, N.E5, N.B4]
+      }
+    ]
+  },
+
+  cosmic_voyage: {
+    variations: [
+      {
+        bpm: 95,
+        filterFreq: 1200,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.06, decay: 0.45, sustain: 0.45, release: 0.25 },
+        leadEnvelope: { attack: 0.05, decay: 0.26, sustain: 0.3, release: 0.3 },
+        bassNotes: [N.C3, N._, N.G2, N._, N.Ab2, N._, N.Bb2, N._, N.C3, N._, N.G2, N._, N.Ab2, N._, N.Bb2, N._],
+        leadNotes: [N.G4, N.C5, N.Eb5, N.G5, N.F5, N.Eb5, N.D5, N.Bb4, N.C5, N.Eb5, N.G5, N.Bb5, N.Ab5, N.G5, N.F5, N.Eb5]
+      },
+      {
+        bpm: 92,
+        filterFreq: 1150,
+        bassOsc: 'triangle',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.08, decay: 0.48, sustain: 0.5, release: 0.3 },
+        leadEnvelope: { attack: 0.06, decay: 0.28, sustain: 0.32, release: 0.32 },
+        bassNotes: [N.Eb3, N._, N.Bb2, N._, N.B2, N._, N.Db3, N._, N.Eb3, N._, N.Bb2, N._, N.B2, N._, N.Db3, N._],
+        leadNotes: [N.Bb4, N.Eb5, N.Gb5, N.Bb5, N.Ab5, N.Gb5, N.F5, N.Db5, N.Eb5, N.Gb5, N.Bb5, N.Db6, N.B5, N.Bb5, N.Ab5, N.Gb5]
+      }
+    ]
+  },
+
+  solar_pulsar: {
+    variations: [
+      {
+        bpm: 112,
+        filterFreq: 1550,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.03, decay: 0.25, sustain: 0.35, release: 0.12 },
+        leadEnvelope: { attack: 0.03, decay: 0.16, sustain: 0.24, release: 0.12 },
+        bassNotes: [N.G2, N.G2, N.B2, N.D3, N.C3, N.C3, N.E3, N.G3, N.D3, N.D3, N.Fs3, N.A3, N.G2, N.D3, N.G3, N._],
+        leadNotes: [N.G4, N.B4, N.D5, N.G5, N.E5, N.C5, N.D5, N.B4, N.C5, N.A4, N.B4, N.G4, N.A4, N.Fs4, N.G4, N._]
+      },
+      {
+        bpm: 120,
+        filterFreq: 1650,
+        bassOsc: 'square',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.2, sustain: 0.3, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.22, release: 0.08 },
+        bassNotes: [N.D3, N.D3, N.F3, N.G3, N.Bb2, N.Bb2, N.C3, N.D3, N.C3, N.C3, N.E3, N.G3, N.D3, N.A2, N.D3, N._],
+        leadNotes: [N.D5, N.F5, N.G5, N.A5, N.F5, N.D5, N.E5, N.C5, N.D5, N.Bb4, N.C5, N.A4, N.Bb4, N.G4, N.A4, N._]
+      }
+    ]
+  },
+
+  quantum_pulse: {
+    variations: [
+      {
+        bpm: 110,
+        filterFreq: 1600,
+        bassOsc: 'sawtooth',
+        leadOsc: 'sine',
+        bassEnvelope: { attack: 0.04, decay: 0.28, sustain: 0.35, release: 0.15 },
+        leadEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.2, release: 0.18 },
+        bassNotes: [N.E3, N.E3, N.G3, N._, N.A3, N.A3, N.B3, N._, N.C3, N.C3, N.D3, N._, N.E3, N.B2, N.E3, N._],
+        leadNotes: [N.E5, N.G5, N.B5, N.D6, N.C6, N.A5, N.B5, N.G5, N.A5, N.E5, N.G5, N.D5, N.E5, N.B4, N.E5, N._]
+      },
+      {
+        bpm: 116,
+        filterFreq: 1750,
+        bassOsc: 'triangle',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.03, decay: 0.22, sustain: 0.3, release: 0.1 },
+        leadEnvelope: { attack: 0.01, decay: 0.12, sustain: 0.2, release: 0.08 },
+        bassNotes: [N.A2, N.A2, N.C3, N._, N.D3, N.D3, N.E3, N._, N.F2, N.F2, N.G2, N._, N.A2, N.E2, N.A2, N._],
+        leadNotes: [N.A4, N.C5, N.E5, N.G5, N.F5, N.D5, N.E5, N.C5, N.D5, N.A4, N.C5, N.G4, N.A4, N.E4, N.A4, N._]
+      }
+    ]
+  },
+
+  epic_heroic: {
+    variations: [
+      {
+        bpm: 125,
+        filterFreq: 2200,
+        bassOsc: 'triangle',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.03, decay: 0.2, sustain: 0.4, release: 0.1 },
+        leadEnvelope: { attack: 0.03, decay: 0.16, sustain: 0.3, release: 0.1 },
+        bassNotes: [N.C3, N.C3, N.G2, N.G2, N.A2, N.A2, N.F2, N.F2, N.C3, N.E3, N.F3, N.G3, N.C3, N.G2, N.C3, N._],
+        leadNotes: [N.C5, N.E5, N.G5, N.G5, N.A5, N.G5, N.F5, N.E5, N.G5, N.C6, N.B5, N.G5, N.A5, N.B5, N.C6, N._]
+      },
+      {
+        bpm: 128,
+        filterFreq: 2300,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.18, sustain: 0.38, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.26, release: 0.1 },
+        bassNotes: [N.D3, N.D3, N.A2, N.A2, N.B2, N.B2, N.G2, N.G2, N.D3, N.Fs3, N.G3, N.A3, N.D3, N.A2, N.D3, N._],
+        leadNotes: [N.D5, N.Fs5, N.A5, N.A5, N.B5, N.A5, N.G5, N.Fs5, N.A5, N.D6, N.Cs6, N.A5, N.B5, N.Cs6, N.D6, N._]
+      }
+    ]
+  },
+
+  dragon_danger: {
+    variations: [
+      {
+        bpm: 126,
+        filterFreq: 1800,
+        bassOsc: 'sawtooth',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.45, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.13, sustain: 0.28, release: 0.08 },
+        bassNotes: [N.D2, N.D2, N.F2, N.D2, N.Ab2, N.G2, N.F2, N.D2, N.D2, N.D2, N.F2, N.D2, N.C3, N.B2, N.Ab2, N.G2],
+        leadNotes: [N.D4, N.F4, N.Ab4, N.A4, N.D5, N.C5, N.Ab4, N.F4, N.D4, N.Ab4, N.A4, N.D5, N.F5, N.D5, N.C5, N.Ab4]
+      },
+      {
+        bpm: 130,
+        filterFreq: 1950,
+        bassOsc: 'square',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.4, release: 0.07 },
+        leadEnvelope: { attack: 0.02, decay: 0.12, sustain: 0.25, release: 0.07 },
+        bassNotes: [N.G2, N.G2, N.Bb2, N.G2, N.Db3, N.C3, N.Bb2, N.G2, N.G2, N.G2, N.Bb2, N.G2, N.F3, N.E3, N.Db3, N.C3],
+        leadNotes: [N.G4, N.Bb4, N.Db5, N.D5, N.G5, N.F5, N.Db5, N.Bb4, N.G4, N.Db5, N.D5, N.G5, N.Bb5, N.G5, N.F5, N.Db5]
+      }
+    ]
+  },
+
+  carnival_groove: {
+    variations: [
+      {
+        bpm: 128,
+        filterFreq: 2100,
+        bassOsc: 'triangle',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.35, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.10, sustain: 0.22, release: 0.06 },
+        bassNotes: [N.F2, N.F2, N._, N.F2, N.C3, N.C3, N._, N.C3, N.Bb2, N.Bb2, N._, N.Bb2, N.C3, N.D3, N.Eb3, N.E3],
+        leadNotes: [N.F5, N.A5, N.C6, N.A5, N.G5, N.E5, N.F5, N.C5, N.D5, N.F5, N.Bb5, N.A5, N.G5, N.F5, N.E5, N.C5]
+      },
+      {
+        bpm: 132,
+        filterFreq: 2250,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.32, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.11, sustain: 0.24, release: 0.08 },
+        bassNotes: [N.Bb2, N.Bb2, N._, N.Bb2, N.F3, N.F3, N._, N.F3, N.Eb3, N.Eb3, N._, N.Eb3, N.F3, N.G3, N.Ab3, N.A3],
+        leadNotes: [N.Bb4, N.D5, N.F5, N.D5, N.C5, N.A4, N.Bb4, N.F4, N.G4, N.Bb4, N.Eb5, N.D5, N.C5, N.Bb4, N.A4, N.F4]
+      }
+    ]
+  },
+
+  playful_bounce: {
+    variations: [
+      {
+        bpm: 126,
+        filterFreq: 2000,
+        bassOsc: 'triangle',
+        leadOsc: 'square',
+        bassEnvelope: { attack: 0.02, decay: 0.14, sustain: 0.3, release: 0.06 },
+        leadEnvelope: { attack: 0.01, decay: 0.09, sustain: 0.2, release: 0.06 },
+        bassNotes: [N.C3, N._, N.G2, N._, N.E3, N._, N.G2, N._, N.F2, N._, N.A2, N._, N.G2, N._, N.B2, N._],
+        leadNotes: [N.E5, N.G5, N.C6, N.G5, N.E5, N.C5, N.D5, N.B4, N.C5, N.E5, N.A5, N.F5, N.G5, N.E5, N.D5, N.C5]
+      },
+      {
+        bpm: 124,
+        filterFreq: 2100,
+        bassOsc: 'square',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.15, sustain: 0.32, release: 0.07 },
+        leadEnvelope: { attack: 0.02, decay: 0.10, sustain: 0.22, release: 0.07 },
+        bassNotes: [N.G2, N._, N.D3, N._, N.B2, N._, N.D3, N._, N.C3, N._, N.E3, N._, N.D3, N._, N.Fs3, N._],
+        leadNotes: [N.B4, N.D5, N.G5, N.D5, N.B4, N.G4, N.A4, N.Fs4, N.G4, N.B4, N.E5, N.C5, N.D5, N.B4, N.A4, N.G4]
+      }
+    ]
+  },
+
+  steampunk_clockwork: {
+    variations: [
+      {
+        bpm: 116,
+        filterFreq: 1750,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.02, decay: 0.18, sustain: 0.35, release: 0.08 },
+        leadEnvelope: { attack: 0.02, decay: 0.13, sustain: 0.22, release: 0.08 },
+        bassNotes: [N.D3, N.A2, N.D3, N.A2, N.F3, N.C3, N.F3, N.C3, N.G3, N.D3, N.G3, N.D3, N.A3, N.E3, N.A3, N._],
+        leadNotes: [N.D5, N.F5, N.A5, N.F5, N.C6, N.A5, N.F5, N.D5, N.Bb5, N.G5, N.D5, N.Bb4, N.A5, N.F5, N.E5, N.D5]
+      },
+      {
+        bpm: 120,
+        filterFreq: 1850,
+        bassOsc: 'square',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.02, decay: 0.16, sustain: 0.32, release: 0.07 },
+        leadEnvelope: { attack: 0.02, decay: 0.11, sustain: 0.2, release: 0.07 },
+        bassNotes: [N.A2, N.E3, N.A2, N.E3, N.C3, N.G3, N.C3, N.G3, N.D3, N.A3, N.D3, N.A3, N.E3, N.B3, N.E3, N._],
+        leadNotes: [N.A4, N.C5, N.E5, N.C5, N.G5, N.E5, N.C5, N.A4, N.F5, N.D5, N.A4, N.F4, N.E5, N.C5, N.B4, N.A4]
+      }
+    ]
   }
 };
 
 /**
  * Sintetizador Procedural de Áudio com Web Audio API
- * Produz efeitos sonoros ricos (SFX) e Trilhas Musicais Temáticas (BGM)
+ * Produz efeitos sonoros ricos (SFX) e Trilhas Musicais Temáticas Variadas (BGM)
  * sem depender de arquivos de áudio externos
  */
 class SoundEngine {
@@ -86,6 +600,9 @@ class SoundEngine {
     this.initialized = false;
     this.bgmPlaying = false;
     this.currentTheme = null;
+    this.currentSignature = null;
+    this.lastSignature = null;
+    this.recentSignatures = [];
     this.bgmTimer = null;
     this.bgmGainNode = null;
     this.stepIndex = 0;
@@ -129,15 +646,78 @@ class SoundEngine {
     return this.isMuted;
   }
 
-  // Identifica o gênero musical a partir do tema visual da fase
+  // Mapeia temas de fases para 23 estilos musicais ricos e temáticos
   getThemeGenre(theme) {
-    if (['forest', 'indigenous', 'autumn', 'spring_season', 'wood'].includes(theme)) return 'nature';
-    if (['desert', 'dune_storm', 'pyramids'].includes(theme)) return 'oriental';
-    if (['ocean', 'waterfall', 'rain', 'ship'].includes(theme)) return 'ocean';
-    if (['storm', 'volcano', 'obsidian', 'rock', 'iron'].includes(theme)) return 'storm_rock';
-    if (['arctic', 'winter', 'crystal', 'aurora'].includes(theme)) return 'crystal_ice';
-    if (['cyberpunk', 'computer', 'internet', 'arcade', 'geometry', 'magic_cube', 'steampunk'].includes(theme)) return 'cyber_arcade';
-    return 'cosmic'; // cosmos, singularity, solar, asteroid, quantum, olympus, sky, heroes, carnival, soccer, music, etc.
+    switch (theme) {
+      case 'forest':
+      case 'spring_season':
+      case 'wood':
+        return 'nature_pastoral';
+      case 'indigenous':
+      case 'autumn':
+        return 'nature_tribal';
+      case 'desert':
+      case 'pyramids':
+        return 'desert_oriental';
+      case 'dune_storm':
+      case 'ruins':
+        return 'desert_caravan';
+      case 'ocean':
+      case 'ship':
+        return 'ocean_ambient';
+      case 'waterfall':
+      case 'rain':
+        return 'water_rush';
+      case 'storm':
+      case 'rock':
+        return 'storm_thunder';
+      case 'volcano':
+      case 'obsidian':
+        return 'volcano_metal';
+      case 'crystal':
+      case 'aurora':
+        return 'crystal_dream';
+      case 'arctic':
+      case 'winter':
+        return 'winter_chill';
+      case 'sky':
+        return 'sky_floating';
+      case 'cyberpunk':
+      case 'metropolis':
+        return 'synthwave_neon';
+      case 'internet':
+      case 'computer':
+        return 'digital_data';
+      case 'arcade':
+      case 'geometry':
+        return 'chiptune_retro';
+      case 'magic_cube':
+        return 'puzzle_mystery';
+      case 'cosmos':
+      case 'singularity':
+        return 'cosmic_voyage';
+      case 'solar':
+      case 'asteroid':
+        return 'solar_pulsar';
+      case 'quantum':
+        return 'quantum_pulse';
+      case 'olympus':
+      case 'heroes':
+        return 'epic_heroic';
+      case 'dragon':
+        return 'dragon_danger';
+      case 'carnival':
+      case 'music':
+        return 'carnival_groove';
+      case 'candy':
+      case 'soccer':
+        return 'playful_bounce';
+      case 'steampunk':
+      case 'iron':
+        return 'steampunk_clockwork';
+      default:
+        return 'nature_pastoral';
+    }
   }
 
   // Toca uma nota sintetizada com envelope ADSR
@@ -172,25 +752,50 @@ class SoundEngine {
     }
   }
 
-  // Inicia a música de fundo dinâmica adaptada à fase atual
-  startStageBGM(stageTheme = 'forest') {
+  // Inicia a música de fundo dinâmica adaptada à fase atual com proteção anti-repetição
+  startStageBGM(stageTheme = 'forest', stageId = 1) {
     this.resume();
     if (!this.ctx) return;
 
     const genre = this.getThemeGenre(stageTheme);
-    if (this.currentTheme === genre && this.bgmPlaying) {
-      return; // Já está tocando a trilha desta fase
+    const themeConfig = BGM_THEMES[genre] || BGM_THEMES.nature_pastoral;
+    const variations = themeConfig.variations || [themeConfig];
+
+    // Calcula a variação baseada no stageId
+    const numId = typeof stageId === 'number' ? stageId : parseInt(stageId, 10) || 1;
+    let varIndex = (numId - 1) % variations.length;
+
+    let signature = `${genre}_v${varIndex}`;
+
+    // Mecanismo Anti-Repetição: se a assinatura resultante for a mesma que acabou de tocar,
+    // ou se está na lista das últimas tocadas recentemente, tenta a outra variação
+    if (this.recentSignatures.length > 0 && this.recentSignatures[this.recentSignatures.length - 1] === signature) {
+      varIndex = (varIndex + 1) % variations.length;
+      signature = `${genre}_v${varIndex}`;
     }
 
-    this.stopBGM(0.3); // Fade out suave do tema anterior
+    // Se já estiver tocando exatamente esta música/variação neste exato instante, mantém o fluxo
+    if (this.currentSignature === signature && this.bgmPlaying) {
+      return;
+    }
+
+    this.stopBGM(0.35); // Fade out suave do tema anterior
     this.currentTheme = genre;
+    this.currentSignature = signature;
+
+    // Registra histórico recente (mantém até 3 anteriores)
+    this.recentSignatures.push(signature);
+    if (this.recentSignatures.length > 4) {
+      this.recentSignatures.shift();
+    }
+
     this.bgmPlaying = true;
 
-    const config = BGM_THEMES[genre] || BGM_THEMES.nature;
+    const config = variations[varIndex] || variations[0];
     this.bgmGainNode = this.ctx.createGain();
     const targetVol = this.isMuted ? 0 : this.bgmVolume * 0.35;
     this.bgmGainNode.gain.setValueAtTime(0.001, this.ctx.currentTime);
-    this.bgmGainNode.gain.linearRampToValueAtTime(targetVol, this.ctx.currentTime + 0.6);
+    this.bgmGainNode.gain.linearRampToValueAtTime(targetVol, this.ctx.currentTime + 0.5);
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
@@ -202,7 +807,7 @@ class SoundEngine {
 
     // Sequenciador de compassos (8 notas por compasso = 16 passos)
     const stepDuration = 60 / config.bpm / 2;
-    this.nextNoteTime = this.ctx.currentTime + 0.1;
+    this.nextNoteTime = this.ctx.currentTime + 0.08;
     this.stepIndex = 0;
 
     this.bgmTimer = setInterval(() => {

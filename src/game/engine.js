@@ -339,7 +339,7 @@ export class GameEngine {
       this.botBall.vy = this.jumpForce; // Dispara largada da bola do Bot simultaneamente
     }
     soundEngine.playJump();
-    soundEngine.startStageBGM(this.stage.theme || 'forest');
+    soundEngine.startStageBGM(this.stage.theme || 'forest', this.stage.id || this.stage.number || 1);
     this.startTime = Date.now();
     this.lastTime = performance.now();
     this.loop();
