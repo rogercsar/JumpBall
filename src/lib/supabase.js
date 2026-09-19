@@ -83,8 +83,17 @@ export const localStore = {
           ...defaultProfile,
           ...parsed,
           gems: parsed.gems !== undefined ? parsed.gems : defaultProfile.gems,
-          unlocked_skins: Array.isArray(parsed.unlocked_skins) ? parsed.unlocked_skins : defaultProfile.unlocked_skins,
-          unlocked_trails: Array.isArray(parsed.unlocked_trails) ? parsed.unlocked_trails : defaultProfile.unlocked_trails
+          unlocked_skins: Array.isArray(parsed.unlocked_skins) && parsed.unlocked_skins.length > 0
+            ? Array.from(new Set([...defaultProfile.unlocked_skins, ...parsed.unlocked_skins]))
+            : defaultProfile.unlocked_skins,
+          unlocked_trails: Array.isArray(parsed.unlocked_trails) && parsed.unlocked_trails.length > 0
+            ? Array.from(new Set([...defaultProfile.unlocked_trails, ...parsed.unlocked_trails]))
+            : defaultProfile.unlocked_trails,
+          achievements: Array.isArray(parsed.achievements) ? parsed.achievements : defaultProfile.achievements,
+          daily_quests_progress: (parsed.daily_quests_progress && typeof parsed.daily_quests_progress === 'object')
+            ? parsed.daily_quests_progress
+            : defaultProfile.daily_quests_progress,
+          endless_high_score: Number(parsed.endless_high_score || 0)
         };
       } catch (e) { /* ignore */ }
     }
@@ -93,7 +102,23 @@ export const localStore = {
   },
 
   saveProfile(profile) {
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    if (!profile) return;
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      const existing = data ? JSON.parse(data) : {};
+      const merged = {
+        ...existing,
+        ...profile,
+        gems: profile.gems !== undefined ? profile.gems : (existing.gems ?? 100),
+        unlocked_skins: Array.from(new Set([...(existing.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']), ...(profile.unlocked_skins || [])])),
+        unlocked_trails: Array.from(new Set([...(existing.unlocked_trails || ['default']), ...(profile.unlocked_trails || [])])),
+        achievements: Array.from(new Set([...(existing.achievements || []), ...(profile.achievements || [])])),
+        daily_quests_progress: profile.daily_quests_progress || existing.daily_quests_progress || { date: '', progress: {}, claimed: {} }
+      };
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(merged));
+    } catch (e) {
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    }
   },
 
   getHistory() {

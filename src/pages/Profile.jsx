@@ -201,13 +201,18 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
     }
 
     if (buySkin) {
-      const ok = await buySkin(skinId, cost);
-      if (ok) {
-        await updateProfile({ ball_skin: skinId });
+      const res = await buySkin(skinId, cost);
+      if (res?.success) {
         showAlert({
           title: '🎉 Skin Desbloqueada!',
           message: `Você adquiriu "${chosenSkin.name}" por ${cost} gemas e ela já está equipada!`,
           variant: 'success'
+        });
+      } else {
+        showAlert({
+          title: 'Não foi possível adquirir',
+          message: res?.reason || 'Verifique seu saldo de gemas.',
+          variant: 'warning'
         });
       }
     }
@@ -281,7 +286,10 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
   };
 
   const checkAchievementProgress = (ach) => {
-    const isUnlocked = profile?.achievements?.includes(ach.id);
+    const isUnlocked = Boolean(
+      profile?.achievements?.includes(ach.id) || 
+      localStore.getProfile()?.achievements?.includes(ach.id)
+    );
     let current = 0;
     let target = 1;
 
@@ -305,7 +313,8 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
       current = Math.min(6, unlockedCount);
       target = 6;
     } else if (ach.id === 'portal_master') {
-      current = Math.min(30, profile?.total_jumps ? Math.floor(profile.total_jumps / 7) : 0);
+      const portalCount = (profile?.daily_quests_progress?.progress?.portals || 0) + (profile?.total_jumps ? Math.floor(profile.total_jumps / 7) : 0);
+      current = Math.min(30, portalCount);
       target = 30;
     } else if (ach.id === 'endless_1000') {
       current = Math.min(1000, profile?.endless_high_score || 0);
@@ -757,8 +766,12 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
               {getDailyQuests(new Date().toISOString().slice(0, 10)).map((quest) => {
-                const currentProgress = profile?.daily_quests_progress?.[quest.id] || 0;
-                const isClaimed = profile?.daily_quests_progress?.[`${quest.id}_claimed`] || false;
+                const progObj = profile?.daily_quests_progress?.progress || {};
+                const currentProgress = progObj[quest.id] ?? progObj[quest.metric] ?? profile?.daily_quests_progress?.[quest.id] ?? 0;
+                const isClaimed = Boolean(
+                  profile?.daily_quests_progress?.claimed?.[quest.id] || 
+                  profile?.daily_quests_progress?.[`${quest.id}_claimed`]
+                );
                 const isComplete = currentProgress >= quest.target;
                 const progressPct = Math.min(100, Math.round((currentProgress / quest.target) * 100));
 
@@ -824,7 +837,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {ACHIEVEMENTS.map((ach) => {
                 const { isUnlocked, current, target, canClaim } = checkAchievementProgress(ach);
-                const isClaimed = profile?.achievements?.includes(ach.id);
+                const isClaimed = isUnlocked || profile?.achievements?.includes(ach.id) || localStore.getProfile()?.achievements?.includes(ach.id);
                 const pct = Math.min(100, Math.round((current / target) * 100));
 
                 return (

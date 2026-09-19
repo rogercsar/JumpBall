@@ -206,12 +206,30 @@ export function AuthProvider({ children }) {
       const bestGamesPlayed = Math.max(data?.games_played || 0, local.games_played || 0);
 
       const merged = {
+        ...local,
         ...(data || {}),
         id: userId,
         stages_completed: resolvedStage,
         high_score: bestHighScore,
         total_jumps: bestTotalJumps,
-        games_played: bestGamesPlayed
+        games_played: bestGamesPlayed,
+        gems: (data?.gems !== undefined && data.gems !== null) ? Math.max(Number(data.gems), Number(local.gems || 0)) : (local.gems ?? 100),
+        ball_skin: data?.ball_skin || local.ball_skin || 'neon-cyan',
+        unlocked_skins: Array.from(new Set([
+          ...(local.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']),
+          ...(data?.unlocked_skins || [])
+        ])),
+        unlocked_trails: Array.from(new Set([
+          ...(local.unlocked_trails || ['default']),
+          ...(data?.unlocked_trails || [])
+        ])),
+        selected_trail: local.selected_trail || data?.selected_trail || 'default',
+        achievements: Array.from(new Set([
+          ...(local.achievements || []),
+          ...(data?.achievements || [])
+        ])),
+        daily_quests_progress: local.daily_quests_progress || data?.daily_quests_progress || { date: '', progress: {}, claimed: {} },
+        endless_high_score: Math.max(local.endless_high_score || 0, data?.endless_high_score || 0)
       };
 
       setProfile(merged);
@@ -311,15 +329,23 @@ export function AuthProvider({ children }) {
 
   // Cadastro de Novo Usuário
   const signup = async (email, password, username, fullName) => {
+    const localBase = localStore.getProfile();
     const createFallbackProfile = (userId) => ({
+      ...localBase,
       id: userId,
       username: username || email.split('@')[0],
       full_name: fullName || 'Novo Jogador',
       avatar_url: null,
-      ball_skin: 'neon-cyan',
-      high_score: 0,
-      total_jumps: 0,
-      stages_completed: 0,
+      ball_skin: localBase.ball_skin || 'neon-cyan',
+      high_score: localBase.high_score || 0,
+      total_jumps: localBase.total_jumps || 0,
+      stages_completed: localBase.stages_completed || 0,
+      gems: localBase.gems ?? 100,
+      unlocked_skins: localBase.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball'],
+      unlocked_trails: localBase.unlocked_trails || ['default'],
+      selected_trail: localBase.selected_trail || 'default',
+      achievements: localBase.achievements || [],
+      daily_quests_progress: localBase.daily_quests_progress || { date: '', progress: {}, claimed: {} },
       created_at: new Date().toISOString()
     });
 
@@ -415,15 +441,42 @@ export function AuthProvider({ children }) {
   // Atualizar Perfil (Nome, Skin da Bola, Fases Concluídas, etc.)
   const updateProfile = async (updates) => {
     const local = localStore.getProfile();
-    const current = profile ? { ...local, ...profile } : local;
-    const updated = { 
-      ...current, 
-      ...updates,
-      stages_completed: updates.stages_completed !== undefined ? updates.stages_completed : (current.stages_completed || 0),
-      high_score: Math.max(current.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
-      total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (current.total_jumps || 0),
-      games_played: (updates.games_played !== undefined) ? updates.games_played : (current.games_played || 0)
+    const base = {
+      ...(profile || {}),
+      ...local
     };
+
+    const mergedUnlockedSkins = Array.from(new Set([
+      ...(base.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']),
+      ...(updates.unlocked_skins || [])
+    ]));
+
+    const mergedUnlockedTrails = Array.from(new Set([
+      ...(base.unlocked_trails || ['default']),
+      ...(updates.unlocked_trails || [])
+    ]));
+
+    const mergedAchievements = Array.from(new Set([
+      ...(base.achievements || []),
+      ...(updates.achievements || [])
+    ]));
+
+    const updated = { 
+      ...base, 
+      ...updates,
+      gems: updates.gems !== undefined ? updates.gems : (base.gems ?? 100),
+      unlocked_skins: mergedUnlockedSkins,
+      unlocked_trails: mergedUnlockedTrails,
+      achievements: mergedAchievements,
+      selected_trail: updates.selected_trail || updates.selectedTrail || base.selected_trail || 'default',
+      ball_skin: updates.ball_skin || updates.ballSkin || base.ball_skin || 'neon-cyan',
+      daily_quests_progress: updates.daily_quests_progress || base.daily_quests_progress || { date: '', progress: {}, claimed: {} },
+      stages_completed: updates.stages_completed !== undefined ? updates.stages_completed : (base.stages_completed || 0),
+      high_score: Math.max(base.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
+      total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (base.total_jumps || 0),
+      games_played: (updates.games_played !== undefined) ? updates.games_played : (base.games_played || 0)
+    };
+
     setProfile(updated);
     localStore.saveProfile(updated);
 
@@ -443,8 +496,8 @@ export function AuthProvider({ children }) {
         const ALLOWED_DB_COLUMNS = ['username', 'full_name', 'avatar_url', 'ball_skin', 'high_score', 'total_jumps', 'stages_completed'];
         const dbUpdates = {};
         for (const col of ALLOWED_DB_COLUMNS) {
-          if (updates[col] !== undefined) {
-            dbUpdates[col] = updates[col];
+          if (updates[col] !== undefined || updated[col] !== undefined) {
+            dbUpdates[col] = updates[col] !== undefined ? updates[col] : updated[col];
           }
         }
         dbUpdates.updated_at = new Date().toISOString();
@@ -461,6 +514,7 @@ export function AuthProvider({ children }) {
         console.error('Erro ao sincronizar perfil com o Supabase:', err);
       }
     }
+    return updated;
   };
 
   // Resetar progresso das fases (zera stages_completed para 0, mantendo todo o histórico de partidas intacto)
@@ -505,7 +559,9 @@ export function AuthProvider({ children }) {
   // Adiciona gemas ao saldo do jogador
   const addGems = async (amount) => {
     if (!amount || amount <= 0) return;
-    const currentGems = profile?.gems ?? 100;
+    const local = localStore.getProfile();
+    const current = { ...(profile || {}), ...local };
+    const currentGems = current.gems ?? 100;
     const newGems = currentGems + amount;
     await updateProfile({ gems: newGems });
     return newGems;
@@ -513,42 +569,52 @@ export function AuthProvider({ children }) {
 
   // Compra uma skin com gemas
   const buySkin = async (skinId, price) => {
-    const currentGems = profile?.gems ?? 100;
+    const local = localStore.getProfile();
+    const current = { ...(profile || {}), ...local };
+    const currentGems = current.gems ?? 100;
     if (currentGems < price) {
       return { success: false, reason: 'Saldo insuficiente de gemas' };
     }
-    const currentUnlocked = profile?.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball'];
+    const currentUnlocked = Array.from(new Set([
+      ...(local.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']),
+      ...(profile?.unlocked_skins || [])
+    ]));
     if (currentUnlocked.includes(skinId)) {
       return { success: true, alreadyOwned: true };
     }
     const newGems = currentGems - price;
     const newUnlocked = [...currentUnlocked, skinId];
-    await updateProfile({
+    const updated = await updateProfile({
       gems: newGems,
       unlocked_skins: newUnlocked,
       ball_skin: skinId
     });
-    return { success: true, newGems, newUnlocked };
+    return { success: true, newGems, newUnlocked, profile: updated };
   };
 
   // Compra um rastro de partículas
   const buyTrail = async (trailId, price) => {
-    const currentGems = profile?.gems ?? 100;
+    const local = localStore.getProfile();
+    const current = { ...(profile || {}), ...local };
+    const currentGems = current.gems ?? 100;
     if (currentGems < price) {
       return { success: false, reason: 'Saldo insuficiente de gemas' };
     }
-    const currentTrails = profile?.unlocked_trails || ['default'];
+    const currentTrails = Array.from(new Set([
+      ...(local.unlocked_trails || ['default']),
+      ...(profile?.unlocked_trails || [])
+    ]));
     if (currentTrails.includes(trailId)) {
       return { success: true, alreadyOwned: true };
     }
     const newGems = currentGems - price;
     const newTrails = [...currentTrails, trailId];
-    await updateProfile({
+    const updated = await updateProfile({
       gems: newGems,
       unlocked_trails: newTrails,
       selected_trail: trailId
     });
-    return { success: true, newGems, newTrails };
+    return { success: true, newGems, newTrails, profile: updated };
   };
 
   // Equipa um rastro selecionado
@@ -556,30 +622,78 @@ export function AuthProvider({ children }) {
     await updateProfile({ selected_trail: trailId });
   };
 
+  // Registra progresso nas missões diárias a partir das partidas
+  const recordQuestProgress = async ({ jumps = 0, gems = 0, portals = 0 }) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const local = localStore.getProfile();
+    const current = { ...(profile || {}), ...local };
+    let questData = current.daily_quests_progress;
+    if (!questData || questData.date !== today) {
+      questData = { date: today, progress: {}, claimed: {} };
+    }
+    const currentProg = questData.progress || {};
+    const jumpsKey = `quest_jumps_${today}`;
+    const gemsKey = `quest_gems_${today}`;
+    const portalsKey = `quest_portals_${today}`;
+
+    const newProg = {
+      ...currentProg,
+      [jumpsKey]: (currentProg[jumpsKey] || 0) + jumps,
+      [gemsKey]: (currentProg[gemsKey] || 0) + gems,
+      [portalsKey]: (currentProg[portalsKey] || 0) + portals,
+      jumps: (currentProg.jumps || 0) + jumps,
+      gems: (currentProg.gems || 0) + gems,
+      portals: (currentProg.portals || 0) + portals
+    };
+
+    const newQuestData = {
+      ...questData,
+      date: today,
+      progress: newProg,
+      claimed: questData.claimed || {}
+    };
+
+    await updateProfile({ daily_quests_progress: newQuestData });
+    return newQuestData;
+  };
+
   // Resgata recompensa de missão diária
   const claimDailyQuest = async (questId, rewardGems) => {
     const today = new Date().toISOString().slice(0, 10);
-    const questData = profile?.daily_quests_progress || { date: today, progress: {}, claimed: {} };
-    if (questData.claimed && questData.claimed[questId]) {
+    const local = localStore.getProfile();
+    const current = { ...(profile || {}), ...local };
+    const questData = current.daily_quests_progress || { date: today, progress: {}, claimed: {} };
+    if (questData.claimed?.[questId] || questData[`${questId}_claimed`]) {
       return { success: false, reason: 'Missão já resgatada hoje' };
     }
-    const newClaimed = { ...(questData.claimed || {}), [questId]: true };
-    const currentGems = profile?.gems ?? 100;
+    const newClaimed = { 
+      ...(questData.claimed || {}), 
+      [questId]: true 
+    };
+    const currentGems = current.gems ?? 100;
     const newGems = currentGems + (rewardGems || 100);
+    const newQuestData = {
+      ...questData,
+      date: today,
+      claimed: newClaimed,
+      [`${questId}_claimed`]: true
+    };
     await updateProfile({
       gems: newGems,
-      daily_quests_progress: { ...questData, date: today, claimed: newClaimed }
+      daily_quests_progress: newQuestData
     });
     return { success: true, newGems };
   };
 
   // Desbloqueia uma conquista / medalha permanente
   const unlockAchievement = async (achievementId, rewardGems = 0) => {
-    const currentAch = profile?.achievements || [];
+    const local = localStore.getProfile();
+    const current = { ...(profile || {}), ...local };
+    const currentAch = Array.from(new Set([...(local.achievements || []), ...(profile?.achievements || [])]));
     if (currentAch.includes(achievementId)) return false;
     const newAch = [...currentAch, achievementId];
-    const currentGems = profile?.gems ?? 100;
-    const newGems = currentGems + rewardGems;
+    const currentGems = current.gems ?? 100;
+    const newGems = currentGems + (rewardGems || 0);
     await updateProfile({
       achievements: newAch,
       gems: newGems
@@ -672,6 +786,7 @@ export function AuthProvider({ children }) {
         buySkin,
         buyTrail,
         setSelectedTrail,
+        recordQuestProgress,
         claimDailyQuest,
         unlockAchievement,
         updateEndlessHighScore,
@@ -705,6 +820,7 @@ export function useAuth() {
       buySkin: async () => ({ success: false }),
       buyTrail: async () => ({ success: false }),
       setSelectedTrail: async () => {},
+      recordQuestProgress: async () => ({}),
       claimDailyQuest: async () => ({ success: false }),
       unlockAchievement: async () => false,
       updateEndlessHighScore: async () => false,

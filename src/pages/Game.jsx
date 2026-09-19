@@ -60,7 +60,7 @@ export const ENDLESS_STAGE = {
 };
 
 export function Game({ onNavigate }) {
-  const { profile, user, updateProfile, addGems, updateEndlessHighScore } = useAuth();
+  const { profile, user, updateProfile, addGems, updateEndlessHighScore, recordQuestProgress } = useAuth();
   const { settings } = useSettings();
   const { showConfirm, showAlert, isDialogOpen } = useDialog();
 
@@ -302,6 +302,13 @@ export function Game({ onNavigate }) {
 
     // Crédito das gemas coletadas na partida
     const gemsEarned = Math.round(result.gems || 0);
+    const portalsVal = Math.round(result.portals || 0);
+
+    // Registra progresso nas missões diárias
+    if (recordQuestProgress) {
+      recordQuestProgress({ jumps: jumpsVal, gems: gemsEarned, portals: portalsVal });
+    }
+
     if (gemsEarned > 0 && addGems) {
       addGems(gemsEarned);
     }

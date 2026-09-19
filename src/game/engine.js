@@ -156,6 +156,7 @@ export class GameEngine {
     this.score = 0;
     this.jumpsCount = 0;
     this.gemsCollected = 0;
+    this.portalsCrossed = 0;
     this.startTime = Date.now();
 
     // Controles e Sensores (Giroscópio desabilitado por solicitação)
@@ -306,6 +307,7 @@ export class GameEngine {
         if (entity.x < -r) {
           entity.x = this.width - wallW - r;
           if (isPlayer) {
+            this.portalsCrossed = (this.portalsCrossed || 0) + 1;
             soundEngine.playPortalWarp();
             this.triggerHaptic(18);
             this.particles.emitPortalWarpBurst(wallW, entity.y, this.wallTheme.portalColor);
@@ -336,6 +338,7 @@ export class GameEngine {
         if (entity.x > this.width + r) {
           entity.x = wallW + r;
           if (isPlayer) {
+            this.portalsCrossed = (this.portalsCrossed || 0) + 1;
             soundEngine.playPortalWarp();
             this.triggerHaptic(18);
             this.particles.emitPortalWarpBurst(this.width - wallW, entity.y, this.wallTheme.portalColor);
@@ -1936,6 +1939,7 @@ export class GameEngine {
       duration,
       jumps: this.jumpsCount,
       gems: this.gemsCollected,
+      portals: this.portalsCrossed || 0,
       status: status,
       isEndless: this.isEndless,
       stage: this.stage,
