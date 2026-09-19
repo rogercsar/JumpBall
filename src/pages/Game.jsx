@@ -577,35 +577,36 @@ export function Game({ onNavigate }) {
 
           {/* SELETOR DE MODO: INDIVIDUAL vs CORRIDA CONTRA A MÁQUINA */}
           <div className="glass-panel p-2.5 sm:p-3 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xl">
-            <div className="flex p-1 bg-slate-900/90 rounded-xl border border-slate-800 w-full md:w-auto">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-900/90 rounded-xl border border-slate-800 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setGameMode('solo')}
-                className={`flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all ${gameMode === 'solo'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-[11px] text-center transition-all truncate ${gameMode === 'solo'
                   ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-slate-950 shadow-md shadow-cyan-500/20 font-black'
                   : 'text-slate-400 hover:text-white'
                   }`}
               >
-                <span>Modo Solo (Individual)</span>
+                <span>Modo Solo</span>
               </button>
               <button
                 type="button"
                 onClick={() => setGameMode('race_ai')}
-                className={`flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all ${gameMode === 'race_ai'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-[11px] text-center transition-all truncate ${gameMode === 'race_ai'
                   ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-md shadow-purple-500/30 font-black'
                   : 'text-slate-400 hover:text-white'
                   }`}
               >
-                <Bot className="w-4 h-4" />
-                <span>Corrida vs Máquina</span>
+                <span>Vs Máquina</span>
               </button>
               <button
                 type="button"
                 onClick={() => setIsPvPModalOpen(true)}
-                className="flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-md shadow-rose-500/25 active:scale-95 cursor-pointer"
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-[11px] text-center transition-all truncate active:scale-95 cursor-pointer ${gameMode === 'race_pvp'
+                  ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md shadow-rose-500/25 font-black'
+                  : 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-white border border-rose-500/20'
+                  }`}
               >
-                <Swords className="w-4 h-4" />
-                <span>Duelo 1v1 (PvP) 🔥</span>
+                <span>Duelo 1v1</span>
               </button>
             </div>
 

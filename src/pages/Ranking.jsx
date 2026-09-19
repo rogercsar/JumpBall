@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Trophy, 
-  Medal, 
-  Crown, 
-  Flame, 
-  RefreshCw, 
-  Gamepad2, 
-  Zap, 
-  CheckCircle2, 
-  User, 
+import {
+  Trophy,
+  Medal,
+  Crown,
+  Flame,
+  RefreshCw,
+  Gamepad2,
+  Zap,
+  CheckCircle2,
+  User,
   Sparkles,
   ArrowRight,
   TrendingUp,
@@ -124,7 +124,7 @@ export function Ranking({ onNavigate }) {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-wider shadow-sm">
               <Crown className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
-              Hall da Fama • Top 10 Global
+              Top 10 Global
             </div>
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white flex items-center gap-3">
               Ranking dos Pilotos
@@ -205,11 +205,10 @@ export function Ranking({ onNavigate }) {
           <button
             type="button"
             onClick={() => setFilter('high_score')}
-            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-              filter === 'high_score'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${filter === 'high_score'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-white'
+              }`}
           >
             <Trophy className="w-3.5 h-3.5" />
             <span>Maiores Pontuações</span>
@@ -218,11 +217,10 @@ export function Ranking({ onNavigate }) {
           <button
             type="button"
             onClick={() => setFilter('stages_completed')}
-            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-              filter === 'stages_completed'
-                ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-slate-950 font-black shadow-md shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${filter === 'stages_completed'
+              ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-slate-950 font-black shadow-md shadow-cyan-500/20'
+              : 'text-slate-400 hover:text-white'
+              }`}
           >
             <Layers className="w-3.5 h-3.5" />
             <span>Mais Fases ({STAGES.length})</span>
@@ -243,7 +241,7 @@ export function Ranking({ onNavigate }) {
           {leaderboard[1] && (
             <div className="flex flex-col items-center animate-fade-in order-1">
               <div className="relative mb-2 flex flex-col items-center">
-                <div 
+                <div
                   className="w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-lg border-2 border-slate-300 flex items-center justify-center relative"
                   style={{
                     background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${getSkinDetails(leaderboard[1].ball_skin).primary} 60%, ${getSkinDetails(leaderboard[1].ball_skin).trail} 100%)`,
@@ -273,7 +271,7 @@ export function Ranking({ onNavigate }) {
             <div className="flex flex-col items-center animate-fade-in order-2">
               <div className="relative mb-2 flex flex-col items-center">
                 <Crown className="w-6 h-6 text-amber-400 animate-bounce mb-1 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                <div 
+                <div
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-2xl border-4 border-amber-400 flex items-center justify-center relative"
                   style={{
                     background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${getSkinDetails(leaderboard[0].ball_skin).primary} 60%, ${getSkinDetails(leaderboard[0].ball_skin).trail} 100%)`,
@@ -306,7 +304,7 @@ export function Ranking({ onNavigate }) {
           {leaderboard[2] && (
             <div className="flex flex-col items-center animate-fade-in order-3">
               <div className="relative mb-2 flex flex-col items-center">
-                <div 
+                <div
                   className="w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-lg border-2 border-amber-700 flex items-center justify-center relative"
                   style={{
                     background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${getSkinDetails(leaderboard[2].ball_skin).primary} 60%, ${getSkinDetails(leaderboard[2].ball_skin).trail} 100%)`,
@@ -368,13 +366,12 @@ export function Ranking({ onNavigate }) {
               return (
                 <div
                   key={item.id || index}
-                  className={`px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between gap-3 transition-all ${
-                    isCurrentUser 
-                      ? 'bg-cyan-950/25 border-l-4 border-l-cyan-400' 
-                      : position === 1 
-                        ? 'bg-amber-950/15' 
-                        : 'hover:bg-slate-900/40'
-                  }`}
+                  className={`px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between gap-3 transition-all ${isCurrentUser
+                    ? 'bg-cyan-950/25 border-l-4 border-l-cyan-400'
+                    : position === 1
+                      ? 'bg-amber-950/15'
+                      : 'hover:bg-slate-900/40'
+                    }`}
                 >
                   {/* Posição + Avatar / Skin + Nome */}
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -414,9 +411,8 @@ export function Ranking({ onNavigate }) {
                     {/* Identificação do Jogador */}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`font-bold text-xs sm:text-sm truncate ${
-                          isCurrentUser ? 'text-cyan-300 font-black' : 'text-slate-100'
-                        }`}>
+                        <span className={`font-bold text-xs sm:text-sm truncate ${isCurrentUser ? 'text-cyan-300 font-black' : 'text-slate-100'
+                          }`}>
                           {item.username || 'Piloto'}
                         </span>
                         {isCurrentUser && (
@@ -459,17 +455,16 @@ export function Ranking({ onNavigate }) {
                       </button>
                     )}
                     <div className="text-right">
-                      <div className={`text-sm sm:text-base font-black font-mono tracking-tight ${
-                        position === 1 
-                          ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.4)]' 
-                          : position === 2 
-                            ? 'text-slate-200' 
-                            : position === 3 
-                              ? 'text-amber-500' 
-                              : isCurrentUser 
-                                ? 'text-cyan-300 font-extrabold' 
-                                : 'text-slate-300'
-                      }`}>
+                      <div className={`text-sm sm:text-base font-black font-mono tracking-tight ${position === 1
+                        ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.4)]'
+                        : position === 2
+                          ? 'text-slate-200'
+                          : position === 3
+                            ? 'text-amber-500'
+                            : isCurrentUser
+                              ? 'text-cyan-300 font-extrabold'
+                              : 'text-slate-300'
+                        }`}>
                         {(item.high_score || 0).toLocaleString()}
                         <span className="text-[10px] text-slate-400 font-bold ml-1">pts</span>
                       </div>
