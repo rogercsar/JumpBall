@@ -78,6 +78,7 @@ export function Game({ onNavigate }) {
   });
 
   const handlePointerDown = (e) => {
+    soundEngine.unlock();
     if (gameState !== 'playing') return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -317,6 +318,7 @@ export function Game({ onNavigate }) {
 
   // Prepara a fase no modo 'ready' aguardando o clique em DAR PLAY
   const startGame = useCallback((stage, modeOverride = null, diffOverride = null) => {
+    soundEngine.unlock();
     const activeMode = modeOverride || gameMode;
     const activeDiff = diffOverride || aiDifficulty;
 
@@ -389,6 +391,7 @@ export function Game({ onNavigate }) {
 
   // Inicia a física e o movimento apenas quando o jogador clica em DAR PLAY
   const handleStartPlay = () => {
+    soundEngine.unlock();
     if (engineRef.current) {
       setGameState('playing');
       engineRef.current.start();

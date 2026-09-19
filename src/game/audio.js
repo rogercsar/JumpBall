@@ -621,11 +621,28 @@ class SoundEngine {
     }
   }
 
-  resume() {
+  unlock() {
     this.init();
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+    if (!this.ctx) return;
+
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
     }
+
+    // Toca um buffer silencioso de 1 amostra para desbloquear a saída de áudio no iOS Safari / WebKit
+    try {
+      const buffer = this.ctx.createBuffer(1, 1, 22050);
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.ctx.destination);
+      source.start(0);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  resume() {
+    this.unlock();
   }
 
   setVolumes(sfxVol, bgmVol) {
@@ -720,33 +737,49 @@ class SoundEngine {
     }
   }
 
-  // Toca uma nota sintetizada com envelope ADSR
-  playNote(freq, type, duration, envelope, targetGainNode, time) {
+  // Toca uma nota sintetizada com envelope ADSR garantidamente monotônico (evita quebra do WebKit no iOS)
+  playNote(freq, type, duration, envelope = {}, targetGainNode, time) {
     if (!freq || freq <= 0 || !this.ctx) return;
     try {
+      const now = this.ctx.currentTime;
+      const startTime = Math.max(now + 0.002, time);
+      const totalDur = Math.max(0.05, duration);
+
       const osc = this.ctx.createOscillator();
       const noteGain = this.ctx.createGain();
 
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, time);
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
 
-      const attack = envelope.attack || 0.03;
-      const decay = envelope.decay || 0.15;
-      const sustain = envelope.sustain || 0.3;
-      const release = envelope.release || 0.1;
+      // Parâmetros ADSR balanceados e estritamente monotônicos para o WebKit
+      const rawAttack = Math.max(0.005, envelope.attack || 0.02);
+      const rawRelease = Math.max(0.01, envelope.release || 0.04);
+      const attack = Math.min(rawAttack, totalDur * 0.25);
+      const release = Math.min(rawRelease, totalDur * 0.35);
+      const maxDecay = Math.max(0.005, totalDur - attack - release);
+      const decay = Math.min(Math.max(0.005, envelope.decay || 0.05), maxDecay * 0.6);
+      const sustainLevel = Math.max(0.01, Math.min(1.0, envelope.sustain ?? 0.3));
       const peakGain = 0.22;
 
-      noteGain.gain.setValueAtTime(0.0001, time);
-      noteGain.gain.linearRampToValueAtTime(peakGain, time + attack);
-      noteGain.gain.linearRampToValueAtTime(peakGain * sustain, time + attack + decay);
-      noteGain.gain.setValueAtTime(peakGain * sustain, time + duration - release);
-      noteGain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+      const t0 = startTime;
+      const tAttack = t0 + attack;
+      const tDecay = tAttack + decay;
+      const tEnd = t0 + totalDur;
+      const tSustainEnd = Math.max(tDecay + 0.002, tEnd - release);
+
+      noteGain.gain.setValueAtTime(0.0001, t0);
+      noteGain.gain.linearRampToValueAtTime(peakGain, tAttack);
+      noteGain.gain.linearRampToValueAtTime(peakGain * sustainLevel, tDecay);
+      if (tSustainEnd > tDecay) {
+        noteGain.gain.setValueAtTime(peakGain * sustainLevel, tSustainEnd);
+      }
+      noteGain.gain.linearRampToValueAtTime(0.0001, tEnd);
 
       osc.connect(noteGain);
       noteGain.connect(targetGainNode);
 
-      osc.start(time);
-      osc.stop(time + duration + 0.02);
+      osc.start(t0);
+      osc.stop(tEnd + 0.02);
     } catch (e) {
       /* ignore audio context schedule errors */
     }
@@ -812,6 +845,17 @@ class SoundEngine {
 
     this.bgmTimer = setInterval(() => {
       if (!this.bgmPlaying || !this.ctx) return;
+
+      // Se o contexto estiver suspenso no iOS Safari, tenta despausar
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+
+      // Se o tempo avançou após desbloqueio no iOS, realinha para evitar acumular notas passadas
+      if (this.nextNoteTime < this.ctx.currentTime) {
+        this.nextNoteTime = this.ctx.currentTime + 0.02;
+      }
+
       while (this.nextNoteTime < this.ctx.currentTime + 0.25) {
         const bassNote = config.bassNotes[this.stepIndex];
         const leadNote = config.leadNotes[this.stepIndex];
@@ -1279,3 +1323,17 @@ class SoundEngine {
 }
 
 export const soundEngine = new SoundEngine();
+
+// Auto-desbloqueio do Web Audio API no primeiro gesto do usuário (fundamental no iOS Safari / WebKit)
+if (typeof window !== 'undefined') {
+  const unlockEvents = ['touchstart', 'touchend', 'mousedown', 'pointerdown', 'keydown'];
+  const handleUserGesture = () => {
+    soundEngine.unlock();
+    if (soundEngine.ctx && soundEngine.ctx.state === 'running') {
+      unlockEvents.forEach((evt) => window.removeEventListener(evt, handleUserGesture, true));
+    }
+  };
+  unlockEvents.forEach((evt) => {
+    window.addEventListener(evt, handleUserGesture, { capture: true, passive: true });
+  });
+}
