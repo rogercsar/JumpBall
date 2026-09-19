@@ -26,15 +26,22 @@ export class GameEngine {
     this.lastBoostReported = 100;
     this.hasPendingBoostUpdate = true;
 
-    // Dimensões lógicas
+    // Dimensões lógicas adaptativas ao espaço disponível na tela
     this.width = 440;
     this.height = 720;
+    this.initCanvas();
 
     this.particles = new ParticleSystem();
     this.background = new BackgroundRenderer(this.width, this.height, this.stage);
     this.running = false;
     this.paused = false;
     this.animationId = null;
+
+    this.handleResize = () => {
+      this.initCanvas();
+      this.render();
+    };
+    window.addEventListener('resize', this.handleResize);
 
     // Sistema de 3 Vidas, Marcadores de Morte e Escudo de Respawn
     this.maxLives = 3;
@@ -113,13 +120,13 @@ export class GameEngine {
     this.thrustSoundTimer = 0;
     this.highestPlatformY = this.height;
 
-    // Configuração de Física da Fase
+    // Configuração de Física da Fase - Salto Normal Reduzido para maior controle e precisão
     this.gravity = stage.gravity || 0.34;
-    this.jumpForce = stage.jumpForce || -11.8;
+    const baseJump = stage.jumpForce || -11.8;
+    this.jumpForce = baseJump * 0.76; // Reduz o salto normal em ~24% (-11.5 vira ~ -8.74)
     this.wind = stage.wind || 0;
     this.friction = stage.friction || 0.94;
 
-    this.initCanvas();
     this.initInitialPlatforms();
     this.render();
   }
@@ -140,14 +147,28 @@ export class GameEngine {
     // Otimização Mobile: limita DPR a no máximo 1.6x no mobile para não sobrecarregar GPU móvel
     const dpr = this.isMobile ? Math.min(rawDpr, 1.6) : Math.min(rawDpr, 2.0);
     this.dpr = dpr;
+
+    // Adaptação dinâmica ao tamanho e proporção real do container para ocupar 100% da tela disponível
+    const parent = this.canvas.parentElement;
+    if (parent) {
+      const rect = parent.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        const aspect = rect.height / rect.width;
+        // Adapta a altura virtual para cobrir toda a extensão vertical do container
+        this.height = Math.round(Math.max(680, Math.min(960, this.width * aspect)));
+        if (this.background) {
+          this.background.height = this.height;
+        }
+      }
+    }
+
     this.canvas.width = Math.round(this.width * dpr);
     this.canvas.height = Math.round(this.height * dpr);
-    this.canvas.style.aspectRatio = `${this.width} / ${this.height}`;
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
     this.canvas.style.maxWidth = '100%';
     this.canvas.style.maxHeight = '100%';
-    this.canvas.style.width = 'auto';
-    this.canvas.style.height = 'auto';
-    this.canvas.style.objectFit = 'contain';
+    this.canvas.style.display = 'block';
 
     this.ctx.scale(dpr, dpr);
     this.ctx.imageSmoothingEnabled = true;
@@ -176,10 +197,10 @@ export class GameEngine {
       hasSpikes: false
     });
 
-    let currentY = this.height - 130;
+    let currentY = this.height - 120;
     while (currentY > -800) {
       this.generatePlatformAt(currentY);
-      currentY -= Math.floor(Math.random() * 45 + 65);
+      currentY -= Math.floor(Math.random() * 28 + 52);
     }
     this.highestPlatformY = currentY;
   }
@@ -281,6 +302,11 @@ export class GameEngine {
   // Acionado pelo botão de Super Salto na tela ou Teclas (Espaço, W, Seta Cima)
   triggerGestureJump() {
     if (!this.running || this.paused) return;
+    const now = performance.now();
+    if (this.lastManualJumpTime && (now - this.lastManualJumpTime < 380)) {
+      return; // Cooldown para evitar disparos múltiplos acidentais no mesmo segundo
+    }
+    this.lastManualJumpTime = now;
     this.gestureSuperJumpTriggered = true;
   }
 
@@ -332,6 +358,9 @@ export class GameEngine {
     this.running = false;
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
+    }
+    if (this.handleResize) {
+      window.removeEventListener('resize', this.handleResize);
     }
   }
 
@@ -440,20 +469,20 @@ export class GameEngine {
       this.particles.emitTrail(this.ball.x, this.ball.y, this.skin.trail);
     }
 
-    // 2.5 Super Pulo / Impulso Proporcional Disparado por Botão Touch, Toque Duplo, Deslizar ⬆ ou Teclado (Espaço/W/Seta Cima)
+    // 2.5 Impulso Proporcional com Força e Carga Reduzidas Conforme Solicitado
     if (this.gestureSuperJumpTriggered) {
       this.gestureSuperJumpTriggered = false;
       const chargeRatio = Math.max(0, Math.min(1, this.boostCharge / this.maxBoostCharge));
 
-      if (chargeRatio > 0.08) {
-        // Pulo com impulso proporcional à carga disponível (1.0x até 1.70x da força de pulo)
-        const boostMultiplier = 1.0 + (chargeRatio * 0.70);
+      if (chargeRatio > 0.12) {
+        // Impulso moderado e proporcional (1.0x até 1.28x da força reduzida de pulo)
+        const boostMultiplier = 1.0 + (chargeRatio * 0.28);
         this.ball.vy = this.jumpForce * boostMultiplier;
-        this.ball.stretchX = Math.max(0.6, 1 - (chargeRatio * 0.35));
-        this.ball.stretchY = Math.min(1.5, 1 + (chargeRatio * 0.45));
+        this.ball.stretchX = Math.max(0.75, 1 - (chargeRatio * 0.2));
+        this.ball.stretchY = Math.min(1.3, 1 + (chargeRatio * 0.25));
         this.jumpsCount++;
 
-        if (chargeRatio >= 0.5) {
+        if (chargeRatio >= 0.6) {
           soundEngine.playSuperJump();
           this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.glow);
         } else {
@@ -465,10 +494,10 @@ export class GameEngine {
         this.boostCharge = 0;
         this.hasPendingBoostUpdate = true;
       } else {
-        // Barra vazia ou quase vazia: executa pulo normal (1.0x) conforme regra do jogo
+        // Barra vazia ou quase vazia: executa pulo normal (1.0x da força reduzida)
         this.ball.vy = this.jumpForce;
-        this.ball.stretchX = 0.85;
-        this.ball.stretchY = 1.15;
+        this.ball.stretchX = 0.9;
+        this.ball.stretchY = 1.1;
         this.jumpsCount++;
         soundEngine.playJump();
         this.particles.emitJumpBurst(this.ball.x, this.ball.y + this.ball.radius, '#94a3b8');
@@ -509,9 +538,9 @@ export class GameEngine {
           this.jumpsCount++;
 
           if (p.type === 'spring') {
-            this.ball.vy = this.jumpForce * 1.65;
-            this.ball.stretchX = 0.6;
-            this.ball.stretchY = 1.6;
+            this.ball.vy = this.jumpForce * 1.45;
+            this.ball.stretchX = 0.65;
+            this.ball.stretchY = 1.45;
             soundEngine.playSpring();
             this.particles.emitSuperJumpBurst(this.ball.x, p.y, '#facc15');
           } else if (p.type === 'fragile') {
@@ -653,7 +682,7 @@ export class GameEngine {
 
     // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera
     while (this.highestPlatformY > this.cameraY - 400) {
-      this.highestPlatformY -= Math.floor(Math.random() * 45 + 65);
+      this.highestPlatformY -= Math.floor(Math.random() * 28 + 52);
       this.generatePlatformAt(this.highestPlatformY);
     }
 

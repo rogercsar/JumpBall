@@ -93,6 +93,7 @@ export function Game({ onNavigate }) {
     touchStateRef.current.activePointerId = e.pointerId;
     touchStateRef.current.startX = clientX;
     touchStateRef.current.startY = clientY;
+    touchStateRef.current.swipeTriggered = false;
 
     // Metade esquerda -> move esquerda (-1); Metade direita -> move direita (1)
     const relX = (clientX - rect.left) / rect.width;
@@ -106,11 +107,11 @@ export function Game({ onNavigate }) {
     if (gameState !== 'playing') return;
     if (touchStateRef.current.activePointerId !== e.pointerId) return;
 
-    // Deslizar para cima (Swipe Up) dispara Super Salto
+    // Deslizar para cima (Swipe Up) dispara Impulso uma única vez por gesto
     const deltaY = touchStateRef.current.startY - e.clientY;
-    if (deltaY > 45) {
+    if (!touchStateRef.current.swipeTriggered && deltaY > 50) {
+      touchStateRef.current.swipeTriggered = true;
       engineRef.current?.triggerGestureJump();
-      touchStateRef.current.startY = e.clientY;
     }
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -132,6 +133,7 @@ export function Game({ onNavigate }) {
     if (touchStateRef.current.activePointerId === e.pointerId) {
       touchStateRef.current.activePointerId = null;
       touchStateRef.current.activeSide = null;
+      touchStateRef.current.swipeTriggered = false;
       setActiveTouchSide(null);
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -469,7 +471,7 @@ export function Game({ onNavigate }) {
     <div 
       className={gameState === 'menu' 
         ? "w-full h-full min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain" 
-        : "w-full flex-1 flex flex-col items-center justify-center p-1 sm:p-2 h-full max-h-full overflow-hidden select-none touch-none overscroll-none"
+        : "w-full flex-1 flex flex-col items-center justify-start p-0.5 sm:p-1.5 h-full max-h-full overflow-hidden select-none touch-none overscroll-none"
       }
       style={gameState === 'menu' ? { WebkitOverflowScrolling: 'touch' } : undefined}
     >
@@ -585,10 +587,10 @@ export function Game({ onNavigate }) {
 
       {/* 2. TELA DO JOGO (CANVAS + HUD + CONTROLES) */}
       {gameState !== 'menu' && (
-        <div className="w-full max-w-[520px] flex flex-col items-center justify-center h-full max-h-full py-0.5">
+        <div className="w-full max-w-[560px] md:max-w-[640px] flex flex-col items-center justify-start h-full max-h-full py-0.5">
           {/* Top Bar / HUD do Jogo */}
           <div className="w-full mb-1 flex items-center justify-between glass-panel px-3 py-1.5 rounded-2xl border border-slate-800 shrink-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={handleExitGame}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -612,6 +614,45 @@ export function Game({ onNavigate }) {
                     }`}
                   />
                 ))}
+              </div>
+
+              {/* Mini Medidor de Impulso ao lado das Vidas */}
+              <div 
+                className={`flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-xl border transition-all duration-200 shadow-inner ${
+                  boostEnergy >= 95 
+                    ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_8px_rgba(251,191,36,0.25)]' 
+                    : 'border-slate-800'
+                }`}
+                title={`Carga de Impulso: ${boostEnergy}%`}
+              >
+                <Zap className={`w-3.5 h-3.5 shrink-0 transition-all ${
+                  boostEnergy >= 95 
+                    ? 'text-amber-400 fill-amber-400 animate-pulse drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]' 
+                    : boostEnergy > 20 
+                      ? 'text-cyan-400' 
+                      : 'text-slate-500'
+                }`} />
+                <div className="w-10 sm:w-14 h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800/80 p-[0.5px]">
+                  <div
+                    className={`h-full rounded-full transition-all duration-150 ${
+                      boostEnergy >= 95
+                        ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 shadow-[0_0_8px_rgba(244,63,94,0.7)] animate-pulse'
+                        : boostEnergy > 25
+                          ? 'bg-gradient-to-r from-cyan-500 to-sky-400'
+                          : 'bg-gradient-to-r from-slate-600 to-slate-500'
+                    }`}
+                    style={{ width: `${boostEnergy}%` }}
+                  />
+                </div>
+                <span className={`text-[10px] font-mono font-bold leading-none shrink-0 ${
+                  boostEnergy >= 95 
+                    ? 'text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]' 
+                    : boostEnergy > 20 
+                      ? 'text-cyan-300' 
+                      : 'text-slate-500'
+                }`}>
+                  {boostEnergy}%
+                </span>
               </div>
             </div>
 
@@ -689,51 +730,18 @@ export function Game({ onNavigate }) {
             </div>
           </div>
 
-          {/* Barra de Progresso de Carga do Super Impulso */}
-          <div className="w-full mb-1.5 px-1 shrink-0">
-            <div className="flex items-center justify-between text-[10px] font-bold mb-0.5">
-              <div className="flex items-center gap-1">
-                <Zap className={`w-3 h-3 ${boostEnergy >= 95 ? 'text-amber-400 animate-pulse fill-amber-400' : 'text-cyan-400'}`} />
-                <span className={boostEnergy >= 95 ? 'text-amber-300 font-black tracking-wide' : 'text-slate-300'}>
-                  {boostEnergy >= 95 ? 'SUPER IMPULSO PRONTO!' : 'CARGA DE IMPULSO'}
-                </span>
-              </div>
-              <span className={`font-mono text-[11px] ${
-                boostEnergy >= 95 
-                  ? 'text-amber-400 font-black drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
-                  : boostEnergy > 20 
-                    ? 'text-cyan-300 font-semibold' 
-                    : 'text-slate-500 font-semibold'
-              }`}>
-                {boostEnergy}%
-              </span>
-            </div>
-            <div className="w-full h-2 bg-slate-950/80 rounded-full overflow-hidden border border-slate-800/80 p-[1px] shadow-inner">
-              <div
-                className={`h-full rounded-full transition-all duration-150 ${
-                  boostEnergy >= 95
-                    ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 shadow-[0_0_12px_rgba(244,63,94,0.7)] animate-pulse'
-                    : boostEnergy > 25
-                      ? 'bg-gradient-to-r from-cyan-500 to-sky-400 shadow-[0_0_8px_rgba(6,182,212,0.4)]'
-                      : 'bg-gradient-to-r from-slate-600 to-slate-500'
-                }`}
-                style={{ width: `${boostEnergy}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Viewport do Canvas do Jogo com Controle de Toque na Tela */}
+          {/* Viewport do Canvas do Jogo com Controle de Toque na Tela (100% da Área Disponível) */}
           <div 
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center flex-1 min-h-0 max-h-[calc(100dvh-4.6rem)] md:max-h-[calc(100dvh-5.2rem)] cursor-pointer touch-none select-none"
+            className="relative w-full flex-1 min-h-0 h-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex justify-center items-center cursor-pointer touch-none select-none"
           >
             <canvas
               id="gameCanvas"
               ref={canvasRef}
-              className="w-auto h-full max-h-full aspect-[440/720] block object-contain pointer-events-none"
+              className="w-full h-full block pointer-events-none"
             />
 
             {/* Feedback Visual Sutil de Toque nas Laterais */}
@@ -993,11 +1001,6 @@ export function Game({ onNavigate }) {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Dica discreta de Controles (Toque Direto na Tela ou Teclado) */}
-          <div className="mt-1 text-center text-[10px] text-slate-500 shrink-0 select-none">
-            Toque nas laterais: mover • Toque duplo / ⬆: Impulso ({boostEnergy >= 95 ? 'Super Salto 100%' : `${boostEnergy}% força`}) • Espaço / W
           </div>
         </div>
       )}
