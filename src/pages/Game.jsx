@@ -45,6 +45,7 @@ export function Game({ onNavigate }) {
   const [currentScore, setCurrentScore] = useState(0);
   const [currentHeight, setCurrentHeight] = useState(0);
   const [currentLives, setCurrentLives] = useState(3);
+  const [boostEnergy, setBoostEnergy] = useState(100);
   const [lastGameResult, setLastGameResult] = useState(null);
 
   // Modo de Jogo: 'solo' (Individual) ou 'race_ai' (Corrida Contra a Máquina)
@@ -317,6 +318,7 @@ export function Game({ onNavigate }) {
     setCurrentScore(0);
     setCurrentHeight(0);
     setCurrentLives(3);
+    setBoostEnergy(100);
     setLastGameResult(null);
     setRaceStats({
       playerHeight: 0,
@@ -366,6 +368,9 @@ export function Game({ onNavigate }) {
           aiDifficulty: activeDiff,
           onRaceUpdate: (stats) => {
             setRaceStats(stats);
+          },
+          onBoostUpdate: (energy) => {
+            setBoostEnergy(energy);
           }
         }
       );
@@ -684,6 +689,39 @@ export function Game({ onNavigate }) {
             </div>
           </div>
 
+          {/* Barra de Progresso de Carga do Super Impulso */}
+          <div className="w-full mb-1.5 px-1 shrink-0">
+            <div className="flex items-center justify-between text-[10px] font-bold mb-0.5">
+              <div className="flex items-center gap-1">
+                <Zap className={`w-3 h-3 ${boostEnergy >= 95 ? 'text-amber-400 animate-pulse fill-amber-400' : 'text-cyan-400'}`} />
+                <span className={boostEnergy >= 95 ? 'text-amber-300 font-black tracking-wide' : 'text-slate-300'}>
+                  {boostEnergy >= 95 ? 'SUPER IMPULSO PRONTO!' : 'CARGA DE IMPULSO'}
+                </span>
+              </div>
+              <span className={`font-mono text-[11px] ${
+                boostEnergy >= 95 
+                  ? 'text-amber-400 font-black drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
+                  : boostEnergy > 20 
+                    ? 'text-cyan-300 font-semibold' 
+                    : 'text-slate-500 font-semibold'
+              }`}>
+                {boostEnergy}%
+              </span>
+            </div>
+            <div className="w-full h-2 bg-slate-950/80 rounded-full overflow-hidden border border-slate-800/80 p-[1px] shadow-inner">
+              <div
+                className={`h-full rounded-full transition-all duration-150 ${
+                  boostEnergy >= 95
+                    ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 shadow-[0_0_12px_rgba(244,63,94,0.7)] animate-pulse'
+                    : boostEnergy > 25
+                      ? 'bg-gradient-to-r from-cyan-500 to-sky-400 shadow-[0_0_8px_rgba(6,182,212,0.4)]'
+                      : 'bg-gradient-to-r from-slate-600 to-slate-500'
+                }`}
+                style={{ width: `${boostEnergy}%` }}
+              />
+            </div>
+          </div>
+
           {/* Viewport do Canvas do Jogo com Controle de Toque na Tela */}
           <div 
             onPointerDown={handlePointerDown}
@@ -959,7 +997,7 @@ export function Game({ onNavigate }) {
 
           {/* Dica discreta de Controles (Toque Direto na Tela ou Teclado) */}
           <div className="mt-1 text-center text-[10px] text-slate-500 shrink-0 select-none">
-            Toque nas laterais da tela para mover • Toque duplo para Pular • Teclado: Setas ← → / Espaço
+            Toque nas laterais: mover • Toque duplo / ⬆: Impulso ({boostEnergy >= 95 ? 'Super Salto 100%' : `${boostEnergy}% força`}) • Espaço / W
           </div>
         </div>
       )}

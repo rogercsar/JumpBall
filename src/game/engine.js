@@ -17,6 +17,14 @@ export class GameEngine {
     this.mode = gameOptions.mode || 'solo';
     this.aiDifficulty = gameOptions.aiDifficulty || 'medium';
     this.onRaceUpdate = gameOptions.onRaceUpdate || null;
+    this.onBoostUpdate = gameOptions.onBoostUpdate || null;
+
+    // Barra de Carga de Impulso / Super Salto
+    this.maxBoostCharge = 100;
+    this.boostCharge = 100;
+    this.boostRechargeRate = 36; // recarrega ~36% por segundo (~2.8s do 0 ao 100%)
+    this.lastBoostReported = 100;
+    this.hasPendingBoostUpdate = true;
 
     // Dimensões lógicas
     this.width = 440;
@@ -349,6 +357,11 @@ export class GameEngine {
       this.invulnerableTimer = Math.max(0, this.invulnerableTimer - dt * 0.0166);
     }
 
+    // Recarga contínua da barra de impulso (quando abaixo de 100%)
+    if (this.boostCharge < this.maxBoostCharge) {
+      this.boostCharge = Math.min(this.maxBoostCharge, this.boostCharge + (this.boostRechargeRate * (dt / 60)));
+    }
+
     // 1. Entrada Horizontal (Apenas Teclado + Toque na Tela)
     let moveInput = 0;
     if (this.keys.left) moveInput = -1;
@@ -427,15 +440,39 @@ export class GameEngine {
       this.particles.emitTrail(this.ball.x, this.ball.y, this.skin.trail);
     }
 
-    // 2.5 Super Pulo Disparado por Botão Touch ou Tecla Espaço / W / Seta Cima
+    // 2.5 Super Pulo / Impulso Proporcional Disparado por Botão Touch, Toque Duplo, Deslizar ⬆ ou Teclado (Espaço/W/Seta Cima)
     if (this.gestureSuperJumpTriggered) {
       this.gestureSuperJumpTriggered = false;
-      this.ball.vy = this.jumpForce * 1.45;
-      this.ball.stretchX = 0.7;
-      this.ball.stretchY = 1.4;
-      this.jumpsCount++;
-      soundEngine.playSuperJump();
-      this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.glow);
+      const chargeRatio = Math.max(0, Math.min(1, this.boostCharge / this.maxBoostCharge));
+
+      if (chargeRatio > 0.08) {
+        // Pulo com impulso proporcional à carga disponível (1.0x até 1.70x da força de pulo)
+        const boostMultiplier = 1.0 + (chargeRatio * 0.70);
+        this.ball.vy = this.jumpForce * boostMultiplier;
+        this.ball.stretchX = Math.max(0.6, 1 - (chargeRatio * 0.35));
+        this.ball.stretchY = Math.min(1.5, 1 + (chargeRatio * 0.45));
+        this.jumpsCount++;
+
+        if (chargeRatio >= 0.5) {
+          soundEngine.playSuperJump();
+          this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.glow);
+        } else {
+          soundEngine.playJump();
+          this.particles.emitJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.primary);
+        }
+
+        // Zera a barra de carga após o impulso
+        this.boostCharge = 0;
+        this.hasPendingBoostUpdate = true;
+      } else {
+        // Barra vazia ou quase vazia: executa pulo normal (1.0x) conforme regra do jogo
+        this.ball.vy = this.jumpForce;
+        this.ball.stretchX = 0.85;
+        this.ball.stretchY = 1.15;
+        this.jumpsCount++;
+        soundEngine.playJump();
+        this.particles.emitJumpBurst(this.ball.x, this.ball.y + this.ball.radius, '#94a3b8');
+      }
     }
 
     // 3. Atualizar Altura e Pontuação (Alinhado exatamente à escala da Meta da Fase)
@@ -531,6 +568,11 @@ export class GameEngine {
           g.collected = true;
           this.gemsCollected++;
           this.score += 150;
+
+          // Bônus de recarga instantânea na barra de impulso (+25%)
+          this.boostCharge = Math.min(this.maxBoostCharge, this.boostCharge + 25);
+          this.hasPendingBoostUpdate = true;
+
           soundEngine.playCollect();
           this.particles.emit(g.x, g.y, 14, {
             color: '#facc15',
@@ -552,6 +594,8 @@ export class GameEngine {
           this.ball.hasMagicBackpack = true;
           this.ball.backpackFuel = 100;
           this.ball.backpackMaxFuel = 100;
+          this.boostCharge = this.maxBoostCharge;
+          this.hasPendingBoostUpdate = true;
           this.score += 250;
           soundEngine.playMagicBackpack();
           this.particles.emitSuperJumpBurst(mb.x, mb.y, '#f59e0b');
@@ -569,13 +613,21 @@ export class GameEngine {
       this.hasPendingRaceUpdate = true;
     }
 
-    // 6.8. Throttling de Notificações para React (a cada ~8 frames ≈ 130ms) para máxima fluidez a 60 FPS no mobile
+    // 6.8. Throttling de Notificações para React (a cada ~6 frames ≈ 100ms) para máxima fluidez a 60 FPS no mobile
     this.uiThrottleTimer = (this.uiThrottleTimer || 0) + dt;
-    if (this.uiThrottleTimer >= 8) {
+    if (this.uiThrottleTimer >= 6) {
       this.uiThrottleTimer = 0;
       if (this.onScoreUpdate && this.hasPendingScoreUpdate) {
         this.hasPendingScoreUpdate = false;
         this.onScoreUpdate(this.score, this.maxHeightReached);
+      }
+      if (this.onBoostUpdate) {
+        const roundedBoost = Math.round(this.boostCharge);
+        if (roundedBoost !== this.lastBoostReported || this.hasPendingBoostUpdate) {
+          this.lastBoostReported = roundedBoost;
+          this.hasPendingBoostUpdate = false;
+          this.onBoostUpdate(roundedBoost);
+        }
       }
       if (this.onRaceUpdate && this.hasPendingRaceUpdate && this.botBall) {
         this.hasPendingRaceUpdate = false;
@@ -923,6 +975,8 @@ export class GameEngine {
     this.ball.stretchY = 0.65;
     this.ball.hasMagicBackpack = false;
     this.ball.backpackFuel = 0;
+    this.boostCharge = this.maxBoostCharge;
+    this.hasPendingBoostUpdate = true;
 
     // Concede 2.5s de escudo de energia
     this.invulnerableTimer = 2.5;
@@ -1672,6 +1726,35 @@ export class GameEngine {
     ctx.strokeStyle = this.skin.glow;
     ctx.lineWidth = 2;
     ctx.stroke();
+
+    // Anel / Halo Dinâmico de Carga de Impulso ao redor da bola
+    if (this.boostCharge > 0) {
+      ctx.save();
+      const chargeRatio = this.boostCharge / this.maxBoostCharge;
+      const ringR = this.ball.radius + 3.5;
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+
+      if (chargeRatio >= 0.98) {
+        // Carga 100%: Halo pulsante dourado/neon
+        const pulse = 1 + Math.sin(Date.now() * 0.009) * 0.07;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = this.isMobile ? 0 : 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, ringR * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // Recarregando: arco proporcional desenhado em sentido horário
+        const startAng = -Math.PI / 2;
+        const endAng = startAng + (Math.PI * 2 * chargeRatio);
+        ctx.strokeStyle = chargeRatio > 0.4 ? '#38bdf8' : '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(0, 0, ringR, startAng, endAng);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     // Escudo de Energia Protetor pós-respawn
     if (this.invulnerableTimer > 0) {
