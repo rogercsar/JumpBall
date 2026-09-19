@@ -57,10 +57,6 @@ const STORAGE_KEYS = {
 
 export const localStore = {
   getProfile() {
-    const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    if (data) {
-      try { return JSON.parse(data); } catch (e) { /* ignore */ }
-    }
     const defaultProfile = {
       id: 'guest-player-001',
       username: 'Piloto',
@@ -70,8 +66,28 @@ export const localStore = {
       high_score: 0,
       total_jumps: 0,
       stages_completed: 0,
+      gems: 100,
+      unlocked_skins: ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball'],
+      selected_trail: 'default',
+      unlocked_trails: ['default'],
+      endless_high_score: 0,
+      achievements: [],
+      daily_quests_progress: { date: '', progress: {}, claimed: {} },
       created_at: new Date().toISOString()
     };
+    const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        return {
+          ...defaultProfile,
+          ...parsed,
+          gems: parsed.gems !== undefined ? parsed.gems : defaultProfile.gems,
+          unlocked_skins: Array.isArray(parsed.unlocked_skins) ? parsed.unlocked_skins : defaultProfile.unlocked_skins,
+          unlocked_trails: Array.isArray(parsed.unlocked_trails) ? parsed.unlocked_trails : defaultProfile.unlocked_trails
+        };
+      } catch (e) { /* ignore */ }
+    }
     localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(defaultProfile));
     return defaultProfile;
   },

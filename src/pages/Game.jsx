@@ -18,7 +18,8 @@ import {
   Heart,
   Bot,
   Swords,
-  Flag
+  Flag,
+  Flame
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
 import { STAGES, BALL_SKINS } from '../game/stages';
@@ -36,8 +37,24 @@ import { PvPLobbyModal } from '../components/PvPLobbyModal';
 import { multiplayerService } from '../services/multiplayer';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 
+export const ENDLESS_STAGE = {
+  id: 'endless',
+  number: 999,
+  name: 'Sobrevivência do Magma',
+  theme: 'volcano',
+  targetHeight: 999999,
+  gravity: 0.34,
+  jumpForce: -11.8,
+  friction: 0.94,
+  wind: 0,
+  speedFactor: 1.1,
+  hazards: ['moving', 'springs', 'spikes'],
+  platformColor: '#ea580c',
+  bgGradient: ['#1c0505', '#450a0a']
+};
+
 export function Game({ onNavigate }) {
-  const { profile, user, updateProfile } = useAuth();
+  const { profile, user, updateProfile, addGems, updateEndlessHighScore } = useAuth();
   const { settings } = useSettings();
   const { showConfirm, showAlert, isDialogOpen } = useDialog();
 
@@ -277,6 +294,17 @@ export function Game({ onNavigate }) {
       games_played: newGamesPlayed
     };
 
+    // Crédito das gemas coletadas na partida
+    const gemsEarned = Math.round(result.gems || 0);
+    if (gemsEarned > 0 && addGems) {
+      addGems(gemsEarned);
+    }
+
+    // Se for modo infinito, atualiza o recorde pessoal de altura
+    if ((result.isEndless || stageNumber === 999) && updateEndlessHighScore) {
+      updateEndlessHighScore(heightVal);
+    }
+
     // 1. Atualiza imediatamente o perfil do jogador no estado e storage
     if (updateProfile) {
       try {
@@ -397,6 +425,7 @@ export function Game({ onNavigate }) {
           mode: activeMode,
           aiDifficulty: activeDiff,
           opponentData: activePvP?.opponent,
+          selectedTrail: profile?.selected_trail || 'default',
           onLocalPlayerUpdate: activeMode === 'race_pvp' ? (state) => {
             multiplayerService.sendPlayerState(state);
           } : null,
@@ -575,9 +604,9 @@ export function Game({ onNavigate }) {
             </div>
           </div>
 
-          {/* SELETOR DE MODO: INDIVIDUAL vs CORRIDA CONTRA A MÁQUINA */}
+          {/* SELETOR DE MODO: INDIVIDUAL vs CORRIDA vs DUELO vs MODO INFINITO */}
           <div className="glass-panel p-2.5 sm:p-3 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xl">
-            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-900/90 rounded-xl border border-slate-800 w-full sm:w-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setGameMode('solo')}
@@ -608,6 +637,17 @@ export function Game({ onNavigate }) {
               >
                 <span>Duelo 1v1</span>
               </button>
+              <button
+                type="button"
+                onClick={() => setGameMode('endless')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-[11px] text-center transition-all truncate flex items-center justify-center gap-1 ${gameMode === 'endless'
+                  ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 text-white shadow-md shadow-orange-500/30 font-black'
+                  : 'text-orange-400 hover:text-orange-300'
+                  }`}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                <span>Infinito 🔥</span>
+              </button>
             </div>
 
             {gameMode === 'race_ai' ? (
@@ -635,6 +675,10 @@ export function Game({ onNavigate }) {
                   ))}
                 </div>
               </div>
+            ) : gameMode === 'endless' ? (
+              <div className="text-xs text-orange-400 font-bold flex items-center gap-1">
+                <Flame className="w-4 h-4 fill-current" /> Modo Sobrevivência Sem Fim com Magma Ascendente
+              </div>
             ) : (
               <div className="text-xs text-slate-400 hidden md:block">
                 Subida individual por {STAGES.length} biomas cósmicos com pontuação e recordes.
@@ -642,8 +686,45 @@ export function Game({ onNavigate }) {
             )}
           </div>
 
-          {/* Grid das Fases */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Seletor de Conteúdo: Modo Infinito vs Grid de Fases Normais */}
+          {gameMode === 'endless' ? (
+            <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-orange-500/40 bg-gradient-to-b from-orange-950/40 via-slate-900/90 to-slate-950 shadow-2xl relative overflow-hidden text-center space-y-6">
+              <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-orange-500 to-red-600 text-white flex items-center justify-center shadow-xl shadow-orange-500/30 border border-orange-400/40 animate-pulse">
+                <Flame className="w-10 h-10" />
+              </div>
+              <div className="space-y-2">
+                <span className="text-xs uppercase font-black text-orange-400 tracking-widest">Desafio Extremo Sem Fim</span>
+                <h2 className="text-3xl sm:text-4xl font-black text-white">Sobrevivência do Magma</h2>
+                <p className="text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+                  O chão se transformou em um rio de magma ardente que sobe sem parar! Pule de plataforma em plataforma, colete power-ups especiais e tente bater o seu recorde de altura máxima.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 max-w-sm mx-auto gap-3 text-left">
+                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+                  <span className="text-[11px] text-slate-400 font-medium">Recorde Pessoal:</span>
+                  <div className="text-2xl font-black text-amber-400">{profile?.endless_high_score || 0}m</div>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+                  <span className="text-[11px] text-slate-400 font-medium">Suas Gemas:</span>
+                  <div className="text-2xl font-black text-cyan-300">{profile?.gems || 0} 💎</div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => startGame(ENDLESS_STAGE, 'endless')}
+                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-black text-base shadow-xl shadow-orange-500/30 flex items-center gap-2 transform active:scale-95 transition-all cursor-pointer"
+                >
+                  <Flame className="w-5 h-5 fill-current" />
+                  <span>INICIAR SOBREVIVÊNCIA</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Grid das Fases */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {STAGES.map((stage) => {
               const completedStages = profile?.stages_completed || 0;
               // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
@@ -660,7 +741,8 @@ export function Game({ onNavigate }) {
                 />
               );
             })}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -811,23 +893,36 @@ export function Game({ onNavigate }) {
             </div>
           )}
 
-          {/* Barra de Progresso até a Meta da Fase */}
+          {/* Barra de Progresso até a Meta da Fase ou Indicador do Modo Infinito */}
           <div className="w-full mb-1 px-1 shrink-0">
-            <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400 mb-0.5">
-              <span>Altura: <strong className="text-cyan-300">{currentHeight}m</strong></span>
-              {gameMode === 'race_ai' && (
-                <span className="text-purple-300">Bot: <strong>{raceStats.botHeight}m</strong></span>
-              )}
-              <span>Meta: <strong className="text-amber-400">{selectedStage?.targetHeight}m</strong></span>
-            </div>
-            <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-              <div
-                className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-amber-400 transition-all duration-100"
-                style={{
-                  width: `${Math.min(100, (currentHeight / (selectedStage?.targetHeight || 1)) * 100)}%`
-                }}
-              />
-            </div>
+            {gameMode === 'endless' ? (
+              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 bg-orange-950/40 px-3 py-1 rounded-xl border border-orange-500/30">
+                <span className="flex items-center gap-1 text-orange-400">
+                  <Flame className="w-3.5 h-3.5 fill-orange-400" /> Altura: <strong>{currentHeight}m</strong>
+                </span>
+                <span className="text-amber-300">
+                  Recorde: <strong>{Math.max(currentHeight, profile?.endless_high_score || 0)}m</strong>
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400 mb-0.5">
+                  <span>Altura: <strong className="text-cyan-300">{currentHeight}m</strong></span>
+                  {gameMode === 'race_ai' && (
+                    <span className="text-purple-300">Bot: <strong>{raceStats.botHeight}m</strong></span>
+                  )}
+                  <span>Meta: <strong className="text-amber-400">{selectedStage?.targetHeight}m</strong></span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-amber-400 transition-all duration-100"
+                    style={{
+                      width: `${Math.min(100, (currentHeight / (selectedStage?.targetHeight || 1)) * 100)}%`
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Viewport do Canvas do Jogo com Controle de Toque na Tela (100% da Área Disponível) */}
@@ -966,18 +1061,26 @@ export function Game({ onNavigate }) {
             {/* Overlay de Game Over */}
             {gameState === 'game_over' && (
               <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in z-20">
-                <div className="w-16 h-16 rounded-3xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30">
-                  <Skull className="w-8 h-8" />
+                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border ${
+                  lastGameResult?.isEndless
+                    ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                    : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                }`}>
+                  {lastGameResult?.isEndless ? <Flame className="w-8 h-8 fill-current" /> : <Skull className="w-8 h-8" />}
                 </div>
 
                 <div>
-                  <span className="text-xs uppercase font-bold text-rose-400 tracking-wider">
-                    {lastGameResult?.isRace
-                      ? (lastGameResult?.winner === 'bot' ? 'A Máquina Alcançou a Meta Primeiro!' : 'Queda no Percurso!')
-                      : 'A gravidade venceu!'}
+                  <span className="text-xs uppercase font-bold tracking-wider text-rose-400">
+                    {lastGameResult?.isEndless
+                      ? '🌋 Fim da Sobrevivência!'
+                      : (lastGameResult?.isRace
+                        ? (lastGameResult?.winner === 'bot' ? 'A Máquina Alcançou a Meta Primeiro!' : 'Queda no Percurso!')
+                        : 'A gravidade venceu!')}
                   </span>
                   <h2 className="text-3xl font-black text-white">
-                    {lastGameResult?.isRace ? 'Derrota na Corrida' : 'Game Over'}
+                    {lastGameResult?.isEndless
+                      ? 'O Magma Te Alcançou!'
+                      : (lastGameResult?.isRace ? 'Derrota na Corrida' : 'Game Over')}
                   </h2>
                 </div>
 
@@ -989,9 +1092,15 @@ export function Game({ onNavigate }) {
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Sua Altura:</span>
+                    <span className="text-slate-400">{lastGameResult?.isEndless ? 'Altura Conquistada:' : 'Sua Altura:'}</span>
                     <span className="font-bold text-cyan-300">{lastGameResult?.maxHeight}m</span>
                   </div>
+                  {lastGameResult?.isEndless && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Recorde Pessoal:</span>
+                      <span className="font-bold text-amber-400">{Math.max(profile?.endless_high_score || 0, lastGameResult?.maxHeight || 0)}m</span>
+                    </div>
+                  )}
                   {lastGameResult?.isRace && (
                     <div className="flex justify-between">
                       <span className="text-slate-400">Altura da IA:</span>
@@ -1003,6 +1112,10 @@ export function Game({ onNavigate }) {
                     <span className="font-bold text-amber-400">{lastGameResult?.score?.toLocaleString()} pts</span>
                   </div>
                   <div className="flex justify-between pt-1 border-t border-slate-800/60">
+                    <span className="text-slate-400">Gemas Coletadas:</span>
+                    <span className="font-bold text-cyan-300">+{lastGameResult?.gems || 0} 💎</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-slate-400">Total de Saltos:</span>
                     <span className="font-bold text-slate-200">{lastGameResult?.jumps}</span>
                   </div>
@@ -1010,20 +1123,22 @@ export function Game({ onNavigate }) {
 
                 <div className="flex flex-col gap-2.5 w-56">
                   <button
-                    onClick={() => startGame(selectedStage)}
-                    className={`py-3.5 rounded-2xl ${lastGameResult?.isRace
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 shadow-purple-500/25'
-                      : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25'
+                    onClick={() => startGame(lastGameResult?.isEndless ? ENDLESS_STAGE : selectedStage, lastGameResult?.isEndless ? 'endless' : null)}
+                    className={`py-3.5 rounded-2xl ${lastGameResult?.isEndless
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 shadow-orange-500/25'
+                      : (lastGameResult?.isRace
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 shadow-purple-500/25'
+                        : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25')
                       } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2`}
                   >
                     <RotateCcw className="w-4 h-4" />
-                    <span>{lastGameResult?.isRace ? 'REVANCHE IMEDIATA' : 'TENTAR NOVAMENTE'}</span>
+                    <span>{lastGameResult?.isEndless ? 'JOGAR NOVAMENTE' : (lastGameResult?.isRace ? 'REVANCHE IMEDIATA' : 'TENTAR NOVAMENTE')}</span>
                   </button>
                   <button
                     onClick={() => setGameState('menu')}
                     className="py-2.5 rounded-xl glass-card text-slate-300 hover:text-white text-xs font-semibold"
                   >
-                    Voltar às Fases
+                    Voltar ao Menu
                   </button>
                 </div>
               </div>
@@ -1075,6 +1190,10 @@ export function Game({ onNavigate }) {
                     </div>
                   )}
                   <div className="flex justify-between">
+                    <span className="text-slate-400">Gemas Coletadas:</span>
+                    <span className="font-bold text-cyan-300">+{lastGameResult?.gems || 0} 💎</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-slate-800/60">
                     <span className="text-slate-400">Tempo de Subida:</span>
                     <span className="font-bold text-slate-200">{lastGameResult?.duration}s</span>
                   </div>

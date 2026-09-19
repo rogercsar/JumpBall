@@ -502,6 +502,101 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Adiciona gemas ao saldo do jogador
+  const addGems = async (amount) => {
+    if (!amount || amount <= 0) return;
+    const currentGems = profile?.gems ?? 100;
+    const newGems = currentGems + amount;
+    await updateProfile({ gems: newGems });
+    return newGems;
+  };
+
+  // Compra uma skin com gemas
+  const buySkin = async (skinId, price) => {
+    const currentGems = profile?.gems ?? 100;
+    if (currentGems < price) {
+      return { success: false, reason: 'Saldo insuficiente de gemas' };
+    }
+    const currentUnlocked = profile?.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball'];
+    if (currentUnlocked.includes(skinId)) {
+      return { success: true, alreadyOwned: true };
+    }
+    const newGems = currentGems - price;
+    const newUnlocked = [...currentUnlocked, skinId];
+    await updateProfile({
+      gems: newGems,
+      unlocked_skins: newUnlocked,
+      ball_skin: skinId
+    });
+    return { success: true, newGems, newUnlocked };
+  };
+
+  // Compra um rastro de partículas
+  const buyTrail = async (trailId, price) => {
+    const currentGems = profile?.gems ?? 100;
+    if (currentGems < price) {
+      return { success: false, reason: 'Saldo insuficiente de gemas' };
+    }
+    const currentTrails = profile?.unlocked_trails || ['default'];
+    if (currentTrails.includes(trailId)) {
+      return { success: true, alreadyOwned: true };
+    }
+    const newGems = currentGems - price;
+    const newTrails = [...currentTrails, trailId];
+    await updateProfile({
+      gems: newGems,
+      unlocked_trails: newTrails,
+      selected_trail: trailId
+    });
+    return { success: true, newGems, newTrails };
+  };
+
+  // Equipa um rastro selecionado
+  const setSelectedTrail = async (trailId) => {
+    await updateProfile({ selected_trail: trailId });
+  };
+
+  // Resgata recompensa de missão diária
+  const claimDailyQuest = async (questId, rewardGems) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const questData = profile?.daily_quests_progress || { date: today, progress: {}, claimed: {} };
+    if (questData.claimed && questData.claimed[questId]) {
+      return { success: false, reason: 'Missão já resgatada hoje' };
+    }
+    const newClaimed = { ...(questData.claimed || {}), [questId]: true };
+    const currentGems = profile?.gems ?? 100;
+    const newGems = currentGems + (rewardGems || 100);
+    await updateProfile({
+      gems: newGems,
+      daily_quests_progress: { ...questData, date: today, claimed: newClaimed }
+    });
+    return { success: true, newGems };
+  };
+
+  // Desbloqueia uma conquista / medalha permanente
+  const unlockAchievement = async (achievementId, rewardGems = 0) => {
+    const currentAch = profile?.achievements || [];
+    if (currentAch.includes(achievementId)) return false;
+    const newAch = [...currentAch, achievementId];
+    const currentGems = profile?.gems ?? 100;
+    const newGems = currentGems + rewardGems;
+    await updateProfile({
+      achievements: newAch,
+      gems: newGems
+    });
+    return true;
+  };
+
+  // Atualiza recorde pessoal no Modo Infinito
+  const updateEndlessHighScore = async (height) => {
+    const currentRecord = profile?.endless_high_score || 0;
+    if (height > currentRecord) {
+      await updateProfile({ endless_high_score: height });
+      return true;
+    }
+    return false;
+  };
+
   // Solicitar recuperação / redefinição de senha
   const resetPassword = async (email) => {
     if (!isSupabaseConfigured || !supabase) {
@@ -573,6 +668,13 @@ export function AuthProvider({ children }) {
         logout,
         updateProfile,
         resetStageProgress,
+        addGems,
+        buySkin,
+        buyTrail,
+        setSelectedTrail,
+        claimDailyQuest,
+        unlockAchievement,
+        updateEndlessHighScore,
         resetPassword,
         updateUserPassword,
         refreshProfile: () => user && fetchProfile(user.id)
@@ -599,6 +701,13 @@ export function useAuth() {
       logout: async () => {},
       updateProfile: async () => {},
       resetStageProgress: async () => {},
+      addGems: async () => 0,
+      buySkin: async () => ({ success: false }),
+      buyTrail: async () => ({ success: false }),
+      setSelectedTrail: async () => {},
+      claimDailyQuest: async () => ({ success: false }),
+      unlockAchievement: async () => false,
+      updateEndlessHighScore: async () => false,
       resetPassword: async () => ({ success: false }),
       updateUserPassword: async () => ({ success: false }),
       refreshProfile: () => {}

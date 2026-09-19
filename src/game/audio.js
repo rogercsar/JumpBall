@@ -1539,6 +1539,81 @@ class SoundEngine {
     osc.start(now);
     osc.stop(now + 0.22);
   }
+
+  // Efeito ao coletar qualquer Power-Up (Ímã, Escudo, Slowmo, Super Mola)
+  playPowerUp() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const freqs = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+    freqs.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const t = now + idx * 0.05;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(this.sfxVolume * 0.35, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.28);
+    });
+  }
+
+  // Efeito de estilhaço quando o Escudo de Bolha quebra absorvendo dano
+  playShieldBreak() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(980, now);
+    osc.frequency.exponentialRampToValueAtTime(220, now + 0.2);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.45, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.24);
+  }
+
+  // Efeito de pulso magnético (Ímã de Gemas)
+  playMagnetPulse() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(640, now + 0.12);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
 }
 
 export const soundEngine = new SoundEngine();

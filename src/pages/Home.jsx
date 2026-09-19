@@ -88,6 +88,16 @@ export function Home({ onNavigate }) {
                 <Sparkles className="w-2.5 h-2.5 text-amber-400" />
                 <span>{playerXP.toLocaleString()} XP</span>
               </span>
+
+              {/* Saldo de Gemas */}
+              <button
+                type="button"
+                onClick={() => onNavigate('profile')}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 text-[10px] font-black text-amber-300 shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                title="Ver Saldo de Gemas na Garagem"
+              >
+                <span>💎 {profile?.gems ?? 100}</span>
+              </button>
             </div>
 
             {/* Saudação e Título (Tamanho Reduzido) */}
@@ -104,7 +114,7 @@ export function Home({ onNavigate }) {
                 )}
               </h1>
               <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
-                Desafie {STAGES.length} biomas cósmicos, salte plataformas e dispute o topo do ranking.
+                Desafie {STAGES.length} biomas cósmicos, colete gemas, sobreviva ao magma e dispute o topo do ranking.
               </p>
             </div>
 
@@ -124,22 +134,30 @@ export function Home({ onNavigate }) {
 
             {/* BOTÕES DE AÇÃO: PRINCIPAIS E RÁPIDOS */}
             <div className="space-y-2 pt-1">
-              {/* Nível 1: Modos de Jogo (Mesmo Tamanho Padronizado) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full sm:max-w-sm">
+              {/* Nível 1: Modos de Jogo */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:max-w-md">
                 <button
                   onClick={() => onNavigate('game')}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer truncate"
                 >
                   <Play className="w-4 h-4 fill-current shrink-0" />
-                  <span>INICIAR JOGO</span>
+                  <span>JOGAR FASES</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('game')}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/35 hover:scale-[1.02] active:scale-95 transition-all border border-rose-400/30 cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer truncate"
                 >
-                  <Swords className="w-4 h-4 animate-pulse shrink-0" />
-                  <span>DUELO 1V1 (PVP)</span>
+                  <Flame className="w-4 h-4 fill-current shrink-0" />
+                  <span>INFINITO 🔥</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('game')}
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/35 hover:scale-[1.02] active:scale-95 transition-all border border-rose-400/30 cursor-pointer truncate"
+                >
+                  <Swords className="w-4 h-4 shrink-0" />
+                  <span>DUELO 1V1</span>
                 </button>
               </div>
 
@@ -147,24 +165,32 @@ export function Home({ onNavigate }) {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
                 <button
                   onClick={() => onNavigate('ranking')}
-                  className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-300 hover:text-amber-200 font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 hover:border-amber-500/50 transition-all active:scale-95 shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-300 hover:text-amber-200 font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 hover:border-amber-500/50 transition-all active:scale-95 shadow-sm"
                 >
                   <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Top 10 Ranking</span>
+                  <span>Ranking</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('profile')}
-                  className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 hover:border-cyan-500/40 transition-all active:scale-95 shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 hover:border-cyan-500/40 transition-all active:scale-95 shadow-sm"
                 >
                   <Palette className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Hangar de Esferas</span>
+                  <span>Loja de Esferas</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('profile')}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-purple-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-purple-500/30 hover:border-purple-500/50 transition-all active:scale-95 shadow-sm"
+                >
+                  <Award className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Missões & Troféus</span>
                 </button>
 
                 {!user && (
                   <button
                     onClick={() => onNavigate('login')}
-                    className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-800 hover:border-slate-700 transition-all active:scale-95"
+                    className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-800 hover:border-slate-700 transition-all active:scale-95"
                   >
                     <LogIn className="w-3.5 h-3.5 text-slate-400" />
                     <span>Entrar</span>
@@ -277,35 +303,43 @@ export function Home({ onNavigate }) {
           </div>
         </div>
 
-        {/* Total de Saltos */}
-        <div className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-sky-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-sky-950/10 shadow-lg">
+        {/* Modo Infinito (Sobrevivência do Magma) */}
+        <div 
+          onClick={() => onNavigate('game')}
+          className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-orange-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-orange-950/10 shadow-lg cursor-pointer hover:scale-[1.02]"
+          title="Jogar Modo Infinito"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Total de Saltos</span>
-            <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
-              <Zap className="w-4 h-4" />
+            <span className="text-xs font-semibold text-slate-400">Modo Infinito</span>
+            <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+              <Flame className="w-4 h-4" />
             </div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-black text-sky-400">
-              {totalJumps.toLocaleString()}
+            <div className="text-2xl sm:text-3xl font-black text-orange-400">
+              {profile?.endless_high_score || 0} <span className="text-xs font-bold text-orange-400/70">metros</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Impulsos verticais</p>
+            <p className="text-[11px] text-slate-400 mt-1">Recorde no magma</p>
           </div>
         </div>
 
-        {/* Partidas Jogadas */}
-        <div className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-purple-950/10 shadow-lg">
+        {/* Saldo de Gemas */}
+        <div 
+          onClick={() => onNavigate('profile')}
+          className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-yellow-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-yellow-950/10 shadow-lg cursor-pointer hover:scale-[1.02]"
+          title="Ver Garagem de Skins e Rastros"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Partidas Realizadas</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-              <Gamepad2 className="w-4 h-4" />
+            <span className="text-xs font-semibold text-slate-400">Gemas Acumuladas</span>
+            <div className="w-8 h-8 rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center">
+              <Sparkles className="w-4 h-4" />
             </div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-black text-purple-400">
-              {gamesPlayed.toLocaleString()}
+            <div className="text-2xl sm:text-3xl font-black text-yellow-400">
+              {profile?.gems ?? 100} <span className="text-xs font-bold text-yellow-400/70">💎</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Sessões completadas</p>
+            <p className="text-[11px] text-slate-400 mt-1">Disponíveis para gastar</p>
           </div>
         </div>
       </section>

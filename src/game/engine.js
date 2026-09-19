@@ -59,6 +59,23 @@ export class GameEngine {
     this.wallBlockedHeight = 220; // 220px parede sólida, 140px portal aberto
     this.wallTheme = this.initWallTheme();
 
+    // Rastro Ativo selecionado na Loja
+    this.selectedTrail = gameOptions.selectedTrail || 'default';
+
+    // Sistema de Novos Power-Ups Coletáveis
+    this.powerups = [];
+    this.activePowerUps = { magnet: 0, shield: false, slowmo: 0, springBoost: 0 };
+
+    // Modo Infinito com Magma / Lava Ascendente
+    this.isEndless = this.mode === 'endless';
+    this.lavaY = this.height + 120;
+    this.lavaSpeed = 0.65;
+    this.lavaWarning = false;
+
+    // Efeitos de Camera Shake e Haptics
+    this.cameraShakeTimer = 0;
+    this.cameraShakeIntensity = 0;
+
     // Estado da Bola do Jogador
     const isRace = this.mode === 'race_ai' || this.mode === 'race_pvp';
     const initialPlayerX = isRace ? this.width / 2 - 32 : this.width / 2;
@@ -279,6 +296,8 @@ export class GameEngine {
           entity.stretchY = 1.22;
           if (isPlayer) {
             soundEngine.playWallBounce();
+            this.triggerCameraShake(4, 120);
+            this.triggerHaptic(25);
             this.particles.emitWallBounceSparks(wallW, entity.y, this.wallTheme.sparkColor, true);
           }
         }
@@ -288,6 +307,7 @@ export class GameEngine {
           entity.x = this.width - wallW - r;
           if (isPlayer) {
             soundEngine.playPortalWarp();
+            this.triggerHaptic(18);
             this.particles.emitPortalWarpBurst(wallW, entity.y, this.wallTheme.portalColor);
             this.particles.emitPortalWarpBurst(this.width - wallW, entity.y, this.wallTheme.portalColor);
           }
@@ -306,6 +326,8 @@ export class GameEngine {
           entity.stretchY = 1.22;
           if (isPlayer) {
             soundEngine.playWallBounce();
+            this.triggerCameraShake(4, 120);
+            this.triggerHaptic(25);
             this.particles.emitWallBounceSparks(this.width - wallW, entity.y, this.wallTheme.sparkColor, false);
           }
         }
@@ -315,6 +337,7 @@ export class GameEngine {
           entity.x = wallW + r;
           if (isPlayer) {
             soundEngine.playPortalWarp();
+            this.triggerHaptic(18);
             this.particles.emitPortalWarpBurst(this.width - wallW, entity.y, this.wallTheme.portalColor);
             this.particles.emitPortalWarpBurst(wallW, entity.y, this.wallTheme.portalColor);
           }
@@ -499,11 +522,16 @@ export class GameEngine {
     this.platforms = [];
     this.gems = [];
     this.magicBackpacks = [];
+    this.powerups = [];
+    this.activePowerUps = { magnet: 0, shield: false, slowmo: 0, springBoost: 0 };
     this.environmentalHazards = [];
     this.activeLightning = null;
     this.hazardSpawnTimer = 0;
     this.lightningTimer = 0;
     this.spawnedBackpacksCount = 0;
+    if (this.isEndless) {
+      this.lavaY = this.height + 120;
+    }
 
     // Plataforma base inicial (mais larga no modo corrida para acomodar jogador e bot)
     const baseWidth = this.mode === 'race_ai' ? 160 : 120;
@@ -601,6 +629,35 @@ export class GameEngine {
         });
         this.spawnedBackpacksCount++;
       }
+    }
+
+    // Chance de gerar um Power-Up especial (Ímã, Escudo, Slowmo, Super Molas)
+    if (Math.random() < 0.12) {
+      const pTypes = ['magnet', 'shield', 'slowmo', 'spring_boost'];
+      const chosenType = pTypes[Math.floor(Math.random() * pTypes.length)];
+      this.powerups.push({
+        x: pX + pWidth / 2,
+        y: y - 28,
+        radius: 12,
+        type: chosenType,
+        collected: false,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // Dispara tremor de câmera cinemático em impactos fortes
+  triggerCameraShake(intensity = 6, durationMs = 180) {
+    this.cameraShakeIntensity = intensity;
+    this.cameraShakeTimer = Math.round(durationMs / 16.6);
+  }
+
+  // Dispara vibração tátil no celular (Haptics)
+  triggerHaptic(pattern = 25) {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch (e) { /* ignore */ }
     }
   }
 
@@ -784,9 +841,9 @@ export class GameEngine {
       this.ball.stretchY += (1 - this.ball.stretchY) * 0.12 * dt;
     }
 
-    // Partículas de rastro contínuo com a cor da skin
+    // Partículas de rastro contínuo estilizado (conforme rastro equipado na Loja)
     if (Math.abs(this.ball.vy) > 2) {
-      this.particles.emitTrail(this.ball.x, this.ball.y, this.skin.trail);
+      this.particles.emitTrail(this.ball.x, this.ball.y, this.skin.trail, this.selectedTrail);
     }
 
     // 2.5 Impulso Proporcional com Força e Carga Reduzidas Conforme Solicitado
@@ -804,9 +861,12 @@ export class GameEngine {
 
         if (chargeRatio >= 0.6) {
           soundEngine.playSuperJump();
+          this.triggerCameraShake(5, 140);
+          this.triggerHaptic(35);
           this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.glow);
         } else {
           soundEngine.playJump();
+          this.triggerHaptic(20);
           this.particles.emitJumpBurst(this.ball.x, this.ball.y + this.ball.radius, this.skin.primary);
         }
 
@@ -857,19 +917,28 @@ export class GameEngine {
           this.ball.y = p.y - this.ball.radius;
           this.jumpsCount++;
 
+          let springBoostMultiplier = 1.0;
+          if (this.activePowerUps.springBoost > 0) {
+            springBoostMultiplier = 1.45;
+            this.activePowerUps.springBoost--;
+            this.triggerCameraShake(4, 120);
+            this.triggerHaptic(30);
+            this.particles.emitSuperJumpBurst(this.ball.x, p.y, '#f59e0b');
+          }
+
           if (p.type === 'spring') {
-            this.ball.vy = this.jumpForce * 1.45;
+            this.ball.vy = this.jumpForce * 1.45 * springBoostMultiplier;
             this.ball.stretchX = 0.65;
             this.ball.stretchY = 1.45;
             soundEngine.playSpring();
             this.particles.emitSuperJumpBurst(this.ball.x, p.y, '#facc15');
           } else if (p.type === 'fragile') {
-            this.ball.vy = this.jumpForce;
+            this.ball.vy = this.jumpForce * springBoostMultiplier;
             p.broken = true;
             soundEngine.playCrumble();
             this.particles.emitPlatformCrumble(p.x, p.y, p.width, p.height, '#ef4444');
           } else {
-            this.ball.vy = this.jumpForce;
+            this.ball.vy = this.jumpForce * springBoostMultiplier;
             this.ball.stretchX = 1.35;
             this.ball.stretchY = 0.7;
             soundEngine.playJump();
@@ -884,10 +953,11 @@ export class GameEngine {
       }
     }
 
-    // 5. Atualizar Plataformas Móveis
+    // 5. Atualizar Plataformas Móveis (Afetado pelo Slowmo)
+    const slowmoPlatMult = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
     for (const p of this.platforms) {
       if (p.type === 'moving' && !p.broken) {
-        p.x += p.vx * dt;
+        p.x += p.vx * dt * slowmoPlatMult;
         if (p.x <= 10) {
           p.x = 10;
           p.vx = Math.abs(p.vx);
@@ -898,21 +968,26 @@ export class GameEngine {
       }
     }
 
-    // 6. Coleta de Gemas
+    // 6. Coleta de Gemas (Atração por Ímã ou Mochila)
+    const isMagnetActive = this.activePowerUps.magnet > 0;
     for (const g of this.gems) {
       if (!g.collected) {
         g.pulse += 0.05 * dt;
         const dist = Math.hypot(this.ball.x - g.x, this.ball.y - g.y);
 
-        // Atração magnética suave das gemas em direção à bola enquanto flutua com a mochila
-        if (this.ball.hasMagicBackpack && dist < 120) {
+        // Atração magnética suave das gemas em direção à bola
+        const magnetReach = isMagnetActive ? 240 : (this.ball.hasMagicBackpack ? 120 : 0);
+        if (magnetReach > 0 && dist < magnetReach) {
           const pullAngle = Math.atan2(this.ball.y - g.y, this.ball.x - g.x);
-          g.x += Math.cos(pullAngle) * 3.5 * dt;
-          g.y += Math.sin(pullAngle) * 3.5 * dt;
+          const pullSpeed = isMagnetActive ? 7.0 : 3.5;
+          g.x += Math.cos(pullAngle) * pullSpeed * dt;
+          g.y += Math.sin(pullAngle) * pullSpeed * dt;
         }
 
-        // Raio de coleta generoso durante o voo com a mochila mágica
-        const collectThreshold = this.ball.hasMagicBackpack ? this.ball.radius + g.radius + 18 : this.ball.radius + g.radius + 6;
+        // Raio de coleta generoso
+        const collectThreshold = this.ball.hasMagicBackpack || isMagnetActive
+          ? this.ball.radius + g.radius + 18
+          : this.ball.radius + g.radius + 6;
         if (dist < collectThreshold) {
           g.collected = true;
           this.gemsCollected++;
@@ -949,6 +1024,39 @@ export class GameEngine {
           soundEngine.playMagicBackpack();
           this.particles.emitSuperJumpBurst(mb.x, mb.y, '#f59e0b');
           this.particles.emitSuperJumpBurst(mb.x, mb.y, '#38bdf8');
+        }
+      }
+    }
+
+    // 6.25. Coleta e Atualização dos Power-Ups (Ímã, Escudo, Slowmo, Super Molas)
+    if (this.activePowerUps.magnet > 0) {
+      this.activePowerUps.magnet = Math.max(0, this.activePowerUps.magnet - dt * 0.0166);
+    }
+    if (this.activePowerUps.slowmo > 0) {
+      this.activePowerUps.slowmo = Math.max(0, this.activePowerUps.slowmo - dt * 0.0166);
+    }
+
+    for (const pu of this.powerups) {
+      if (!pu.collected) {
+        pu.pulse += 0.05 * dt;
+        const dist = Math.hypot(this.ball.x - pu.x, this.ball.y - pu.y);
+        if (dist < this.ball.radius + pu.radius + 8) {
+          pu.collected = true;
+          this.score += 200;
+          soundEngine.playPowerUp();
+          this.triggerCameraShake(3, 110);
+          this.triggerHaptic(40);
+          this.particles.emitPowerUpPickup(pu.x, pu.y, pu.type);
+
+          if (pu.type === 'magnet') {
+            this.activePowerUps.magnet = 8.0;
+          } else if (pu.type === 'shield') {
+            this.activePowerUps.shield = true;
+          } else if (pu.type === 'slowmo') {
+            this.activePowerUps.slowmo = 6.0;
+          } else if (pu.type === 'spring_boost') {
+            this.activePowerUps.springBoost = 3;
+          }
         }
       }
     }
@@ -1043,27 +1151,58 @@ export class GameEngine {
     }
 
     // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera
-    while (this.highestPlatformY > this.cameraY - 400) {
+    const genAheadDistance = this.isEndless ? 650 : 400;
+    while (this.highestPlatformY > this.cameraY - genAheadDistance) {
       this.highestPlatformY -= Math.floor(Math.random() * 28 + 52);
       this.generatePlatformAt(this.highestPlatformY);
+    }
+
+    // 8.5. Atualização da Lava Ascendente no Modo Infinito
+    if (this.isEndless) {
+      const heightProgress = Math.max(0, this.maxHeightReached);
+      const speedScale = 1 + (heightProgress / 2200) * 0.75;
+      const slowmoLavaMult = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
+      this.lavaY -= this.lavaSpeed * speedScale * slowmoLavaMult * dt;
+
+      // Borbulhamento estocástico
+      if (Math.random() < 0.25) {
+        const spurX = Math.random() * this.width;
+        this.particles.emitLavaSpurt(spurX, this.lavaY);
+      }
+
+      // Alerta de proximidade
+      this.lavaWarning = (this.lavaY - this.ball.y) < 220;
+
+      // Se a bola mergulhar na lava:
+      if (this.ball.y + this.ball.radius >= this.lavaY) {
+        this.takeDamage('lava');
+        this.ball.vy = this.jumpForce * 1.35; // Salto de pânico para tentar escapar
+        this.ball.stretchY = 1.45;
+        this.triggerCameraShake(10, 240);
+        this.triggerHaptic([60, 40, 60]);
+        this.particles.emitLavaSpurt(this.ball.x, this.lavaY);
+      }
     }
 
     // 9. Limpeza de Entidades Fora da Tela
     this.platforms = this.platforms.filter((p) => p.y < this.cameraY + this.height + 150);
     this.gems = this.gems.filter((g) => !g.collected && g.y < this.cameraY + this.height + 150);
     this.magicBackpacks = this.magicBackpacks.filter((mb) => !mb.collected && mb.y < this.cameraY + this.height + 150);
+    this.powerups = this.powerups.filter((pu) => !pu.collected && pu.y < this.cameraY + this.height + 150);
 
     // 10. Atualizar Partículas
     this.particles.update(dt);
 
-    // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada)
-    const goalY = -this.stage.targetHeight + (this.height - 120);
-    if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
-      if (this.mode === 'race_pvp' && this.onPvPFinish) {
-        this.onPvPFinish('win');
+    // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada - apenas no modo normal ou corrida)
+    if (!this.isEndless) {
+      const goalY = -this.stage.targetHeight + (this.height - 120);
+      if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
+        if (this.mode === 'race_pvp' && this.onPvPFinish) {
+          this.onPvPFinish('win');
+        }
+        this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
+        return;
       }
-      this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
-      return;
     }
 
     // 12. Verificação de Queda / Sistema de 3 Vidas
@@ -1403,6 +1542,17 @@ export class GameEngine {
   takeDamage(source = 'hazard') {
     if (this.invulnerableTimer > 0 || this.lives <= 0 || this.finished) return;
 
+    // Se o escudo de bolha estiver ativo, absorve o dano completamente!
+    if (this.activePowerUps.shield) {
+      this.activePowerUps.shield = false;
+      this.invulnerableTimer = 1.2;
+      soundEngine.playShieldBreak();
+      this.particles.emitShieldBreak(this.ball.x, this.ball.y);
+      this.triggerHaptic(45);
+      this.triggerCameraShake(8, 220);
+      return;
+    }
+
     // Se o jogador estiver com a mochila mágica, perde a mochila imediatamente!
     if (this.ball.hasMagicBackpack) {
       this.ball.hasMagicBackpack = false;
@@ -1418,6 +1568,9 @@ export class GameEngine {
     if (this.onLivesUpdate) {
       this.onLivesUpdate(this.lives);
     }
+
+    this.triggerHaptic([60, 40, 60]);
+    this.triggerCameraShake(10, 250);
 
     // SFX de dano e partículas de impacto
     soundEngine.playHazardHit();
@@ -1784,6 +1937,7 @@ export class GameEngine {
       jumps: this.jumpsCount,
       gems: this.gemsCollected,
       status: status,
+      isEndless: this.isEndless,
       stage: this.stage,
       isRace,
       isPvP,
@@ -1808,6 +1962,15 @@ export class GameEngine {
 
   render() {
     const ctx = this.ctx;
+
+    ctx.save();
+    // Camera Shake em impactos e perigos
+    if (this.cameraShakeTimer > 0) {
+      this.cameraShakeTimer--;
+      const shakeX = (Math.random() - 0.5) * this.cameraShakeIntensity;
+      const shakeY = (Math.random() - 0.5) * this.cameraShakeIntensity;
+      ctx.translate(shakeX, shakeY);
+    }
 
     // 1. Cenário de Fundo Temático com Parallax e Partículas Atmosféricas
     this.background.draw(ctx, this.cameraY);
@@ -2190,6 +2353,29 @@ export class GameEngine {
       ctx.restore();
     }
 
+    // Escudo de Bolha Ativo (Power-Up Coletável)
+    if (this.activePowerUps.shield) {
+      ctx.save();
+      const bubblePulse = 1 + Math.sin(Date.now() * 0.008) * 0.05;
+      const shieldR = (this.ball.radius + 9) * bubblePulse;
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = this.isMobile ? 0 : 16;
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.24)';
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, shieldR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Reflexo vítreo curvo na bolha
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.beginPath();
+      ctx.ellipse(-shieldR * 0.35, -shieldR * 0.35, shieldR * 0.28, shieldR * 0.14, -0.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     ctx.restore();
 
     // 5.2. Medidor de Combustível da Mochila Mágica (HUD e Barra sobre a bola)
@@ -2447,6 +2633,166 @@ export class GameEngine {
       ctx.fillText('🏆 LINHA DE CHEGADA', 22, goalScreenY - 11);
       ctx.restore();
     }
+
+    // 6.5. Desenhar Power-Ups Coletáveis
+    this.drawPowerUps(ctx);
+
+    // 6.8. Desenhar Magma / Lava Subindo no Modo Infinito
+    this.drawLava(ctx);
+
+    // 6.9. HUD de Power-Ups Ativos
+    this.drawPowerUpsHUD(ctx);
+
+    ctx.restore(); // Fecha o ctx.save() do Camera Shake
+  }
+
+  // Desenha os Power-Ups coletáveis flutuando nas plataformas
+  drawPowerUps(ctx) {
+    for (const pu of this.powerups) {
+      if (pu.collected) continue;
+      const screenY = pu.y - this.cameraY;
+      if (screenY < -30 || screenY > this.height + 30) continue;
+
+      ctx.save();
+      const floatOffset = Math.sin(pu.pulse * 3) * 4;
+      ctx.translate(pu.x, screenY + floatOffset);
+
+      let pColor = '#38bdf8';
+      let pIcon = '🧲';
+      if (pu.type === 'magnet') {
+        pColor = '#ec4899';
+        pIcon = '🧲';
+      } else if (pu.type === 'shield') {
+        pColor = '#06b6d4';
+        pIcon = '🛡️';
+      } else if (pu.type === 'slowmo') {
+        pColor = '#a855f7';
+        pIcon = '⏳';
+      } else if (pu.type === 'spring_boost') {
+        pColor = '#eab308';
+        pIcon = '⚡';
+      }
+
+      ctx.shadowColor = pColor;
+      ctx.shadowBlur = this.isMobile ? 0 : 12;
+
+      // Orbe brilhante
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = pColor;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, pu.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Ícone do Power-Up
+      ctx.font = '13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pIcon, 0, 1);
+
+      ctx.restore();
+    }
+  }
+
+  // Desenha o Magma / Lava Ascendente no Modo Infinito
+  drawLava(ctx) {
+    if (!this.isEndless) return;
+    const screenLavaY = this.lavaY - this.cameraY;
+    if (screenLavaY > this.height + 150) return;
+
+    ctx.save();
+    // Gradiente térmico da lava
+    const lavaGrad = ctx.createLinearGradient(0, screenLavaY, 0, screenLavaY + 280);
+    lavaGrad.addColorStop(0, '#ffedd5');
+    lavaGrad.addColorStop(0.1, '#f97316');
+    lavaGrad.addColorStop(0.35, '#dc2626');
+    lavaGrad.addColorStop(1, '#450a0a');
+    ctx.fillStyle = lavaGrad;
+
+    // Superfície ondulante da lava
+    ctx.beginPath();
+    ctx.moveTo(0, screenLavaY);
+    const waveStep = 20;
+    const time = Date.now() * 0.0035;
+    for (let x = 0; x <= this.width; x += waveStep) {
+      const wave = Math.sin(time + x * 0.04) * 6 + Math.cos(time * 1.4 + x * 0.02) * 3;
+      ctx.lineTo(x, screenLavaY + wave);
+    }
+    ctx.lineTo(this.width, this.height + 300);
+    ctx.lineTo(0, this.height + 300);
+    ctx.closePath();
+    ctx.fill();
+
+    // Borda superior incandescente
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#f97316';
+    ctx.shadowBlur = this.isMobile ? 0 : 18;
+    ctx.beginPath();
+    ctx.moveTo(0, screenLavaY);
+    for (let x = 0; x <= this.width; x += waveStep) {
+      const wave = Math.sin(time + x * 0.04) * 6 + Math.cos(time * 1.4 + x * 0.02) * 3;
+      ctx.lineTo(x, screenLavaY + wave);
+    }
+    ctx.stroke();
+
+    // Alerta piscante caso a lava esteja perigosamente próxima
+    if (this.lavaWarning) {
+      const warnPulse = (Math.sin(Date.now() * 0.012) + 1) * 0.5;
+      ctx.fillStyle = `rgba(239, 68, 68, ${0.12 + warnPulse * 0.18})`;
+      ctx.fillRect(0, 0, this.width, this.height);
+
+      ctx.fillStyle = '#fef08a';
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 10;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔥 O MAGMA ESTÁ SUBINDO! SUBA RÁPIDO! 🔥', this.width / 2, Math.min(this.height - 30, screenLavaY - 20));
+    }
+    ctx.restore();
+  }
+
+  // Desenha os indicadores dos Power-Ups ativos em formato de pílulas holográficas
+  drawPowerUpsHUD(ctx) {
+    const active = [];
+    if (this.activePowerUps.magnet > 0) {
+      active.push({ icon: '🧲', text: `${this.activePowerUps.magnet.toFixed(1)}s`, color: '#ec4899', border: '#f472b6' });
+    }
+    if (this.activePowerUps.shield) {
+      active.push({ icon: '🛡️', text: 'ESCUDO', color: '#06b6d4', border: '#22d3ee' });
+    }
+    if (this.activePowerUps.slowmo > 0) {
+      active.push({ icon: '⏳', text: `${this.activePowerUps.slowmo.toFixed(1)}s`, color: '#a855f7', border: '#c084fc' });
+    }
+    if (this.activePowerUps.springBoost > 0) {
+      active.push({ icon: '⚡', text: `${this.activePowerUps.springBoost}x PULO`, color: '#eab308', border: '#fde047' });
+    }
+
+    if (active.length === 0) return;
+
+    ctx.save();
+    let startY = 82;
+    for (const item of active) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.strokeStyle = item.border;
+      ctx.lineWidth = 1.4;
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = this.isMobile ? 0 : 8;
+
+      this.roundRect(ctx, 16, startY, 94, 22, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${item.icon} ${item.text}`, 24, startY + 11);
+
+      startY += 26;
+    }
+    ctx.restore();
   }
 
   roundRect(ctx, x, y, width, height, radius) {

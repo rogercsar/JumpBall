@@ -19,20 +19,55 @@ import {
   Gamepad2,
   ChevronLeft,
   ChevronRight,
-  Lock
+  Lock,
+  Flame,
+  Award,
+  Target,
+  Coins
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDialog } from '../contexts/DialogContext';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
-import { BALL_SKINS, STAGES } from '../game/stages';
+import { BALL_SKINS, BALL_TRAILS, ACHIEVEMENTS, getDailyQuests, STAGES } from '../game/stages';
 import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 const PAGE_SIZE = 10;
 
+const TRAIL_ICONS = {
+  Sparkles: '✨',
+  Flame: '🔥',
+  Palette: '🌈',
+  Star: '⭐',
+  Zap: '⚡',
+  Music: '🎵',
+  Flower2: '🌸'
+};
+
+const ACH_ICONS = {
+  ArrowUp: '🚀',
+  Compass: '🧭',
+  Award: '🎖️',
+  Crown: '👑',
+  Gem: '💎',
+  Shield: '🛡️',
+  RotateCw: '🌀',
+  Flame: '🔥'
+};
+
 export function Profile({ onNavigate, initialTab = 'skins' }) {
-  const { user, profile, updateProfile, isGuest } = useAuth();
+  const { 
+    user, 
+    profile, 
+    updateProfile, 
+    isGuest,
+    buySkin,
+    buyTrail,
+    setSelectedTrail,
+    claimDailyQuest,
+    unlockAchievement
+  } = useAuth();
   const { showAlert } = useDialog();
-  const [activeTab, setActiveTab] = useState(initialTab); // 'skins' | 'history'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'skins' | 'trails' | 'quests' | 'history'
   const [isEditingName, setIsEditingName] = useState(false);
   const [usernameInput, setUsernameInput] = useState(profile?.username || '');
   const [fullNameInput, setFullNameInput] = useState(profile?.full_name || '');
@@ -139,24 +174,146 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
     const chosenSkin = BALL_SKINS.find(s => s.id === skinId);
     if (!chosenSkin) return;
 
-    const isUnlocked = !chosenSkin.unlockStage || stagesCompleted >= chosenSkin.unlockStage;
-    if (!isUnlocked) {
+    const isUnlocked = !chosenSkin.unlockStage || stagesCompleted >= chosenSkin.unlockStage || profile?.unlocked_skins?.includes(skinId);
+    if (isUnlocked) {
+      await updateProfile({ ball_skin: skinId });
+      showAlert({
+        title: 'Esfera Equipada',
+        message: `A skin "${chosenSkin.name}" foi equipada na sua bola de salto!`,
+        variant: 'success',
+        confirmText: 'Jogar com ela'
+      });
+      return;
+    }
+
+    // Se estiver bloqueada por fase, o jogador pode comprá-la com gemas
+    const cost = chosenSkin.priceGems || 500;
+    const currentGems = profile?.gems ?? 100;
+
+    if (currentGems < cost) {
       showAlert({
         title: '🔒 Skin Bloqueada',
-        message: `A skin "${chosenSkin.name}" é desbloqueada ao vencer a Fase ${chosenSkin.unlockStage}! Conquiste as fases no modo solo para liberar essa esfera especial.`,
+        message: `"${chosenSkin.name}" é desbloqueada ao vencer a Fase ${chosenSkin.unlockStage} ou por ${cost} 💎 Gemas (Seu saldo: ${currentGems} 💎). Colete mais gemas jogando para liberá-la!`,
         variant: 'warning',
         confirmText: 'Entendido'
       });
       return;
     }
 
-    await updateProfile({ ball_skin: skinId });
-    showAlert({
-      title: 'Esfera Equipada',
-      message: `A skin "${chosenSkin.name}" foi equipada na sua bola de salto!`,
-      variant: 'success',
-      confirmText: 'Jogar com ela'
-    });
+    if (buySkin) {
+      const ok = await buySkin(skinId, cost);
+      if (ok) {
+        await updateProfile({ ball_skin: skinId });
+        showAlert({
+          title: '🎉 Skin Desbloqueada!',
+          message: `Você adquiriu "${chosenSkin.name}" por ${cost} gemas e ela já está equipada!`,
+          variant: 'success'
+        });
+      }
+    }
+  };
+
+  const handleSelectTrail = async (trailId) => {
+    const chosenTrail = BALL_TRAILS.find(t => t.id === trailId);
+    if (!chosenTrail) return;
+
+    const isUnlocked = !chosenTrail.priceGems || chosenTrail.priceGems === 0 || profile?.unlocked_trails?.includes(trailId);
+    if (isUnlocked) {
+      if (setSelectedTrail) {
+        await setSelectedTrail(trailId);
+      }
+      showAlert({
+        title: 'Rastro Equipado',
+        message: `O rastro "${chosenTrail.name}" foi ativado para suas partidas!`,
+        variant: 'success'
+      });
+      return;
+    }
+
+    const cost = chosenTrail.priceGems;
+    const currentGems = profile?.gems ?? 100;
+
+    if (currentGems < cost) {
+      showAlert({
+        title: '💎 Gemas Insuficientes',
+        message: `O rastro "${chosenTrail.name}" custa ${cost} 💎 Gemas (Seu saldo: ${currentGems} 💎). Jogue para acumular mais gemas!`,
+        variant: 'warning'
+      });
+      return;
+    }
+
+    if (buyTrail) {
+      const ok = await buyTrail(trailId, cost);
+      if (ok) {
+        showAlert({
+          title: '🎉 Rastro Desbloqueado!',
+          message: `Você adquiriu o rastro "${chosenTrail.name}" por ${cost} gemas e ele já está equipado!`,
+          variant: 'success'
+        });
+      }
+    }
+  };
+
+  const handleClaimQuest = async (quest) => {
+    if (claimDailyQuest) {
+      const ok = await claimDailyQuest(quest.id, quest.rewardGems);
+      if (ok) {
+        showAlert({
+          title: '🎁 Recompensa Resgatada!',
+          message: `Você recebeu +${quest.rewardGems} 💎 Gemas pela missão "${quest.title}"!`,
+          variant: 'success'
+        });
+      }
+    }
+  };
+
+  const handleClaimAchievement = async (ach) => {
+    if (unlockAchievement) {
+      const ok = await unlockAchievement(ach.id, ach.rewardGems);
+      if (ok) {
+        showAlert({
+          title: '🏆 Conquista Desbloqueada!',
+          message: `Parabéns! Você resgatou +${ach.rewardGems} 💎 Gemas pelo troféu "${ach.title}"!`,
+          variant: 'success'
+        });
+      }
+    }
+  };
+
+  const checkAchievementProgress = (ach) => {
+    const isUnlocked = profile?.achievements?.includes(ach.id);
+    let current = 0;
+    let target = 1;
+
+    if (ach.id === 'first_jump') {
+      current = Math.min(1, profile?.total_jumps || 0);
+      target = 1;
+    } else if (ach.id === 'stage_10') {
+      current = Math.min(10, stagesCompleted);
+      target = 10;
+    } else if (ach.id === 'stage_25') {
+      current = Math.min(25, stagesCompleted);
+      target = 25;
+    } else if (ach.id === 'stage_50') {
+      current = Math.min(50, stagesCompleted);
+      target = 50;
+    } else if (ach.id === 'gem_hunter') {
+      current = Math.min(500, profile?.gems || 0);
+      target = 500;
+    } else if (ach.id === 'skin_collector') {
+      const unlockedCount = BALL_SKINS.filter(s => !s.unlockStage || stagesCompleted >= s.unlockStage || profile?.unlocked_skins?.includes(s.id)).length;
+      current = Math.min(6, unlockedCount);
+      target = 6;
+    } else if (ach.id === 'portal_master') {
+      current = Math.min(30, profile?.total_jumps ? Math.floor(profile.total_jumps / 7) : 0);
+      target = 30;
+    } else if (ach.id === 'endless_1000') {
+      current = Math.min(1000, profile?.endless_high_score || 0);
+      target = 1000;
+    }
+
+    const canClaim = !isUnlocked && current >= target;
+    return { isUnlocked, current, target, canClaim };
   };
 
   const handleFilterChange = (newFilter) => {
@@ -249,6 +406,13 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                   Modo Convidado
                 </span>
               )}
+
+              {/* Saldo de Gemas em Destaque */}
+              <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500/15 via-yellow-500/20 to-amber-500/15 px-3.5 py-1 rounded-xl border border-amber-500/40 text-amber-300 shadow-md">
+                <Sparkles className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
+                <span className="text-xs font-bold">Saldo:</span>
+                <span className="text-sm sm:text-base font-black text-amber-400">{profile?.gems ?? 100} 💎</span>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-400">
@@ -268,78 +432,115 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
       </div>
 
       {/* 2. ESTATÍSTICAS GERAIS DO PILOTO */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 space-y-1">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+        <div className="glass-card rounded-2xl p-3.5 sm:p-4 border border-slate-800 space-y-1">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Recorde</span>
             <Trophy className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-400">
+          <div className="text-xl sm:text-2xl font-black text-amber-400">
             {(profile?.high_score || 0).toLocaleString()}
           </div>
-          <p className="text-[11px] text-slate-500">Pontuação máxima</p>
+          <p className="text-[10px] text-slate-500">Pontuação máxima</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 space-y-1">
+        <div className="glass-card rounded-2xl p-3.5 sm:p-4 border border-slate-800 space-y-1">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Fases</span>
             <Layers className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-cyan-400">
-            {profile?.stages_completed || 0} <span className="text-xs text-slate-500 font-bold">/ {STAGES.length}</span>
+          <div className="text-xl sm:text-2xl font-black text-cyan-400">
+            {profile?.stages_completed || 0} <span className="text-[10px] text-slate-500 font-bold">/ {STAGES.length}</span>
           </div>
-          <p className="text-[11px] text-slate-500">Fases liberadas</p>
+          <p className="text-[10px] text-slate-500">Fases liberadas</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 space-y-1">
+        <div className="glass-card rounded-2xl p-3.5 sm:p-4 border border-slate-800 space-y-1">
           <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Saltos</span>
-            <Zap className="w-4 h-4 text-rose-400" />
+            <span>Modo Infinito</span>
+            <Flame className="w-4 h-4 text-orange-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-rose-400">
-            {(profile?.total_jumps || 0).toLocaleString()}
+          <div className="text-xl sm:text-2xl font-black text-orange-400">
+            {profile?.endless_high_score || 0}m
           </div>
-          <p className="text-[11px] text-slate-500">Impulsos totais</p>
+          <p className="text-[10px] text-slate-500">Recorde no magma</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 space-y-1">
+        <div className="glass-card rounded-2xl p-3.5 sm:p-4 border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-slate-400 text-xs">
+            <span>Gemas</span>
+            <Coins className="w-4 h-4 text-yellow-400" />
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-yellow-400">
+            {profile?.gems ?? 100}
+          </div>
+          <p className="text-[10px] text-slate-500">Saldo acumulado</p>
+        </div>
+
+        <div className="glass-card rounded-2xl p-3.5 sm:p-4 border border-slate-800 space-y-1 col-span-2 sm:col-span-1">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Partidas</span>
             <HistoryIcon className="w-4 h-4 text-purple-400" />
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-purple-400">
+          <div className="text-xl sm:text-2xl font-black text-purple-400">
             {matches.length}
           </div>
-          <p className="text-[11px] text-slate-500">Sessões registradas</p>
+          <p className="text-[10px] text-slate-500">Sessões registradas</p>
         </div>
       </div>
 
-      {/* 3. SELETOR DE ABAS INTERNAS (GARAGEM DE SKINS / HISTÓRICO DE PARTIDAS) */}
-      <div className="flex p-1 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-inner">
+      {/* 3. SELETOR DE ABAS INTERNAS (SKINS / RASTROS / MISSÕES / HISTÓRICO) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-inner">
         <button
           type="button"
           onClick={() => setActiveTab('skins')}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all truncate ${
             activeTab === 'skins'
               ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-slate-950 font-black shadow-md shadow-cyan-500/20'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Palette className="w-4 h-4" />
-          <span>Garagem de Esferas ({BALL_SKINS.length})</span>
+          <Palette className="w-4 h-4 shrink-0" />
+          <span>Esferas ({BALL_SKINS.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('trails')}
+          className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all truncate ${
+            activeTab === 'trails'
+              ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white font-black shadow-md shadow-purple-500/20'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 shrink-0" />
+          <span>Rastros FX ({BALL_TRAILS.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('quests')}
+          className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all truncate ${
+            activeTab === 'quests'
+              ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Award className="w-4 h-4 shrink-0" />
+          <span>Missões & Troféus</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('history')}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all truncate ${
             activeTab === 'history'
-              ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white font-black shadow-md shadow-purple-500/20'
+              ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white font-black shadow-md shadow-rose-500/20'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <HistoryIcon className="w-4 h-4" />
-          <span>Histórico de Partidas ({matches.length})</span>
+          <HistoryIcon className="w-4 h-4 shrink-0" />
+          <span>Histórico ({matches.length})</span>
         </button>
       </div>
 
@@ -350,14 +551,14 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
             <div className="flex items-center gap-2">
               <Palette className="w-5 h-5 text-cyan-400" />
               <div>
-                <h2 className="text-lg font-bold text-white">Garagem de Esferas ({BALL_SKINS.length})</h2>
-                <p className="text-xs text-slate-400">Desbloqueie visuais de heróis, forças táticas e cosmonautas avançando pelas fases!</p>
+                <h2 className="text-lg font-bold text-white">Garagem e Loja de Esferas ({BALL_SKINS.length})</h2>
+                <p className="text-xs text-slate-400">Desbloqueie avançando pelas fases ou compre instantaneamente com suas Gemas 💎!</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="px-3 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-black text-xs shadow-sm">
-                {BALL_SKINS.filter(s => !s.unlockStage || stagesCompleted >= s.unlockStage).length} / {BALL_SKINS.length} Liberadas
+                {BALL_SKINS.filter(s => !s.unlockStage || stagesCompleted >= s.unlockStage || profile?.unlocked_skins?.includes(s.id)).length} / {BALL_SKINS.length} Liberadas
               </span>
             </div>
           </div>
@@ -395,7 +596,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
             {BALL_SKINS.filter(s => skinCategory === 'all' || s.category === skinCategory).map((skin) => {
               const isSelected = activeSkin.id === skin.id;
-              const isUnlocked = !skin.unlockStage || stagesCompleted >= skin.unlockStage;
+              const isUnlocked = !skin.unlockStage || stagesCompleted >= skin.unlockStage || profile?.unlocked_skins?.includes(skin.id);
 
               return (
                 <button
@@ -405,21 +606,21 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                     isSelected
                       ? 'bg-cyan-500/10 border-cyan-400 shadow-lg shadow-cyan-500/25 scale-105 ring-2 ring-cyan-400/40'
                       : !isUnlocked
-                        ? 'bg-slate-950/50 border-slate-800/80 opacity-70 hover:opacity-90 hover:border-amber-500/40'
+                        ? 'bg-slate-950/50 border-slate-800/80 opacity-80 hover:opacity-100 hover:border-amber-500/40'
                         : 'glass-card border-slate-800 hover:border-slate-700 hover:scale-[1.02]'
                   }`}
                 >
-                  {/* Badge de Bloqueio com Fase Requerida */}
+                  {/* Badge de Bloqueio com Fase Requerida ou Preço em Gemas */}
                   {!isUnlocked && (
                     <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-bold flex items-center gap-0.5 shadow-sm">
                       <Lock className="w-2.5 h-2.5" />
-                      <span>Fase {skin.unlockStage}</span>
+                      <span>{skin.priceGems || 500} 💎</span>
                     </div>
                   )}
 
                   {/* Visual Vetorial da Bola com Emblema Real e Glow */}
                   <div className="relative mt-1 flex items-center justify-center">
-                    <div className={`transition-transform ${!isUnlocked ? 'filter grayscale-[25%] opacity-75' : 'group-hover:scale-105'}`}>
+                    <div className={`transition-transform ${!isUnlocked ? 'filter grayscale-[20%] opacity-85' : 'group-hover:scale-105'}`}>
                       <SkinPreviewCanvas skinId={skin.id} size={54} shadow={isUnlocked} />
                     </div>
                     {!isUnlocked && (
@@ -440,12 +641,246 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                           ? 'text-amber-400/90' 
                           : 'text-slate-500'
                     }`}>
-                      {isSelected ? 'Equipado' : !isUnlocked ? `🔒 Fase ${skin.unlockStage}` : 'Selecionar'}
+                      {isSelected ? 'Equipado' : !isUnlocked ? `Fase ${skin.unlockStage} ou ${skin.priceGems || 500} 💎` : 'Selecionar'}
                     </span>
                   </div>
                 </button>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* 4.5. ABA 2: LOJA DE RASTROS FX */}
+      {activeTab === 'trails' && (
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-6 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-400" />
+              <div>
+                <h2 className="text-lg font-bold text-white">Loja de Rastros e Efeitos (Trail FX)</h2>
+                <p className="text-xs text-slate-400">Personalize o rastro de partículas da sua esfera durante os saltos e subidas!</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-black text-xs shadow-sm">
+                Rastro Ativo: {BALL_TRAILS.find(t => t.id === (profile?.selected_trail || 'default'))?.name || 'Padrão'}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {BALL_TRAILS.map((trail) => {
+              const isSelected = (profile?.selected_trail || 'default') === trail.id;
+              const isUnlocked = trail.priceGems === 0 || profile?.unlocked_trails?.includes(trail.id);
+
+              return (
+                <div
+                  key={trail.id}
+                  className={`p-4 rounded-2xl border transition-all relative overflow-hidden flex flex-col justify-between gap-3 ${
+                    isSelected
+                      ? 'bg-purple-500/10 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-500/20'
+                      : 'glass-card border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{TRAIL_ICONS[trail.icon] || '✨'}</span>
+                        <h3 className="font-bold text-white text-sm">{trail.name}</h3>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">{trail.description}</p>
+                    </div>
+                    {isSelected && (
+                      <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 text-[10px] font-black border border-purple-500/30">
+                        EM USO
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Demonstração da Cor do Rastro */}
+                  <div className="flex items-center gap-1.5 py-1">
+                    <span className="text-[10px] text-slate-500 font-medium">Cor do Efeito:</span>
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className="w-4 h-4 rounded-full shadow-md border border-white/30"
+                        style={{ backgroundColor: trail.color || '#38bdf8' }}
+                      />
+                      <span className="text-[10px] font-bold text-slate-400 font-mono">{trail.color || '#38bdf8'}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-400">
+                      {isUnlocked ? 'Desbloqueado' : `${trail.priceGems} 💎`}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTrail(trail.id)}
+                      className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-slate-800 text-slate-400 cursor-default'
+                          : isUnlocked
+                            ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black shadow-md shadow-cyan-500/20 active:scale-95'
+                            : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black shadow-md shadow-amber-500/20 active:scale-95'
+                      }`}
+                    >
+                      {isSelected ? 'Equipado' : isUnlocked ? 'Equipar' : `Comprar (${trail.priceGems} 💎)`}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 4.7. ABA 3: MISSÕES DIÁRIAS & CONQUISTAS */}
+      {activeTab === 'quests' && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Missões Diárias */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-amber-400" />
+                <div>
+                  <h2 className="text-lg font-bold text-white">Missões Diárias</h2>
+                  <p className="text-xs text-slate-400">Complete as 3 tarefas de hoje para encher o bolso de gemas!</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold self-start sm:self-auto">
+                Atualiza todo dia à meia-noite 🕛
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              {getDailyQuests(new Date().toISOString().slice(0, 10)).map((quest) => {
+                const currentProgress = profile?.daily_quests_progress?.[quest.id] || 0;
+                const isClaimed = profile?.daily_quests_progress?.[`${quest.id}_claimed`] || false;
+                const isComplete = currentProgress >= quest.target;
+                const progressPct = Math.min(100, Math.round((currentProgress / quest.target) * 100));
+
+                return (
+                  <div
+                    key={quest.id}
+                    className="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between gap-3 relative overflow-hidden"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-2xl">{ACH_ICONS[quest.icon] || '🎯'}</span>
+                        <span className="px-2 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-black">
+                          +{quest.rewardGems} 💎
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-white text-sm mt-2">{quest.title}</h3>
+                      <p className="text-xs text-slate-400 mt-0.5">{quest.desc || quest.description}</p>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                      <div className="flex justify-between text-[11px] font-semibold text-slate-400">
+                        <span>Progresso</span>
+                        <span className="text-slate-200">{currentProgress} / {quest.target}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div
+                          className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all"
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={!isComplete || isClaimed}
+                        onClick={() => handleClaimQuest(quest)}
+                        className={`w-full py-2 rounded-xl text-xs font-black transition-all ${
+                          isClaimed
+                            ? 'bg-slate-800 text-slate-500 cursor-default'
+                            : isComplete
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-md shadow-emerald-500/20 active:scale-95 cursor-pointer'
+                              : 'bg-slate-800/50 text-slate-500 border border-slate-700/40 cursor-not-allowed'
+                        }`}
+                      >
+                        {isClaimed ? 'Resgatado ✅' : isComplete ? `Resgatar +${quest.rewardGems} 💎` : 'Em Progresso'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Mural de Conquistas */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-5">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-yellow-400" />
+              <div>
+                <h2 className="text-lg font-bold text-white">Mural de Troféus & Conquistas</h2>
+                <p className="text-xs text-slate-400">Marcos de honra permanentes para celebrar sua jornada cósmica!</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {ACHIEVEMENTS.map((ach) => {
+                const { isUnlocked, current, target, canClaim } = checkAchievementProgress(ach);
+                const isClaimed = profile?.achievements?.includes(ach.id);
+                const pct = Math.min(100, Math.round((current / target) * 100));
+
+                return (
+                  <div
+                    key={ach.id}
+                    className={`p-4 rounded-2xl border transition-all flex items-start gap-3.5 ${
+                      isClaimed
+                        ? 'bg-amber-500/10 border-amber-500/30'
+                        : 'glass-card border-slate-800'
+                    }`}
+                  >
+                    <div className="text-3xl shrink-0 p-2 rounded-2xl bg-slate-900 border border-slate-800">
+                      {ACH_ICONS[ach.icon] || '🏆'}
+                    </div>
+
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-bold text-white text-sm truncate">{ach.title}</h3>
+                        <span className="px-2 py-0.5 rounded-md bg-yellow-500/15 border border-yellow-500/30 text-yellow-300 text-[11px] font-black shrink-0">
+                          +{ach.rewardGems} 💎
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400">{ach.desc || ach.description}</p>
+
+                      <div className="pt-1 space-y-1">
+                        <div className="flex justify-between text-[10px] text-slate-400">
+                          <span>Progresso</span>
+                          <span>{current.toLocaleString()} / {target.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                          <div
+                            className="h-full bg-gradient-to-r from-yellow-500 to-amber-400 rounded-full"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {canClaim && (
+                        <button
+                          type="button"
+                          onClick={() => handleClaimAchievement(ach)}
+                          className="mt-2 w-full py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+                        >
+                          Coletar +{ach.rewardGems} 💎
+                        </button>
+                      )}
+                      {isClaimed && (
+                        <span className="inline-block text-[11px] text-emerald-400 font-bold mt-1">
+                          ✓ Conquistado
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
