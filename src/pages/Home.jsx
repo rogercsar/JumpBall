@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { STAGES, BALL_SKINS } from '../game/stages';
+import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 export function Home({ onNavigate }) {
   const { user, profile, updateProfile } = useAuth();
@@ -188,17 +189,13 @@ export function Home({ onNavigate }) {
                 }}
               />
 
-              {/* Esfera 3D compacta */}
+              {/* Esfera vetorial estilizada hiper-personalizada */}
               <div
-                className="relative w-20 h-20 rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer active:scale-95"
+                className="relative flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer active:scale-95"
                 onClick={() => onNavigate('profile')}
                 title="Personalizar Esfera no Hangar"
-                style={{
-                  background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${currentSkin.primary} 45%, ${currentSkin.trail} 100%)`,
-                  boxShadow: `0 0 35px ${currentSkin.glow}, inset -5px -5px 14px rgba(0,0,0,0.6)`
-                }}
               >
-                <div className="w-5 h-5 rounded-full bg-white/45 blur-xs absolute top-2.5 left-4" />
+                <SkinPreviewCanvas skinId={currentSkin.id} size={76} shadow={true} />
               </div>
             </div>
 
@@ -220,14 +217,13 @@ export function Home({ onNavigate }) {
                     key={skin.id}
                     onClick={() => handleQuickEquipSkin(skin.id)}
                     title={skin.name}
-                    className={`w-5 h-5 rounded-full transition-transform ${currentSkin.id === skin.id
-                        ? 'scale-125 ring-2 ring-white shadow-md'
-                        : 'opacity-60 hover:opacity-100 hover:scale-110'
+                    className={`transition-transform flex items-center justify-center ${currentSkin.id === skin.id
+                        ? 'scale-125 ring-2 ring-cyan-400 rounded-full shadow-md'
+                        : 'opacity-70 hover:opacity-100 hover:scale-110'
                       }`}
-                    style={{
-                      background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${skin.primary} 50%, ${skin.trail} 100%)`
-                    }}
-                  />
+                  >
+                    <SkinPreviewCanvas skinId={skin.id} size={20} shadow={false} />
+                  </button>
                 ))}
               </div>
             </div>

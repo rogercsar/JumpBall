@@ -1,6 +1,7 @@
 import { soundEngine } from './audio';
 import { ParticleSystem } from './particles';
 import { BackgroundRenderer } from './background';
+import { drawBallSkin } from './skinRenderer';
 
 export class GameEngine {
   constructor(canvas, stage, skin, onGameOver, onVictory, onScoreUpdate, onLivesUpdate, gameOptions = {}) {
@@ -51,6 +52,12 @@ export class GameEngine {
     this.lives = 3;
     this.deathMarkers = [];
     this.invulnerableTimer = 0;
+
+    // Sistema de Paredes Laterais Temáticas (Bloqueios e Portais Abertos)
+    this.wallWidth = 14;
+    this.wallCycleHeight = 360;
+    this.wallBlockedHeight = 220; // 220px parede sólida, 140px portal aberto
+    this.wallTheme = this.initWallTheme();
 
     // Estado da Bola do Jogador
     const isRace = this.mode === 'race_ai' || this.mode === 'race_pvp';
@@ -171,6 +178,287 @@ export class GameEngine {
     if (stageNum <= 16) return 3;
     if (stageNum <= 28) return 4;
     return 5; // Fases mais altas com maior extensão vertical
+  }
+
+  // Define o estilo temático das paredes e portais conforme a fase
+  initWallTheme() {
+    const theme = (this.stage && this.stage.theme) ? this.stage.theme.toLowerCase() : 'cyber';
+    if (theme.includes('forest') || theme.includes('nature') || theme.includes('tree')) {
+      return {
+        type: 'forest',
+        primary: '#1e3a2b',
+        secondary: '#062419',
+        border: '#22c55e',
+        accent: '#86efac',
+        portalColor: '#4ade80',
+        sparkColor: '#86efac'
+      };
+    } else if (theme.includes('desert') || theme.includes('sand') || theme.includes('dune')) {
+      return {
+        type: 'desert',
+        primary: '#542c09',
+        secondary: '#2e1503',
+        border: '#eab308',
+        accent: '#fde047',
+        portalColor: '#f59e0b',
+        sparkColor: '#facc15'
+      };
+    } else if (theme.includes('ocean') || theme.includes('water') || theme.includes('abyss')) {
+      return {
+        type: 'ocean',
+        primary: '#073b4c',
+        secondary: '#031726',
+        border: '#06b6d4',
+        accent: '#67e8f9',
+        portalColor: '#0ea5e9',
+        sparkColor: '#38bdf8'
+      };
+    } else if (theme.includes('ice') || theme.includes('glacier') || theme.includes('frost') || theme.includes('snow')) {
+      return {
+        type: 'ice',
+        primary: '#0c4a6e',
+        secondary: '#082f49',
+        border: '#38bdf8',
+        accent: '#e0f2fe',
+        portalColor: '#7dd3fc',
+        sparkColor: '#ffffff'
+      };
+    } else if (theme.includes('volcano') || theme.includes('magma') || theme.includes('lava') || theme.includes('fire')) {
+      return {
+        type: 'volcano',
+        primary: '#450a0a',
+        secondary: '#1c0505',
+        border: '#ef4444',
+        accent: '#f97316',
+        portalColor: '#fbbf24',
+        sparkColor: '#fdba74'
+      };
+    } else if (theme.includes('space') || theme.includes('cosmic') || theme.includes('void') || theme.includes('galaxy')) {
+      return {
+        type: 'space',
+        primary: '#1e1b4b',
+        secondary: '#0f0c29',
+        border: '#818cf8',
+        accent: '#c084fc',
+        portalColor: '#a855f7',
+        sparkColor: '#e0e7ff'
+      };
+    } else {
+      return {
+        type: 'cyber',
+        primary: '#0f172a',
+        secondary: '#020617',
+        border: '#06b6d4',
+        accent: '#ec4899',
+        portalColor: '#a855f7',
+        sparkColor: '#38bdf8'
+      };
+    }
+  }
+
+  // Verifica se uma coordenada vertical Y do mundo corresponde a uma parede bloqueada ou portal aberto
+  isWallBlocked(worldY) {
+    const cycle = this.wallCycleHeight;
+    const normY = ((Math.floor(worldY) % cycle) + cycle) % cycle;
+    return normY < this.wallBlockedHeight;
+  }
+
+  // Trata colisões laterais: ricochete com impacto na parede ou travessia pelo portal
+  handleLateralWallCollisions(entity, dt, isPlayer = false) {
+    const wallW = this.wallWidth;
+    const r = entity.radius;
+
+    // 1. Parede Lateral Esquerda
+    if (entity.x - r <= wallW) {
+      if (this.isWallBlocked(entity.y)) {
+        // Bloqueada: Ricochete físico
+        entity.x = wallW + r;
+        if (entity.vx < 0) {
+          entity.vx = Math.abs(entity.vx) * 0.82 + 2.4;
+          entity.stretchX = 0.78;
+          entity.stretchY = 1.22;
+          if (isPlayer) {
+            soundEngine.playWallBounce();
+            this.particles.emitWallBounceSparks(wallW, entity.y, this.wallTheme.sparkColor, true);
+          }
+        }
+      } else {
+        // Portal Aberto: Atravessar totalmente para o lado oposto
+        if (entity.x < -r) {
+          entity.x = this.width - wallW - r;
+          if (isPlayer) {
+            soundEngine.playPortalWarp();
+            this.particles.emitPortalWarpBurst(wallW, entity.y, this.wallTheme.portalColor);
+            this.particles.emitPortalWarpBurst(this.width - wallW, entity.y, this.wallTheme.portalColor);
+          }
+        }
+      }
+    }
+
+    // 2. Parede Lateral Direita
+    if (entity.x + r >= this.width - wallW) {
+      if (this.isWallBlocked(entity.y)) {
+        // Bloqueada: Ricochete físico
+        entity.x = this.width - wallW - r;
+        if (entity.vx > 0) {
+          entity.vx = -Math.abs(entity.vx) * 0.82 - 2.4;
+          entity.stretchX = 0.78;
+          entity.stretchY = 1.22;
+          if (isPlayer) {
+            soundEngine.playWallBounce();
+            this.particles.emitWallBounceSparks(this.width - wallW, entity.y, this.wallTheme.sparkColor, false);
+          }
+        }
+      } else {
+        // Portal Aberto: Atravessar totalmente para o lado oposto
+        if (entity.x > this.width + r) {
+          entity.x = wallW + r;
+          if (isPlayer) {
+            soundEngine.playPortalWarp();
+            this.particles.emitPortalWarpBurst(this.width - wallW, entity.y, this.wallTheme.portalColor);
+            this.particles.emitPortalWarpBurst(wallW, entity.y, this.wallTheme.portalColor);
+          }
+        }
+      }
+    }
+  }
+
+  // Renderiza as paredes laterais temáticas e os portais abertos
+  drawLateralWalls(ctx) {
+    const theme = this.wallTheme;
+    const wallW = this.wallWidth;
+    const cycle = this.wallCycleHeight;
+    const blockedH = this.wallBlockedHeight;
+    const openH = cycle - blockedH;
+
+    const startY = this.cameraY - 40;
+    const endY = this.cameraY + this.height + 40;
+
+    const firstCycleIndex = Math.floor(startY / cycle);
+    const lastCycleIndex = Math.floor(endY / cycle);
+
+    ctx.save();
+
+    for (let c = firstCycleIndex; c <= lastCycleIndex; c++) {
+      const cycleWorldTop = c * cycle;
+      const screenBlockedTop = cycleWorldTop - this.cameraY;
+      const screenGatewayTop = screenBlockedTop + blockedH;
+
+      // ==========================================
+      // A. SEÇÃO BLOQUEADA (PAREDE SÓLIDA)
+      // ==========================================
+      // 1. Pilar Esquerdo
+      const gradLeft = ctx.createLinearGradient(0, 0, wallW, 0);
+      gradLeft.addColorStop(0, theme.secondary);
+      gradLeft.addColorStop(0.7, theme.primary);
+      gradLeft.addColorStop(1, theme.border);
+      ctx.fillStyle = gradLeft;
+      ctx.fillRect(0, screenBlockedTop, wallW, blockedH);
+
+      // Borda interna iluminada
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(wallW, screenBlockedTop);
+      ctx.lineTo(wallW, screenBlockedTop + blockedH);
+      ctx.stroke();
+
+      // 2. Pilar Direito
+      const gradRight = ctx.createLinearGradient(this.width - wallW, 0, this.width, 0);
+      gradRight.addColorStop(0, theme.border);
+      gradRight.addColorStop(0.3, theme.primary);
+      gradRight.addColorStop(1, theme.secondary);
+      ctx.fillStyle = gradRight;
+      ctx.fillRect(this.width - wallW, screenBlockedTop, wallW, blockedH);
+
+      ctx.beginPath();
+      ctx.moveTo(this.width - wallW, screenBlockedTop);
+      ctx.lineTo(this.width - wallW, screenBlockedTop + blockedH);
+      ctx.stroke();
+
+      // 3. Detalhes Decorativos no Bloco (Ranhuras / Rebites temáticos)
+      const numSegments = 5;
+      const segStep = blockedH / numSegments;
+      ctx.strokeStyle = theme.accent;
+      ctx.lineWidth = 1;
+      ctx.fillStyle = theme.accent;
+      for (let s = 1; s < numSegments; s++) {
+        const segY = screenBlockedTop + s * segStep;
+        // Ranhura horizontal esquerda
+        ctx.beginPath();
+        ctx.moveTo(1, segY);
+        ctx.lineTo(wallW - 2, segY);
+        ctx.stroke();
+        ctx.fillRect(wallW - 4, segY - 1.5, 3, 3);
+
+        // Ranhura horizontal direita
+        ctx.beginPath();
+        ctx.moveTo(this.width - wallW + 2, segY);
+        ctx.lineTo(this.width - 1, segY);
+        ctx.stroke();
+        ctx.fillRect(this.width - wallW + 1, segY - 1.5, 3, 3);
+      }
+
+      // ==========================================
+      // B. TERMINAIS / EMISSORES DE ENERGIA NAS BORDAS DO PORTAL
+      // ==========================================
+      ctx.fillStyle = theme.accent;
+      ctx.fillRect(0, screenGatewayTop - 4, wallW + 2, 4);
+      ctx.fillRect(this.width - wallW - 2, screenGatewayTop - 4, wallW + 2, 4);
+
+      ctx.fillRect(0, screenGatewayTop + openH, wallW + 2, 4);
+      ctx.fillRect(this.width - wallW - 2, screenGatewayTop + openH, wallW + 2, 4);
+
+      // ==========================================
+      // C. SEÇÃO ABERTA (PORTAL DE PASSAGEM / TELETRANSPORTE)
+      // ==========================================
+      const portalGradLeft = ctx.createLinearGradient(0, 0, wallW * 2.5, 0);
+      portalGradLeft.addColorStop(0, theme.portalColor);
+      portalGradLeft.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = portalGradLeft;
+      ctx.globalAlpha = 0.28;
+      ctx.fillRect(0, screenGatewayTop, wallW * 2.5, openH);
+
+      const portalGradRight = ctx.createLinearGradient(this.width, 0, this.width - wallW * 2.5, 0);
+      portalGradRight.addColorStop(0, theme.portalColor);
+      portalGradRight.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = portalGradRight;
+      ctx.fillRect(this.width - wallW * 2.5, screenGatewayTop, wallW * 2.5, openH);
+      ctx.globalAlpha = 1.0;
+
+      // Linha de energia tracejada vertical
+      ctx.save();
+      ctx.strokeStyle = theme.portalColor;
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(2, screenGatewayTop);
+      ctx.lineTo(2, screenGatewayTop + openH);
+      ctx.moveTo(this.width - 2, screenGatewayTop);
+      ctx.lineTo(this.width - 2, screenGatewayTop + openH);
+      ctx.stroke();
+      ctx.restore();
+
+      // Chevrons animados convidativos ( « e » )
+      const midGatewayY = screenGatewayTop + openH / 2;
+      ctx.fillStyle = theme.portalColor;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const chevronAlpha = 0.45 + Math.sin(Date.now() * 0.006) * 0.35;
+      ctx.globalAlpha = Math.max(0.15, chevronAlpha);
+      ctx.fillText('«', 7, midGatewayY - 20);
+      ctx.fillText('«', 7, midGatewayY);
+      ctx.fillText('«', 7, midGatewayY + 20);
+
+      ctx.fillText('»', this.width - 7, midGatewayY - 20);
+      ctx.fillText('»', this.width - 7, midGatewayY);
+      ctx.fillText('»', this.width - 7, midGatewayY + 20);
+      ctx.globalAlpha = 1.0;
+    }
+
+    ctx.restore();
   }
 
   initCanvas() {
@@ -448,12 +736,8 @@ export class GameEngine {
     this.ball.x += this.ball.vx * dt;
     this.ball.angle += (this.ball.vx * 0.05) * dt;
 
-    // Wrap around nas bordas laterais da tela
-    if (this.ball.x < -this.ball.radius) {
-      this.ball.x = this.width + this.ball.radius;
-    } else if (this.ball.x > this.width + this.ball.radius) {
-      this.ball.x = -this.ball.radius;
-    }
+    // Tratamento de Paredes Laterais: Bloqueio com Ricochete vs Portal Aberto com Travessia
+    this.handleLateralWallCollisions(this.ball, dt, true);
 
     // 2. Física Vertical (Gravidade ou Efeito Balão Suave da Mochila Mágica)
     if (this.ball.hasMagicBackpack && this.ball.backpackFuel > 0) {
@@ -919,12 +1203,8 @@ export class GameEngine {
     bot.x += bot.vx * dt;
     bot.angle += (bot.vx * 0.05) * dt;
 
-    // Wrap around nas bordas da tela
-    if (bot.x < -bot.radius) {
-      bot.x = this.width + bot.radius;
-    } else if (bot.x > this.width + bot.radius) {
-      bot.x = -bot.radius;
-    }
+    // Tratamento de Paredes Laterais para o Bot
+    this.handleLateralWallCollisions(bot, dt, false);
 
     // Física Vertical
     bot.vy += this.gravity * dt;
@@ -1774,6 +2054,9 @@ export class GameEngine {
     // 4.5. Desenhar Inimigos e Perigos Ambientais da Cena
     this.drawEnvironmentalHazards(ctx);
 
+    // 4.8. Desenhar Paredes Laterais e Portais Temáticos
+    this.drawLateralWalls(ctx);
+
     // 5. Desenhar a Bola do Jogador
     const ballScreenY = this.ball.y - this.cameraY;
 
@@ -1846,25 +2129,14 @@ export class GameEngine {
     ctx.rotate(this.ball.angle);
     ctx.scale(this.ball.stretchX, this.ball.stretchY);
 
-    // Glow externo
-    ctx.shadowColor = this.skin.glow;
-    ctx.shadowBlur = this.isMobile ? 0 : 18;
-
-    // Gradiente esférico 3D
-    const ballGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.ball.radius);
-    ballGrad.addColorStop(0, '#ffffff');
-    ballGrad.addColorStop(0.4, this.skin.primary);
-    ballGrad.addColorStop(1, this.skin.trail);
-
-    ctx.fillStyle = ballGrad;
-    ctx.beginPath();
-    ctx.arc(0, 0, this.ball.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Contorno brilhante
-    ctx.strokeStyle = this.skin.glow;
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Renderização vetorial hiper-personalizada da Skin ativa com detalhes do herói/tema
+    drawBallSkin(ctx, this.skin?.id || 'neon-cyan', 0, 0, this.ball.radius, {
+      shadow: !this.isMobile,
+      shadowBlur: 18,
+      angle: 0,
+      stretchX: 1,
+      stretchY: 1
+    });
 
     // Anel / Halo Dinâmico de Carga de Impulso ao redor da bola
     if (this.boostCharge > 0) {
@@ -1991,31 +2263,14 @@ export class GameEngine {
         ctx.rotate(this.botBall.angle);
         ctx.scale(this.botBall.stretchX, this.botBall.stretchY);
 
-        // Glow externo do Bot
-        ctx.shadowColor = this.botBall.skin.glow;
-        ctx.shadowBlur = this.isMobile ? 0 : 18;
-
-        // Gradiente do Bot
-        const botGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.botBall.radius);
-        botGrad.addColorStop(0, '#ffffff');
-        botGrad.addColorStop(0.35, this.botBall.skin.primary);
-        botGrad.addColorStop(1, this.botBall.skin.trail);
-
-        ctx.fillStyle = botGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, this.botBall.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Contorno brilhante
-        ctx.strokeStyle = this.botBall.skin.glow;
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-
-        // Visor óptico cibernético de IA
-        ctx.fillStyle = '#38bdf8';
-        ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = this.isMobile ? 0 : 8;
-        ctx.fillRect(-6, -3, 12, 5);
+        // Renderização vetorial temática da esfera do Bot IA (Cyber Shinobi)
+        drawBallSkin(ctx, 'cyber-shinobi', 0, 0, this.botBall.radius, {
+          shadow: !this.isMobile,
+          shadowBlur: 16,
+          angle: 0,
+          stretchX: 1,
+          stretchY: 1
+        });
 
         ctx.restore();
 
@@ -2090,22 +2345,14 @@ export class GameEngine {
         ctx.rotate(this.opponentBall.angle);
         ctx.scale(this.opponentBall.stretchX, this.opponentBall.stretchY);
 
-        ctx.shadowColor = this.opponentBall.skin.glow;
-        ctx.shadowBlur = this.isMobile ? 0 : 18;
-
-        const oppGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.opponentBall.radius);
-        oppGrad.addColorStop(0, '#ffffff');
-        oppGrad.addColorStop(0.35, this.opponentBall.skin.primary);
-        oppGrad.addColorStop(1, this.opponentBall.skin.trail);
-
-        ctx.fillStyle = oppGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, this.opponentBall.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = this.opponentBall.skin.glow;
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
+        // Renderização vetorial temática da esfera do adversário humano
+        drawBallSkin(ctx, this.opponentBall.skin?.id || 'neon-cyan', 0, 0, this.opponentBall.radius, {
+          shadow: !this.isMobile,
+          shadowBlur: 16,
+          angle: 0,
+          stretchX: 1,
+          stretchY: 1
+        });
 
         ctx.restore();
 

@@ -166,6 +166,32 @@ export class ParticleSystem {
     }
   }
 
+  // Faíscas de ricochete na parede lateral bloqueada
+  emitWallBounceSparks(x, y, color = '#38bdf8', isLeft = true) {
+    this.emit(x, y, 10, {
+      color,
+      size: 3.5,
+      speed: 4.2,
+      spread: Math.PI * 0.7,
+      baseAngle: isLeft ? 0 : Math.PI,
+      life: 0.45,
+      gravity: 0.12
+    });
+  }
+
+  // Anel de partículas ao atravessar o portal lateral aberto
+  emitPortalWarpBurst(x, y, color = '#a855f7') {
+    this.emit(x, y, 14, {
+      color,
+      size: 4,
+      speed: 3.6,
+      spread: Math.PI * 2,
+      baseAngle: 0,
+      life: 0.6,
+      gravity: 0
+    });
+  }
+
   update(dt = 1) {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];

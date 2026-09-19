@@ -1491,6 +1491,54 @@ class SoundEngine {
     osc.start(now);
     osc.stop(now + 0.32);
   }
+
+  // Efeito de Colisão / Ricochete na Parede Lateral Bloqueada
+  playWallBounce() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(70, now + 0.12);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  // Efeito de Teletransporte / Travessia no Portal Lateral Aberto
+  playPortalWarp() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+
+    gain.gain.setValueAtTime(this.sfxVolume * 0.28, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.22);
+  }
 }
 
 export const soundEngine = new SoundEngine();

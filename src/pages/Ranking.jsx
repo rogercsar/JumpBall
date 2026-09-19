@@ -19,6 +19,7 @@ import {
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { BALL_SKINS, STAGES } from '../game/stages';
+import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 export function Ranking({ onNavigate }) {
   const { user, profile } = useAuth();
@@ -241,13 +242,8 @@ export function Ranking({ onNavigate }) {
           {leaderboard[1] && (
             <div className="flex flex-col items-center animate-fade-in order-1">
               <div className="relative mb-2 flex flex-col items-center">
-                <div
-                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-lg border-2 border-slate-300 flex items-center justify-center relative"
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${getSkinDetails(leaderboard[1].ball_skin).primary} 60%, ${getSkinDetails(leaderboard[1].ball_skin).trail} 100%)`,
-                    boxShadow: '0 0 15px rgba(203, 213, 225, 0.4)'
-                  }}
-                >
+                <div className="relative flex items-center justify-center">
+                  <SkinPreviewCanvas skinId={leaderboard[1].ball_skin} size={54} />
                   <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
                     2
                   </span>
@@ -271,13 +267,8 @@ export function Ranking({ onNavigate }) {
             <div className="flex flex-col items-center animate-fade-in order-2">
               <div className="relative mb-2 flex flex-col items-center">
                 <Crown className="w-6 h-6 text-amber-400 animate-bounce mb-1 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                <div
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-2xl border-4 border-amber-400 flex items-center justify-center relative"
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${getSkinDetails(leaderboard[0].ball_skin).primary} 60%, ${getSkinDetails(leaderboard[0].ball_skin).trail} 100%)`,
-                    boxShadow: '0 0 25px rgba(251, 191, 36, 0.6)'
-                  }}
-                >
+                <div className="relative flex items-center justify-center">
+                  <SkinPreviewCanvas skinId={leaderboard[0].ball_skin} size={70} />
                   <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-center shadow-lg">
                     1
                   </span>
@@ -304,13 +295,8 @@ export function Ranking({ onNavigate }) {
           {leaderboard[2] && (
             <div className="flex flex-col items-center animate-fade-in order-3">
               <div className="relative mb-2 flex flex-col items-center">
-                <div
-                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-lg border-2 border-amber-700 flex items-center justify-center relative"
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${getSkinDetails(leaderboard[2].ball_skin).primary} 60%, ${getSkinDetails(leaderboard[2].ball_skin).trail} 100%)`,
-                    boxShadow: '0 0 15px rgba(180, 83, 9, 0.4)'
-                  }}
-                >
+                <div className="relative flex items-center justify-center">
+                  <SkinPreviewCanvas skinId={leaderboard[2].ball_skin} size={54} />
                   <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center shadow-md">
                     3
                   </span>
@@ -397,15 +383,8 @@ export function Ranking({ onNavigate }) {
                     </div>
 
                     {/* Preview da Esfera / Skin equipada */}
-                    <div
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full shrink-0 shadow-md flex items-center justify-center"
-                      title={`Skin: ${skin.name}`}
-                      style={{
-                        background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${skin.primary} 60%, ${skin.trail} 100%)`,
-                        boxShadow: `0 0 10px ${skin.glow}40`
-                      }}
-                    >
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/60 blur-[1px]" />
+                    <div className="shrink-0 flex items-center justify-center" title={`Skin: ${skin.name}`}>
+                      <SkinPreviewCanvas skinId={item.ball_skin} size={36} shadow={false} />
                     </div>
 
                     {/* Identificação do Jogador */}

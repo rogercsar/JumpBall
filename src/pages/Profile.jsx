@@ -25,6 +25,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDialog } from '../contexts/DialogContext';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 import { BALL_SKINS, STAGES } from '../game/stages';
+import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 const PAGE_SIZE = 10;
 
@@ -196,16 +197,10 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar com a Skin da Bola Ativa */}
           <div className="relative group">
-            <div 
-              className="w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-105"
-              style={{
-                background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${activeSkin.primary} 45%, ${activeSkin.trail} 100%)`,
-                boxShadow: `0 0 30px ${activeSkin.glow}`
-              }}
-            >
-              <div className="w-4 h-4 rounded-full bg-white/40 blur-xs absolute top-3 left-5" />
+            <div className="flex items-center justify-center transition-transform group-hover:scale-105">
+              <SkinPreviewCanvas skinId={activeSkin.id} size={88} shadow={true} />
             </div>
-            <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-slate-900 border border-slate-700 text-cyan-400">
+            <div className="absolute bottom-0 right-0 p-1.5 rounded-full bg-slate-900 border border-slate-700 text-cyan-400 shadow-md">
               <Sparkles className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -422,24 +417,16 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                     </div>
                   )}
 
-                  {/* Visual da Bola com Gradiente Fiel */}
-                  <div className="relative mt-1">
-                    <div 
-                      className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform ${
-                        !isUnlocked ? 'filter grayscale-[30%] brightness-90' : 'group-hover:scale-105'
-                      }`}
-                      style={{
-                        background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${skin.primary} 45%, ${skin.trail} 100%)`,
-                        boxShadow: isUnlocked ? `0 0 18px ${skin.glow}` : '0 0 8px rgba(0,0,0,0.5)'
-                      }}
-                    >
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/40 blur-xs absolute top-2 left-3" />
-                      {!isUnlocked && (
-                        <div className="w-7 h-7 rounded-full bg-slate-950/80 backdrop-blur-xs border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-md">
-                          <Lock className="w-3.5 h-3.5" />
-                        </div>
-                      )}
+                  {/* Visual Vetorial da Bola com Emblema Real e Glow */}
+                  <div className="relative mt-1 flex items-center justify-center">
+                    <div className={`transition-transform ${!isUnlocked ? 'filter grayscale-[25%] opacity-75' : 'group-hover:scale-105'}`}>
+                      <SkinPreviewCanvas skinId={skin.id} size={54} shadow={isUnlocked} />
                     </div>
+                    {!isUnlocked && (
+                      <div className="w-7 h-7 rounded-full bg-slate-950/85 backdrop-blur-xs border border-amber-500/60 flex items-center justify-center text-amber-400 shadow-lg absolute">
+                        <Lock className="w-3.5 h-3.5" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="w-full">
