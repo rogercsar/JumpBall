@@ -139,7 +139,10 @@ export const localStore = {
       sfxVolume: 0.7,
       bgmVolume: 0.4,
       hapticsEnabled: true,
-      controlMode: 'hybrid' // 'hybrid', 'gyro', 'camera', 'touch', 'keyboard'
+      controlMode: 'hybrid', // 'hybrid', 'gyro', 'camera', 'touch', 'keyboard'
+      customBgmEnabled: false,
+      customBgmUrl: '',
+      customBgmTitle: ''
     };
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(defaultSettings));
     return defaultSettings;

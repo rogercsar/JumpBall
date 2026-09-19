@@ -10,7 +10,12 @@ export function SettingsProvider({ children }) {
   useEffect(() => {
     // Sincroniza volumes com o sintetizador Web Audio
     soundEngine.setVolumes(settings.sfxVolume, settings.bgmVolume);
-  }, [settings.sfxVolume, settings.bgmVolume]);
+    soundEngine.setCustomBgmConfig({
+      enabled: settings.customBgmEnabled,
+      url: settings.customBgmUrl,
+      title: settings.customBgmTitle
+    });
+  }, [settings.sfxVolume, settings.bgmVolume, settings.customBgmEnabled, settings.customBgmUrl, settings.customBgmTitle]);
 
   const updateSettings = (partial) => {
     setSettings((prev) => {

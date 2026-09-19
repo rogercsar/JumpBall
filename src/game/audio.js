@@ -606,6 +606,15 @@ class SoundEngine {
     this.bgmTimer = null;
     this.bgmGainNode = null;
     this.stepIndex = 0;
+
+    // Suporte a Música Personalizada (Rádios Web / Streams / MP3)
+    this.customAudio = null;
+    this.customBgmEnabled = false;
+    this.customBgmUrl = '';
+    this.customBgmTitle = '';
+    this.customAudioPlaying = false;
+    this.lastStageTheme = 'forest';
+    this.lastStageId = 1;
   }
 
   init() {
@@ -652,6 +661,9 @@ class SoundEngine {
       const targetVol = this.isMuted ? 0 : this.bgmVolume * 0.35;
       this.bgmGainNode.gain.setValueAtTime(targetVol, this.ctx.currentTime);
     }
+    if (this.customAudio) {
+      this.customAudio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.bgmVolume));
+    }
   }
 
   toggleMute() {
@@ -660,7 +672,120 @@ class SoundEngine {
       const targetVol = this.isMuted ? 0 : this.bgmVolume * 0.35;
       this.bgmGainNode.gain.setValueAtTime(targetVol, this.ctx.currentTime);
     }
+    if (this.customAudio) {
+      this.customAudio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.bgmVolume));
+    }
     return this.isMuted;
+  }
+
+  // Configuração da Música de Fundo Personalizada
+  setCustomBgmConfig({ enabled, url, title }) {
+    const wasPlaying = this.customAudioPlaying;
+    const oldUrl = this.customBgmUrl;
+
+    this.customBgmEnabled = Boolean(enabled);
+    this.customBgmUrl = (url || '').trim();
+    this.customBgmTitle = title || '';
+
+    if (wasPlaying) {
+      if (!this.customBgmEnabled || this.customBgmUrl !== oldUrl) {
+        this.stopCustomAudio();
+        if (this.customBgmEnabled && this.customBgmUrl) {
+          this.playCustomAudio();
+        } else if (this.bgmPlaying) {
+          this.startProceduralBGM(this.lastStageTheme, this.lastStageId);
+        }
+      }
+    }
+  }
+
+  playCustomAudio(onErrorCallback) {
+    if (this.isMuted || this.bgmVolume <= 0 || !this.customBgmUrl) return;
+    this.resume();
+
+    // Se já houver o mesmo elemento com a mesma URL e sem erro, aproveita a reprodução
+    if (this.customAudio && this.customAudio.src === this.customBgmUrl && !this.customAudio.error) {
+      this.customAudio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.bgmVolume));
+      const p = this.customAudio.play();
+      if (p !== undefined) {
+        p.then(() => {
+          this.customAudioPlaying = true;
+        }).catch((err) => {
+          console.warn('Falha ao reproduzir áudio personalizado:', err);
+          this.customAudioPlaying = false;
+          if (onErrorCallback) onErrorCallback(err);
+        });
+      }
+      return;
+    }
+
+    // Descarta e limpa instância anterior para não acumular erros
+    this.stopCustomAudio();
+
+    try {
+      const audio = new Audio();
+      audio.loop = true;
+      audio.preload = 'auto';
+      audio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.bgmVolume));
+      audio.src = this.customBgmUrl;
+
+      audio.onerror = () => {
+        console.warn('Erro ao carregar fonte de áudio:', audio.error);
+        this.customAudioPlaying = false;
+        if (onErrorCallback) onErrorCallback(audio.error);
+      };
+
+      this.customAudio = audio;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            this.customAudioPlaying = true;
+          })
+          .catch((err) => {
+            console.warn('Falha ao reproduzir áudio personalizado:', err);
+            this.customAudioPlaying = false;
+            if (onErrorCallback) onErrorCallback(err);
+          });
+      }
+    } catch (err) {
+      console.warn('Exceção ao criar áudio:', err);
+      this.customAudioPlaying = false;
+      if (onErrorCallback) onErrorCallback(err);
+    }
+  }
+
+  stopCustomAudio() {
+    if (this.customAudio) {
+      try {
+        this.customAudio.pause();
+        this.customAudio.src = '';
+        this.customAudio.load();
+      } catch (e) { /* ignore */ }
+    }
+    this.customAudio = null;
+    this.customAudioPlaying = false;
+  }
+
+  pauseCustomAudio() {
+    if (this.customAudio && this.customAudioPlaying) {
+      try {
+        this.customAudio.pause();
+      } catch (e) { /* ignore */ }
+    }
+  }
+
+  resumeCustomAudio() {
+    if (this.customBgmEnabled && this.customBgmUrl && !this.isMuted && this.bgmVolume > 0) {
+      if (this.customAudio) {
+        this.customAudio.volume = Math.max(0, Math.min(1, this.bgmVolume));
+        this.customAudio.play().then(() => {
+          this.customAudioPlaying = true;
+        }).catch(() => {});
+      } else {
+        this.playCustomAudio();
+      }
+    }
   }
 
   // Mapeia temas de fases para 23 estilos musicais ricos e temáticos
@@ -785,8 +910,24 @@ class SoundEngine {
     }
   }
 
-  // Inicia a música de fundo dinâmica adaptada à fase atual com proteção anti-repetição
+  // Inicia a música de fundo da fase (Customizada ou Procedural)
   startStageBGM(stageTheme = 'forest', stageId = 1) {
+    this.lastStageTheme = stageTheme;
+    this.lastStageId = stageId;
+
+    if (this.customBgmEnabled && this.customBgmUrl) {
+      this.stopProceduralBGM(0.35);
+      this.playCustomAudio();
+      this.bgmPlaying = true;
+      return;
+    }
+
+    this.stopCustomAudio();
+    this.startProceduralBGM(stageTheme, stageId);
+  }
+
+  // Inicia a música de fundo procedural dinâmica adaptada à fase atual com proteção anti-repetição
+  startProceduralBGM(stageTheme = 'forest', stageId = 1) {
     this.resume();
     if (!this.ctx) return;
 
@@ -812,7 +953,7 @@ class SoundEngine {
       return;
     }
 
-    this.stopBGM(0.35); // Fade out suave do tema anterior
+    this.stopProceduralBGM(0.35); // Fade out suave do tema anterior
     this.currentTheme = genre;
     this.currentSignature = signature;
 
@@ -874,6 +1015,11 @@ class SoundEngine {
   }
 
   pauseBGM() {
+    this.pauseCustomAudio();
+    this.pauseProceduralBGM();
+  }
+
+  pauseProceduralBGM() {
     if (this.bgmGainNode && this.ctx) {
       try {
         this.bgmGainNode.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
@@ -882,6 +1028,14 @@ class SoundEngine {
   }
 
   resumeBGM() {
+    if (this.customBgmEnabled && this.customBgmUrl) {
+      this.resumeCustomAudio();
+    } else {
+      this.resumeProceduralBGM();
+    }
+  }
+
+  resumeProceduralBGM() {
     if (this.bgmGainNode && this.ctx) {
       try {
         const targetVol = this.isMuted ? 0 : this.bgmVolume * 0.35;
@@ -891,6 +1045,11 @@ class SoundEngine {
   }
 
   stopBGM(fadeDuration = 0.4) {
+    this.stopCustomAudio();
+    this.stopProceduralBGM(fadeDuration);
+  }
+
+  stopProceduralBGM(fadeDuration = 0.4) {
     if (this.bgmTimer) {
       clearInterval(this.bgmTimer);
       this.bgmTimer = null;

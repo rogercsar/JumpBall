@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings as SettingsIcon, 
   Smartphone, 
@@ -10,7 +10,12 @@ import {
   PlayCircle,
   HelpCircle,
   Check,
-  Layers
+  Layers,
+  Radio,
+  Music,
+  Play,
+  Square,
+  Sparkles
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useDialog } from '../contexts/DialogContext';
@@ -19,12 +24,50 @@ import { soundEngine } from '../game/audio';
 import { STAGES } from '../game/stages';
 import { TiltMeter } from '../components/TiltMeter';
 
+const PRESET_RADIOS = [
+  {
+    id: 'lofi',
+    name: 'Groove Salad (Lofi & Chill)',
+    desc: 'SomaFM • Downtempo, Lofi e Ambient 24/7',
+    url: 'https://ice1.somafm.com/groovesalad-128-mp3',
+    icon: '☕'
+  },
+  {
+    id: 'synthwave',
+    name: 'Vaporwaves (Synthwave 80s)',
+    desc: 'SomaFM • Synthwave, Retrô 80s e Cyberpunk',
+    url: 'https://ice1.somafm.com/vaporwaves-128-mp3',
+    icon: '🌆'
+  },
+  {
+    id: 'dance',
+    name: 'DEF CON Radio (Cyber Gamer)',
+    desc: 'SomaFM • Música de hacker, eletrônica e ritmo cósmico',
+    url: 'https://ice1.somafm.com/defcon-128-mp3',
+    icon: '⚡'
+  },
+  {
+    id: 'chiptune',
+    name: 'CliqHop (Chiptune 8-Bit)',
+    desc: 'SomaFM • Beats 8-bit, chiptune e videogame retrô',
+    url: 'https://ice1.somafm.com/cliqhop-128-mp3',
+    icon: '👾'
+  }
+];
+
 export function Settings({ orientation, requestOrientationPermission, permissionGranted, needsPermissionPrompt, calibrate }) {
   const { settings, updateSettings } = useSettings();
   const { showAlert, showConfirm } = useDialog();
   const { profile, resetStageProgress } = useAuth();
   const [simulatedGamma, setSimulatedGamma] = useState(0);
   const [savedBadge, setSavedBadge] = useState(false);
+  const [isPlayingTest, setIsPlayingTest] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      soundEngine.stopCustomAudio();
+    };
+  }, []);
 
   const triggerSaveToast = () => {
     setSavedBadge(true);
@@ -66,6 +109,72 @@ export function Settings({ orientation, requestOrientationPermission, permission
 
   const handleTestSound = () => {
     soundEngine.playSuperJump();
+  };
+
+  const handleToggleCustomBgm = (enabled) => {
+    if (isPlayingTest) {
+      soundEngine.stopCustomAudio();
+      setIsPlayingTest(false);
+    }
+    updateSettings({ customBgmEnabled: enabled });
+    triggerSaveToast();
+  };
+
+  const handleCustomBgmUrlChange = (url) => {
+    updateSettings({ customBgmUrl: url });
+    triggerSaveToast();
+  };
+
+  const handleSelectPreset = (preset) => {
+    updateSettings({
+      customBgmEnabled: true,
+      customBgmUrl: preset.url,
+      customBgmTitle: preset.name
+    });
+    triggerSaveToast();
+
+    soundEngine.stopCustomAudio();
+    setIsPlayingTest(true);
+    soundEngine.setCustomBgmConfig({ enabled: true, url: preset.url, title: preset.name });
+    soundEngine.playCustomAudio(() => {
+      setIsPlayingTest(false);
+      showAlert({
+        title: 'Falha na Conexão',
+        message: 'Não foi possível carregar o áudio no momento. Verifique sua conexão com a internet.',
+        variant: 'warning'
+      });
+    });
+  };
+
+  const handleToggleTestPlayback = () => {
+    if (isPlayingTest) {
+      soundEngine.stopCustomAudio();
+      setIsPlayingTest(false);
+    } else {
+      const url = settings.customBgmUrl?.trim();
+      if (!url) {
+        showAlert({
+          title: 'URL Necessária',
+          message: 'Cole o link de uma rádio web/MP3 ou clique em uma das rádios sugeridas abaixo para testar.',
+          variant: 'warning'
+        });
+        return;
+      }
+      setIsPlayingTest(true);
+      soundEngine.setCustomBgmConfig({
+        enabled: true,
+        url: url,
+        title: settings.customBgmTitle
+      });
+      soundEngine.playCustomAudio(() => {
+        setIsPlayingTest(false);
+        showAlert({
+          title: 'Não foi possível carregar o áudio',
+          message: 'O link inserido não respondeu ou não é um stream de áudio direto. Verifique se a URL termina em .mp3 ou escolha uma das rádios pré-definidas da lista.',
+          variant: 'warning'
+        });
+      });
+    }
   };
 
   const handleReset = async () => {
@@ -372,7 +481,135 @@ export function Settings({ orientation, requestOrientationPermission, permission
         </div>
       </div>
 
-      {/* 5. SEÇÃO DE PROGRESSO DAS FASES (RESETAR FASES E MANTER HISTÓRICO) */}
+      {/* 5. SEÇÃO DE MÚSICA DE FUNDO PERSONALIZADA (RÁDIO WEB / LOFI / MP3) */}
+      <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
+              <Radio className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-white">Música Personalizada de Fundo</h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                  Rádio Web / MP3
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">Toque rádios online Lofi 24/7 ou links diretos de áudio no fundo das fases</p>
+            </div>
+          </div>
+
+          {/* Toggle Ativar / Desativar */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-slate-400">
+              {settings.customBgmEnabled ? 'Ativada' : 'Música do Jogo (Padrão)'}
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={Boolean(settings.customBgmEnabled)}
+                onChange={(e) => handleToggleCustomBgm(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500" />
+            </label>
+          </div>
+        </div>
+
+        {settings.customBgmEnabled && (
+          <div className="space-y-4 pt-2 border-t border-slate-800/80 animate-fade-in">
+            {/* Aviso limpo */}
+            <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-200 text-xs flex items-center gap-2.5">
+              <Music className="w-4 h-4 text-purple-400 shrink-0" />
+              <span>
+                O som tocará <strong>nativamente em segundo plano</strong> durante as fases, sem abrir nenhuma janela na tela do jogo!
+              </span>
+            </div>
+
+            {/* Input de URL e Botão de Teste */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300 block">
+                Link do Stream de Áudio ou Arquivo .MP3
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="url"
+                  value={settings.customBgmUrl || ''}
+                  onChange={(e) => handleCustomBgmUrlChange(e.target.value)}
+                  placeholder="Ex: https://stream.nightride.fm/synthwave.mp3 ou link .mp3"
+                  className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleToggleTestPlayback}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shrink-0 ${
+                    isPlayingTest
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white animate-pulse'
+                      : 'bg-purple-600 hover:bg-purple-500 text-white'
+                  }`}
+                >
+                  {isPlayingTest ? (
+                    <>
+                      <Square className="w-3.5 h-3.5 fill-current" />
+                      <span>Parar Teste</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Testar Rádio</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Rádios Pré-Definidas de 1 Clique */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-slate-400">Rádios 24/7 Recomendadas (Clique para escolher):</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {PRESET_RADIOS.map((preset) => {
+                  const isCurrent = settings.customBgmUrl === preset.url;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset)}
+                      className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 ${
+                        isCurrent
+                          ? 'bg-purple-500/15 border-purple-400 shadow-md shadow-purple-500/10 ring-1 ring-purple-400/40'
+                          : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-lg">{preset.icon}</span>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-white block truncate">{preset.name}</span>
+                          <span className="text-[10px] text-slate-400 block truncate">{preset.desc}</span>
+                        </div>
+                      </div>
+                      {isCurrent ? (
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500 text-slate-950 shrink-0">
+                          Ativa
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold text-slate-500 hover:text-purple-300 shrink-0">
+                          Usar
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 6. SEÇÃO DE PROGRESSO DAS FASES (RESETAR FASES E MANTER HISTÓRICO) */}
       <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4 bg-gradient-to-b from-slate-900/60 to-slate-950/80">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
