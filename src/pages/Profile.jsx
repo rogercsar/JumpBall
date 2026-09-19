@@ -23,12 +23,17 @@ import {
   Flame,
   Award,
   Target,
-  Coins
+  Coins,
+  Cake,
+  Gift,
+  PartyPopper,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDialog } from '../contexts/DialogContext';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 import { BALL_SKINS, BALL_TRAILS, ACHIEVEMENTS, getDailyQuests, STAGES } from '../game/stages';
+import { getActiveCommemorativeStages, getUpcomingCommemorativeStages } from '../game/events';
 import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 const PAGE_SIZE = 10;
@@ -71,7 +76,16 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [usernameInput, setUsernameInput] = useState(profile?.username || '');
   const [fullNameInput, setFullNameInput] = useState(profile?.full_name || '');
+  const [birthDateInput, setBirthDateInput] = useState(profile?.birth_date || '');
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setUsernameInput(profile.username || '');
+      setFullNameInput(profile.full_name || '');
+      setBirthDateInput(profile.birth_date || '');
+    }
+  }, [profile]);
 
   // Estados do Histórico de Partidas
   const [matches, setMatches] = useState([]);
@@ -83,6 +97,10 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
   const activeSkin = BALL_SKINS.find(s => s.id === currentSkinId) || BALL_SKINS[0];
   const stagesCompleted = Math.max(profile?.stages_completed || 0, localStore.getProfile()?.stages_completed || 0);
   const [skinCategory, setSkinCategory] = useState('all'); // 'all' | 'heroes' | 'army' | 'space' | 'starter'
+
+  // Fases Comemorativas (Ativas no momento e Próximas)
+  const activeEvents = getActiveCommemorativeStages(profile);
+  const upcomingEvents = getUpcomingCommemorativeStages(profile);
 
   const fetchHistory = async () => {
     setHistoryLoading(true);
@@ -160,12 +178,13 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
     }
     await updateProfile({
       username: usernameInput.trim(),
-      full_name: fullNameInput.trim()
+      full_name: fullNameInput.trim(),
+      birth_date: birthDateInput || null
     });
     setIsEditingName(false);
     showAlert({
       title: 'Perfil Atualizado',
-      message: `Seu nome de piloto foi alterado para "${usernameInput.trim()}" com sucesso!`,
+      message: 'Seus dados e data de aniversário foram sincronizados na nuvem com sucesso!',
       variant: 'success'
     });
   };
@@ -375,21 +394,46 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
           <div className="flex-1 text-center sm:text-left space-y-2">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
               {isEditingName ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={usernameInput}
-                    onChange={(e) => setUsernameInput(e.target.value)}
-                    className="px-3 py-1.5 bg-slate-900 border border-cyan-500 rounded-xl text-lg font-bold text-white focus:outline-none"
-                    placeholder="Seu Apelido"
-                  />
-                  <button
-                    onClick={handleSaveProfile}
-                    className="p-2 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400"
-                    title="Salvar"
-                  >
-                    <Save className="w-4 h-4" />
-                  </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full max-w-lg">
+                  <div className="flex-1 flex flex-col gap-1 text-left">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Apelido</label>
+                    <input
+                      type="text"
+                      value={usernameInput}
+                      onChange={(e) => setUsernameInput(e.target.value)}
+                      className="px-3 py-1.5 bg-slate-900 border border-cyan-500 rounded-xl text-base font-bold text-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                      placeholder="Seu Apelido"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 text-left">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                      <Cake className="w-3 h-3 text-pink-400" />
+                      Data de Nascimento
+                    </label>
+                    <input
+                      type="date"
+                      value={birthDateInput}
+                      onChange={(e) => setBirthDateInput(e.target.value)}
+                      className="px-3 py-1.5 bg-slate-900 border border-pink-500/60 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-1 focus:ring-pink-400"
+                    />
+                  </div>
+                  <div className="flex items-end gap-1.5 mt-2 sm:mt-0">
+                    <button
+                      onClick={handleSaveProfile}
+                      className="p-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-all flex items-center gap-1 shadow-md shadow-cyan-500/20"
+                      title="Salvar Alterações"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span className="text-xs sm:hidden">Salvar</span>
+                    </button>
+                    <button
+                      onClick={() => setIsEditingName(false)}
+                      className="p-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 transition-all"
+                      title="Cancelar"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center sm:justify-start gap-2">
@@ -400,10 +444,11 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                     onClick={() => {
                       setUsernameInput(profile?.username || '');
                       setFullNameInput(profile?.full_name || '');
+                      setBirthDateInput(profile?.birth_date || '');
                       setIsEditingName(true);
                     }}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition-colors"
-                    title="Editar Nome"
+                    title="Editar Perfil e Aniversário"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -435,7 +480,58 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                   Piloto desde {new Date(profile?.created_at || Date.now()).toLocaleDateString('pt-BR')}
                 </span>
               </div>
+              <div className="flex items-center gap-1.5">
+                <Cake className="w-3.5 h-3.5 text-pink-400" />
+                {profile?.birth_date ? (
+                  <span>
+                    Aniversário: {new Date(profile.birth_date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setUsernameInput(profile?.username || '');
+                      setFullNameInput(profile?.full_name || '');
+                      setBirthDateInput('');
+                      setIsEditingName(true);
+                    }}
+                    className="text-pink-400 hover:text-pink-300 underline underline-offset-2 transition-colors cursor-pointer"
+                  >
+                    Definir data de aniversário (+Fase Especial)
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Banner de Eventos Festivos Ativos no Perfil */}
+            {activeEvents.length > 0 && (
+              <div className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-pink-500/15 via-purple-500/15 to-cyan-500/15 border border-pink-500/30 flex flex-wrap items-center justify-between gap-3 text-left">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl animate-bounce">
+                    {activeEvents[0].celebrationIcon || '🎉'}
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-white">
+                        {activeEvents[0].celebrationTitle || activeEvents[0].name}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 font-bold border border-pink-500/40">
+                        {activeEvents[0].daysRemaining} {activeEvents[0].daysRemaining === 1 ? 'dia restante' : 'dias restantes'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      {activeEvents[0].celebrationSubtitle} Conquiste a fase e ganhe +{activeEvents[0].rewardGems} 💎!
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  to="/game"
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-pink-500/20 transition-all hover:scale-105 active:scale-95"
+                >
+                  <PartyPopper className="w-3.5 h-3.5" />
+                  JOGAR FASE
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

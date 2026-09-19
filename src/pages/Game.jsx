@@ -19,10 +19,14 @@ import {
   Bot,
   Swords,
   Flag,
-  Flame
+  Flame,
+  PartyPopper,
+  Cake,
+  Gift
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
 import { STAGES, BALL_SKINS } from '../game/stages';
+import { getActiveCommemorativeStages } from '../game/events';
 import { soundEngine } from '../game/audio';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSettings } from '../contexts/SettingsContext';
@@ -95,6 +99,11 @@ export function Game({ onNavigate }) {
   const [isPvPModalOpen, setIsPvPModalOpen] = useState(false);
   const [pvpMatchConfig, setPvpMatchConfig] = useState(null);
   const [challengeCodeFromUrl, setChallengeCodeFromUrl] = useState('');
+
+  // Fases comemorativas ativas na semana atual (Aniversário, Natal, Páscoa, etc.)
+  const activeEventStages = React.useMemo(() => {
+    return getActiveCommemorativeStages(profile);
+  }, [profile]);
 
   // Detecta se o jogador acessou via link de desafio (?challenge=JPXXX)
   useEffect(() => {
@@ -270,8 +279,11 @@ export function Game({ onNavigate }) {
       localProf.stages_completed || 0
     );
 
-    // Se concluiu a fase, avança as fases concluídas garantindo o desbloqueio da próxima!
-    const newStagesCompleted = isWin ? Math.max(currentCompleted, stageNumber) : currentCompleted;
+    const isEventStage = Boolean(stageObj?.isEvent);
+    // Se concluiu a fase normal, avança o progresso sequencial. Fases de eventos comemorativos são bônus independentes.
+    const newStagesCompleted = (isWin && !isEventStage && stageNumber < 999)
+      ? Math.max(currentCompleted, stageNumber)
+      : currentCompleted;
     const newHighScore = Math.max(profileRef.current?.high_score || 0, localProf.high_score || 0, scoreVal);
     const newTotalJumps = (profileRef.current?.total_jumps || localProf.total_jumps || 0) + jumpsVal;
     const newGamesPlayed = (profileRef.current?.games_played || localProf.games_played || 0) + 1;
@@ -300,8 +312,9 @@ export function Game({ onNavigate }) {
       games_played: newGamesPlayed
     };
 
-    // Crédito das gemas coletadas na partida
-    const gemsEarned = Math.round(result.gems || 0);
+    // Crédito das gemas coletadas na partida + bônus de evento se venceu a fase festiva
+    const eventRewardGems = (isWin && isEventStage) ? (stageObj?.rewardGems || 500) : 0;
+    const gemsEarned = Math.round(result.gems || 0) + eventRewardGems;
     const portalsVal = Math.round(result.portals || 0);
 
     // Registra progresso nas missões diárias
@@ -410,13 +423,21 @@ export function Game({ onNavigate }) {
         activeSkin,
         (result) => {
           setGameState('game_over');
-          setLastGameResult(result);
-          saveGameResult(result, stage);
+          const enhancedResult = { ...result, stage, isEvent: Boolean(stage?.isEvent) };
+          setLastGameResult(enhancedResult);
+          saveGameResult(enhancedResult, stage);
         },
         (result) => {
           setGameState('victory');
-          setLastGameResult(result);
-          saveGameResult(result, stage);
+          const enhancedResult = {
+            ...result,
+            stage,
+            isEvent: Boolean(stage?.isEvent),
+            eventRewardGems: stage?.rewardGems || 0,
+            celebrationTitle: stage?.celebrationTitle || stage?.name
+          };
+          setLastGameResult(enhancedResult);
+          saveGameResult(enhancedResult, stage);
 
           // Chuva de confetes
           try {
@@ -736,24 +757,98 @@ export function Game({ onNavigate }) {
               </div>
             </div>
           ) : (
-            /* Grid das Fases */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {STAGES.map((stage) => {
-              const completedStages = profile?.stages_completed || 0;
-              // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
-              const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
-              const isCompleted = stage.number <= completedStages;
+            <div className="space-y-6">
+              {/* Seção de Fases Comemorativas Ativas (Tempo Limitado: 7 Dias) */}
+              {activeEventStages.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <PartyPopper className="w-5 h-5 text-pink-400 animate-bounce" />
+                      <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                        Eventos & Fases Comemorativas
+                        <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 font-bold border border-pink-500/30 shadow-sm">
+                          Disponível por 7 Dias
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
 
-              return (
-                <StageCard
-                  key={stage.id}
-                  stage={stage}
-                  isUnlocked={isUnlocked}
-                  isCompleted={isCompleted}
-                  onSelect={startGame}
-                />
-              );
-            })}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {activeEventStages.map((evStage) => (
+                      <div
+                        key={evStage.id}
+                        className="relative glass-panel rounded-3xl p-5 border border-pink-500/40 bg-gradient-to-br from-pink-950/30 via-slate-900/90 to-purple-950/30 shadow-xl hover:border-pink-400/80 transition-all flex flex-col justify-between group overflow-hidden"
+                      >
+                        <div className="absolute -top-12 -right-12 w-36 h-36 bg-pink-500/15 rounded-full blur-2xl pointer-events-none group-hover:bg-pink-500/25 transition-all" />
+
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-pink-500/25 shrink-0">
+                                {evStage.celebrationIcon || '🎉'}
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-bold text-pink-400 uppercase tracking-wider block">
+                                  {evStage.celebrationSubtitle || 'Evento Comemorativo'}
+                                </span>
+                                <h4 className="text-base sm:text-lg font-black text-white group-hover:text-pink-300 transition-colors leading-tight">
+                                  {evStage.name}
+                                </h4>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1 shrink-0">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-200 font-bold whitespace-nowrap">
+                                {evStage.daysRemaining} {evStage.daysRemaining === 1 ? 'dia restante' : 'dias restantes'}
+                              </span>
+                              <span className="text-xs font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 shadow-sm">
+                                +{evStage.rewardGems} 💎
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed pt-1">
+                            {evStage.description}
+                          </p>
+                        </div>
+
+                        <div className="pt-4 flex items-center justify-between border-t border-slate-800/60 mt-3">
+                          <span className="text-[11px] text-slate-400 font-medium">
+                            Meta: <strong className="text-pink-300 font-bold">{evStage.targetHeight}m</strong>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => startGame(evStage)}
+                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs shadow-lg shadow-pink-500/25 flex items-center gap-1.5 transform active:scale-95 transition-all cursor-pointer"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>JOGAR EVENTO</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Grid das Fases Regulares */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {STAGES.map((stage) => {
+                const completedStages = profile?.stages_completed || 0;
+                // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
+                const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
+                const isCompleted = stage.number <= completedStages;
+
+                return (
+                  <StageCard
+                    key={stage.id}
+                    stage={stage}
+                    isUnlocked={isUnlocked}
+                    isCompleted={isCompleted}
+                    onSelect={startGame}
+                  />
+                );
+              })}
+              </div>
             </div>
           )}
         </div>
@@ -1166,16 +1261,26 @@ export function Game({ onNavigate }) {
 
                 <div>
                   <span className="text-xs uppercase font-bold text-amber-400 tracking-wider">
-                    {lastGameResult?.isPvP
+                    {lastGameResult?.isEvent
+                      ? `🎉 ${lastGameResult?.celebrationTitle || 'Evento Festivo Conquistado!'}`
+                      : lastGameResult?.isPvP
                       ? `🏆 Você superou @${lastGameResult?.opponentName || 'Adversário'}!`
                       : (lastGameResult?.isRace ? 'Vitória Épica na Corrida!' : 'Meta Alcançada com Sucesso!')}
                   </span>
                   <h2 className="text-3xl font-black text-white">
-                    {lastGameResult?.isPvP ? 'Vitória no Duelo 1v1!' : (lastGameResult?.isRace ? 'Você Venceu a Máquina!' : 'Fase Concluída!')}
+                    {lastGameResult?.isEvent
+                      ? 'Recompensa Festiva Liberada!'
+                      : lastGameResult?.isPvP ? 'Vitória no Duelo 1v1!' : (lastGameResult?.isRace ? 'Você Venceu a Máquina!' : 'Fase Concluída!')}
                   </h2>
                 </div>
 
                 <div className="p-4 rounded-2xl glass-card w-full max-w-xs space-y-2 border border-slate-800 text-left text-xs">
+                  {lastGameResult?.isEvent && (
+                    <div className="flex justify-between pb-1 border-b border-pink-500/30 text-pink-300 font-bold">
+                      <span>Bônus Comemorativo:</span>
+                      <span className="text-amber-400 font-black">+{lastGameResult?.eventRewardGems || 500} 💎</span>
+                    </div>
+                  )}
                   {lastGameResult?.isPvP && (
                     <div className="flex justify-between pb-1 border-b border-emerald-500/30 text-emerald-400 font-bold">
                       <span>Resultado Duelo:</span>
@@ -1213,7 +1318,15 @@ export function Game({ onNavigate }) {
                 </div>
 
                 <div className="flex flex-col gap-2.5 w-56">
-                  {lastGameResult?.isPvP ? (
+                  {lastGameResult?.isEvent ? (
+                    <button
+                      onClick={() => setGameState('menu')}
+                      className="py-3.5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-pink-500/25 flex items-center justify-center gap-1.5 cursor-pointer transform active:scale-95 transition-all"
+                    >
+                      <PartyPopper className="w-4 h-4" />
+                      <span>COLETAR E VOLTAR AO MENU</span>
+                    </button>
+                  ) : lastGameResult?.isPvP ? (
                     <button
                       onClick={() => setIsPvPModalOpen(true)}
                       className="py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm shadow-xl shadow-rose-500/25 flex items-center justify-center gap-1.5"

@@ -19,10 +19,12 @@ import {
   Star,
   Crown,
   ChevronRight,
-  Swords
+  Swords,
+  PartyPopper
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { STAGES, BALL_SKINS } from '../game/stages';
+import { getActiveCommemorativeStages } from '../game/events';
 import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 export function Home({ onNavigate }) {
@@ -34,6 +36,9 @@ export function Home({ onNavigate }) {
   const totalJumps = profile?.total_jumps || 0;
   const gamesPlayed = profile?.games_played || 0;
   const progressPercent = Math.min(100, Math.round((stagesCompleted / STAGES.length) * 100));
+
+  // Eventos comemorativos ativos na data atual
+  const activeEvents = React.useMemo(() => getActiveCommemorativeStages(profile), [profile]);
 
   // Sistema de Nível e Patente Gamer calibrado dinamicamente para todas as fases
   const maxAltitude = STAGES[STAGES.length - 1]?.targetHeight || 43000;
@@ -188,6 +193,45 @@ export function Home({ onNavigate }) {
           </div>
         </div>
       </section>
+
+      {/* BANNER DE EVENTO COMEMORATIVO ATIVO (QUANDO HOUVER) */}
+      {activeEvents.length > 0 && (
+        <section className="relative overflow-hidden rounded-3xl p-5 sm:p-6 border border-pink-500/40 bg-gradient-to-r from-pink-950/40 via-purple-950/40 to-slate-950 shadow-2xl">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 text-center sm:text-left">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-pink-500/30 shrink-0 animate-bounce">
+                {activeEvents[0].celebrationIcon || '🎉'}
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40">
+                    Evento Festivo Ativo • {activeEvents[0].daysRemaining} {activeEvents[0].daysRemaining === 1 ? 'dia restante' : 'dias restantes'}
+                  </span>
+                  <span className="text-xs font-black text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                    +{activeEvents[0].rewardGems} 💎 Recompensa
+                  </span>
+                </div>
+                <h2 className="text-lg sm:text-xl font-black text-white">
+                  {activeEvents[0].name}
+                </h2>
+                <p className="text-xs text-slate-300 max-w-xl">
+                  {activeEvents[0].celebrationSubtitle} Conquiste o topo nesta semana antes que o evento se encerre!
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onNavigate('game')}
+              className="py-3 px-5 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xl shadow-pink-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <PartyPopper className="w-4 h-4" />
+              <span>JOGAR FASE FESTIVA</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* 3. CARDS DE ESTATÍSTICAS (MINIMALISTAS) */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">

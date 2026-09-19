@@ -73,6 +73,7 @@ export const localStore = {
       endless_high_score: 0,
       achievements: [],
       daily_quests_progress: { date: '', progress: {}, claimed: {} },
+      birth_date: null,
       created_at: new Date().toISOString()
     };
     const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
@@ -82,6 +83,7 @@ export const localStore = {
         return {
           ...defaultProfile,
           ...parsed,
+          birth_date: parsed.birth_date !== undefined ? parsed.birth_date : defaultProfile.birth_date,
           gems: parsed.gems !== undefined ? parsed.gems : defaultProfile.gems,
           unlocked_skins: Array.isArray(parsed.unlocked_skins) && parsed.unlocked_skins.length > 0
             ? Array.from(new Set([...defaultProfile.unlocked_skins, ...parsed.unlocked_skins]))
@@ -109,6 +111,7 @@ export const localStore = {
       const merged = {
         ...existing,
         ...profile,
+        birth_date: profile.birth_date !== undefined ? profile.birth_date : (existing.birth_date || null),
         gems: profile.gems !== undefined ? profile.gems : (existing.gems ?? 100),
         unlocked_skins: Array.from(new Set([...(existing.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']), ...(profile.unlocked_skins || [])])),
         unlocked_trails: Array.from(new Set([...(existing.unlocked_trails || ['default']), ...(profile.unlocked_trails || [])])),

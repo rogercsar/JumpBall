@@ -142,6 +142,7 @@ export function AuthProvider({ children }) {
           const mergedProfile = {
             ...localProf,
             ...sessProf,
+            birth_date: sessProf.birth_date || metaProf.birth_date || localProf.birth_date || null,
             stages_completed: sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0),
             high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0, Number(metaProf.high_score || 0)),
             total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0, Number(metaProf.total_jumps || 0)),
@@ -280,6 +281,7 @@ export function AuthProvider({ children }) {
       // Progresso diário: mescla progresso mais recente
       const resolvedDailyQuests = cloudMeta.daily_quests_progress || local.daily_quests_progress || data?.daily_quests_progress || { date: '', progress: {}, claimed: {} };
 
+      const resolvedBirthDate = cloudMeta.birth_date || data?.birth_date || local.birth_date || null;
       const resolvedBallSkin = data?.ball_skin || cloudMeta.ball_skin || local.ball_skin || 'neon-cyan';
       const resolvedTrail = cloudMeta.selected_trail || local.selected_trail || data?.selected_trail || 'default';
       const resolvedEndlessScore = Math.max(
@@ -292,6 +294,7 @@ export function AuthProvider({ children }) {
         ...local,
         ...(data || {}),
         id: userId,
+        birth_date: resolvedBirthDate,
         stages_completed: resolvedStage,
         high_score: bestHighScore,
         total_jumps: bestTotalJumps,
@@ -325,11 +328,13 @@ export function AuthProvider({ children }) {
         cloudMeta.gems === undefined ||
         resolvedUnlockedSkins.length > (cloudMeta.unlocked_skins?.length || 0) ||
         resolvedAchievements.length > (cloudMeta.achievements?.length || 0) ||
-        resolvedGems > (Number(cloudMeta.gems) || 0)
+        resolvedGems > (Number(cloudMeta.gems) || 0) ||
+        (resolvedBirthDate && !cloudMeta.birth_date)
       ) {
         try {
           supabase.auth.updateUser({
             data: {
+              birth_date: resolvedBirthDate,
               gems: resolvedGems,
               unlocked_skins: resolvedUnlockedSkins,
               unlocked_trails: resolvedUnlockedTrails,
@@ -565,6 +570,7 @@ export function AuthProvider({ children }) {
     const updated = { 
       ...base, 
       ...updates,
+      birth_date: updates.birth_date !== undefined ? updates.birth_date : (base.birth_date || null),
       gems: updates.gems !== undefined ? updates.gems : (base.gems ?? 100),
       unlocked_skins: mergedUnlockedSkins,
       unlocked_trails: mergedUnlockedTrails,
@@ -612,11 +618,12 @@ export function AuthProvider({ children }) {
           }
         }
 
-        // Sincroniza metadados completos na nuvem (gemas, skins, rastros, conquistas, missões)
+        // Sincroniza metadados completos na nuvem (gemas, skins, rastros, conquistas, missões, aniversário)
         // Isso garante sincronização 100% perfeita e instantânea entre Celular e Computador!
         try {
           await supabase.auth.updateUser({
             data: {
+              birth_date: updated.birth_date,
               gems: updated.gems,
               unlocked_skins: updated.unlocked_skins,
               unlocked_trails: updated.unlocked_trails,
