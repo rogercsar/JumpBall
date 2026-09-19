@@ -47,6 +47,12 @@ export function Game({ onNavigate }) {
   const [currentLives, setCurrentLives] = useState(3);
   const [boostEnergy, setBoostEnergy] = useState(100);
   const [lastGameResult, setLastGameResult] = useState(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(() => soundEngine.isMuted);
+
+  const toggleMute = () => {
+    const muted = soundEngine.toggleMute();
+    setIsAudioMuted(muted);
+  };
 
   // Modo de Jogo: 'solo' (Individual) ou 'race_ai' (Corrida Contra a Máquina)
   const [gameMode, setGameMode] = useState('solo');
@@ -449,11 +455,13 @@ export function Game({ onNavigate }) {
 
       if (confirmed) {
         if (engineRef.current) engineRef.current.stop();
+        soundEngine.stopBGM(0.4);
         setGameState('menu');
       } else if (engineRef.current && wasPlaying) {
         engineRef.current.resume();
       }
     } else {
+      soundEngine.stopBGM(0.4);
       setGameState('menu');
     }
   };
@@ -464,6 +472,7 @@ export function Game({ onNavigate }) {
       if (engineRef.current) {
         engineRef.current.stop();
       }
+      soundEngine.stopBGM(0.4);
     };
   }, []);
 
@@ -670,13 +679,29 @@ export function Game({ onNavigate }) {
                 ▶
               </div>
             ) : (
-              <button
-                onClick={togglePause}
-                className="p-1.5 rounded-xl bg-slate-800/80 text-cyan-300 hover:bg-slate-700 transition-colors"
-                title={gameState === 'paused' ? 'Continuar' : 'Pausar'}
-              >
-                {gameState === 'paused' ? <Play className="w-3.5 h-3.5 fill-current" /> : <Pause className="w-3.5 h-3.5" />}
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  className="p-1.5 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                  title={isAudioMuted ? 'Ativar Música e Áudio' : 'Mutar Música e Áudio'}
+                >
+                  {isAudioMuted ? (
+                    <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                  ) : (
+                    <Volume2 className="w-3.5 h-3.5 text-cyan-300" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={togglePause}
+                  className="p-1.5 rounded-xl bg-slate-800/80 text-cyan-300 hover:bg-slate-700 transition-colors"
+                  title={gameState === 'paused' ? 'Continuar' : 'Pausar'}
+                >
+                  {gameState === 'paused' ? <Play className="w-3.5 h-3.5 fill-current" /> : <Pause className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             )}
           </div>
 

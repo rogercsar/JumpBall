@@ -339,6 +339,7 @@ export class GameEngine {
       this.botBall.vy = this.jumpForce; // Dispara largada da bola do Bot simultaneamente
     }
     soundEngine.playJump();
+    soundEngine.startStageBGM(this.stage.theme || 'forest');
     this.startTime = Date.now();
     this.lastTime = performance.now();
     this.loop();
@@ -346,10 +347,12 @@ export class GameEngine {
 
   pause() {
     this.paused = true;
+    soundEngine.pauseBGM();
   }
 
   resume() {
     this.paused = false;
+    soundEngine.resumeBGM();
     this.lastTime = performance.now();
     this.loop();
   }
@@ -362,6 +365,7 @@ export class GameEngine {
     if (this.handleResize) {
       window.removeEventListener('resize', this.handleResize);
     }
+    soundEngine.stopBGM(0.4);
   }
 
   loop(currentTime = performance.now()) {
@@ -1381,6 +1385,7 @@ export class GameEngine {
     if (this.finished) return;
     this.finished = true;
     this.running = false;
+    soundEngine.stopBGM(0.3);
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
