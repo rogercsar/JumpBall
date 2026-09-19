@@ -13,11 +13,14 @@ export class GameEngine {
     this.onScoreUpdate = onScoreUpdate;
     this.onLivesUpdate = onLivesUpdate;
 
-    // Modos de Jogo: 'solo' (padrão) ou 'race_ai' (Corrida 1v1 vs Máquina)
+    // Modos de Jogo: 'solo' (padrão), 'race_ai' (vs Máquina) ou 'race_pvp' (Duelo 1v1)
     this.mode = gameOptions.mode || 'solo';
     this.aiDifficulty = gameOptions.aiDifficulty || 'medium';
     this.onRaceUpdate = gameOptions.onRaceUpdate || null;
     this.onBoostUpdate = gameOptions.onBoostUpdate || null;
+    this.opponentData = gameOptions.opponentData || null;
+    this.onLocalPlayerUpdate = gameOptions.onLocalPlayerUpdate || null;
+    this.onPvPFinish = gameOptions.onPvPFinish || null;
 
     // Barra de Carga de Impulso / Super Salto
     this.maxBoostCharge = 100;
@@ -50,7 +53,8 @@ export class GameEngine {
     this.invulnerableTimer = 0;
 
     // Estado da Bola do Jogador
-    const initialPlayerX = this.mode === 'race_ai' ? this.width / 2 - 32 : this.width / 2;
+    const isRace = this.mode === 'race_ai' || this.mode === 'race_pvp';
+    const initialPlayerX = isRace ? this.width / 2 - 32 : this.width / 2;
     this.ball = {
       x: initialPlayerX,
       y: this.height - 76,
@@ -65,7 +69,7 @@ export class GameEngine {
       backpackMaxFuel: 100
     };
 
-    // Estado da Bola do Bot IA (Competidor na Corrida)
+    // Estado da Bola do Bot IA (Competidor na Corrida vs Máquina)
     if (this.mode === 'race_ai') {
       this.botBall = {
         x: this.width / 2 + 32,
@@ -89,6 +93,34 @@ export class GameEngine {
       };
     } else {
       this.botBall = null;
+    }
+
+    // Estado da Bola do Adversário Remoto (Duelo 1v1 PvP)
+    if (this.mode === 'race_pvp') {
+      const oppSkin = this.opponentData?.skin || {
+        primary: '#f43f5e',
+        glow: '#fb7185',
+        trail: '#be123c'
+      };
+      this.opponentBall = {
+        x: this.width / 2 + 32,
+        y: this.height - 76,
+        targetX: this.width / 2 + 32,
+        targetY: this.height - 76,
+        vx: 0,
+        vy: 0,
+        radius: 16,
+        stretchX: 1,
+        stretchY: 1,
+        angle: 0,
+        lives: 3,
+        maxHeightReached: 0,
+        invulnerableTimer: 0,
+        username: this.opponentData?.username || 'Adversário',
+        skin: oppSkin
+      };
+    } else {
+      this.opponentBall = null;
     }
 
     // Câmera
@@ -676,6 +708,48 @@ export class GameEngine {
           botLives: this.botBall.lives
         });
       }
+      if (this.onRaceUpdate && this.opponentBall) {
+        const pHeight = Math.max(0, this.maxHeightReached);
+        const oppHeight = Math.max(0, this.opponentBall.maxHeightReached);
+        const diff = pHeight - oppHeight;
+        const leader = diff > 4 ? 'player' : (diff < -4 ? 'opponent' : 'tied');
+        this.onRaceUpdate({
+          playerHeight: pHeight,
+          botHeight: oppHeight,
+          distanceDiff: diff,
+          leader,
+          botLives: this.opponentBall.lives,
+          opponentName: this.opponentBall.username
+        });
+      }
+    }
+
+    // Atualização física e interpolação do adversário humano (PvP)
+    if (this.opponentBall && this.opponentBall.lives > 0) {
+      this.opponentBall.x += (this.opponentBall.targetX - this.opponentBall.x) * 0.45;
+      this.opponentBall.y += (this.opponentBall.targetY - this.opponentBall.y) * 0.45;
+      if (this.opponentBall.invulnerableTimer > 0) {
+        this.opponentBall.invulnerableTimer = Math.max(0, this.opponentBall.invulnerableTimer - dt * 0.0166);
+      }
+      if (Math.abs(this.opponentBall.vy) > 2) {
+        this.particles.emitTrail(this.opponentBall.x, this.opponentBall.y, this.opponentBall.skin.trail);
+      }
+    }
+
+    // Transmissão de telemetria do jogador local para o oponente no modo PvP
+    if (this.mode === 'race_pvp' && this.onLocalPlayerUpdate) {
+      this.onLocalPlayerUpdate({
+        x: this.ball.x,
+        y: this.ball.y,
+        vx: this.ball.vx,
+        vy: this.ball.vy,
+        stretchX: this.ball.stretchX,
+        stretchY: this.ball.stretchY,
+        angle: this.ball.angle,
+        lives: this.lives,
+        maxHeightReached: this.maxHeightReached,
+        invulnerableTimer: this.invulnerableTimer
+      });
     }
 
     // 7. Câmera Vertical (Segue a bola do jogador para cima suavemente)
@@ -701,7 +775,10 @@ export class GameEngine {
     // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada)
     const goalY = -this.stage.targetHeight + (this.height - 120);
     if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
-      this.finishGame('completed', { raceWinner: 'player' });
+      if (this.mode === 'race_pvp' && this.onPvPFinish) {
+        this.onPvPFinish('win');
+      }
+      this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
       return;
     }
 
@@ -753,7 +830,10 @@ export class GameEngine {
         if (this.onLivesUpdate) {
           this.onLivesUpdate(0);
         }
-        this.finishGame('game_over', { raceWinner: 'bot' });
+        if (this.mode === 'race_pvp' && this.onPvPFinish) {
+          this.onPvPFinish('lose');
+        }
+        this.finishGame('game_over', { raceWinner: this.mode === 'race_pvp' ? 'opponent' : 'bot', opponentName: this.opponentBall?.username });
       }
     }
   }
@@ -932,6 +1012,28 @@ export class GameEngine {
     if (bot.maxHeightReached >= this.stage.targetHeight || bot.y <= goalY + bot.radius) {
       this.finishGame('race_bot_won', { raceWinner: 'bot', raceReason: 'bot_reached_goal' });
       return;
+    }
+  }
+
+  // Atualização remota da posição e física do oponente humano no Duelo 1v1
+  updateRemoteOpponent(data) {
+    if (!this.opponentBall || !data) return;
+    if (data.x !== undefined) this.opponentBall.targetX = data.x;
+    if (data.y !== undefined) this.opponentBall.targetY = data.y;
+    if (data.vx !== undefined) this.opponentBall.vx = data.vx;
+    if (data.vy !== undefined) this.opponentBall.vy = data.vy;
+    if (data.stretchX !== undefined) this.opponentBall.stretchX = data.stretchX;
+    if (data.stretchY !== undefined) this.opponentBall.stretchY = data.stretchY;
+    if (data.angle !== undefined) this.opponentBall.angle = data.angle;
+    if (data.lives !== undefined) this.opponentBall.lives = data.lives;
+    if (data.maxHeightReached !== undefined) {
+      this.opponentBall.maxHeightReached = Math.max(this.opponentBall.maxHeightReached, data.maxHeightReached);
+    }
+    if (data.invulnerableTimer !== undefined) {
+      this.opponentBall.invulnerableTimer = data.invulnerableTimer;
+    }
+    if (data.finished) {
+      this.finishGame('race_bot_won', { raceWinner: 'opponent', raceReason: 'opponent_reached_goal', opponentName: this.opponentBall.username });
     }
   }
 
@@ -1391,7 +1493,8 @@ export class GameEngine {
       this.animationId = null;
     }
     const duration = Math.floor((Date.now() - this.startTime) / 1000);
-    const isRace = this.mode === 'race_ai';
+    const isRace = this.mode === 'race_ai' || this.mode === 'race_pvp';
+    const isPvP = this.mode === 'race_pvp';
     const isPlayerWin = status === 'completed';
 
     const resultPayload = {
@@ -1403,8 +1506,10 @@ export class GameEngine {
       status: status,
       stage: this.stage,
       isRace,
-      winner: isPlayerWin ? 'player' : (status === 'race_bot_won' ? 'bot' : (details.raceWinner || 'none')),
-      botHeight: this.botBall ? this.botBall.maxHeightReached : 0,
+      isPvP,
+      winner: isPlayerWin ? 'player' : (status === 'race_bot_won' ? (isPvP ? 'opponent' : 'bot') : (details.raceWinner || 'none')),
+      botHeight: this.botBall ? this.botBall.maxHeightReached : (this.opponentBall ? this.opponentBall.maxHeightReached : 0),
+      opponentName: this.opponentBall ? this.opponentBall.username : (details.opponentName || null),
       raceReason: details.raceReason || null
     };
 
@@ -1970,6 +2075,96 @@ export class GameEngine {
           ctx.textBaseline = 'middle';
           const distBelow = Math.round((this.botBall.y - (this.cameraY + this.height)) / 10);
           ctx.fillText(`▼ BOT -${distBelow}m`, 0, 0);
+        }
+        ctx.restore();
+      }
+    }
+
+    // 5.6 Desenhar a Bola do Oponente Humano (Modo Duelo 1v1 PvP)
+    if (this.opponentBall && this.opponentBall.lives > 0) {
+      const oppScreenY = this.opponentBall.y - this.cameraY;
+
+      if (oppScreenY > -40 && oppScreenY < this.height + 40) {
+        ctx.save();
+        ctx.translate(this.opponentBall.x, oppScreenY);
+        ctx.rotate(this.opponentBall.angle);
+        ctx.scale(this.opponentBall.stretchX, this.opponentBall.stretchY);
+
+        ctx.shadowColor = this.opponentBall.skin.glow;
+        ctx.shadowBlur = this.isMobile ? 0 : 18;
+
+        const oppGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, this.opponentBall.radius);
+        oppGrad.addColorStop(0, '#ffffff');
+        oppGrad.addColorStop(0.35, this.opponentBall.skin.primary);
+        oppGrad.addColorStop(1, this.opponentBall.skin.trail);
+
+        ctx.fillStyle = oppGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.opponentBall.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = this.opponentBall.skin.glow;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.restore();
+
+        // Placa flutuante com o nome real do oponente
+        ctx.save();
+        ctx.translate(this.opponentBall.x, oppScreenY - this.opponentBall.radius - 13);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.strokeStyle = this.opponentBall.skin.glow;
+        ctx.lineWidth = 1;
+        const nameText = `⚔️ @${this.opponentBall.username}`;
+        ctx.font = 'bold 9px sans-serif';
+        const textWidth = ctx.measureText(nameText).width;
+        this.roundRect(ctx, -(textWidth / 2 + 8), -10, textWidth + 16, 17, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#fecdd3';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(nameText, 0, -1);
+        ctx.restore();
+      } else {
+        // Indicador Off-screen do Oponente
+        ctx.save();
+        const clampedX = Math.max(48, Math.min(this.width - 48, this.opponentBall.x));
+        if (oppScreenY <= -40) {
+          ctx.translate(clampedX, 24);
+          ctx.fillStyle = 'rgba(225, 29, 72, 0.95)';
+          ctx.shadowColor = '#f43f5e';
+          ctx.shadowBlur = this.isMobile ? 0 : 12;
+          this.roundRect(ctx, -52, -12, 104, 24, 6);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const distAbove = Math.round((this.cameraY - this.opponentBall.y) / 10);
+          ctx.fillText(`▲ @${this.opponentBall.username} +${distAbove}m`, 0, 0);
+        } else if (oppScreenY >= this.height + 40) {
+          ctx.translate(clampedX, this.height - 24);
+          ctx.fillStyle = 'rgba(225, 29, 72, 0.95)';
+          ctx.shadowColor = '#f43f5e';
+          ctx.shadowBlur = this.isMobile ? 0 : 12;
+          this.roundRect(ctx, -52, -12, 104, 24, 6);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const distBelow = Math.round((this.opponentBall.y - (this.cameraY + this.height)) / 10);
+          ctx.fillText(`▼ @${this.opponentBall.username} -${distBelow}m`, 0, 0);
         }
         ctx.restore();
       }

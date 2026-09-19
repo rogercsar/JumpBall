@@ -18,7 +18,8 @@ import {
   Flame,
   Star,
   Crown,
-  ChevronRight
+  ChevronRight,
+  Swords
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { STAGES, BALL_SKINS } from '../game/stages';
@@ -121,6 +122,14 @@ export function Home({ onNavigate }) {
               >
                 <Play className="w-5 h-5 fill-current" />
                 <span>INICIAR JOGO</span>
+              </button>
+
+              <button
+                onClick={() => onNavigate('game')}
+                className="px-6 py-4 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm flex items-center gap-2.5 shadow-xl shadow-rose-500/25 hover:shadow-rose-500/45 hover:scale-105 active:scale-95 transition-all border border-rose-400/30"
+              >
+                <Swords className="w-4 h-4 animate-pulse" />
+                <span>DUELO 1V1 (PVP)</span>
               </button>
 
               <button

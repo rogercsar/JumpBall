@@ -13,7 +13,8 @@ import {
   ArrowRight,
   TrendingUp,
   Award,
-  Layers
+  Layers,
+  Swords
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -442,25 +443,40 @@ export function Ranking({ onNavigate }) {
                     </div>
                   </div>
 
-                  {/* Pontuação Recorde */}
-                  <div className="text-right shrink-0">
-                    <div className={`text-sm sm:text-base font-black font-mono tracking-tight ${
-                      position === 1 
-                        ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.4)]' 
-                        : position === 2 
-                          ? 'text-slate-200' 
-                          : position === 3 
-                            ? 'text-amber-500' 
-                            : isCurrentUser 
-                              ? 'text-cyan-300 font-extrabold' 
-                              : 'text-slate-300'
-                    }`}>
-                      {(item.high_score || 0).toLocaleString()}
-                      <span className="text-[10px] text-slate-400 font-bold ml-1">pts</span>
+                  {/* Pontuação Recorde e Botão de Desafio */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    {!isCurrentUser && onNavigate && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('game');
+                        }}
+                        className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 hover:border-rose-500/50 text-rose-300 hover:text-white font-bold text-xs transition-all active:scale-95 shadow-sm"
+                        title={`Desafiar ${item.username || 'Piloto'} para um Duelo 1v1`}
+                      >
+                        <Swords className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Desafiar</span>
+                      </button>
+                    )}
+                    <div className="text-right">
+                      <div className={`text-sm sm:text-base font-black font-mono tracking-tight ${
+                        position === 1 
+                          ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.4)]' 
+                          : position === 2 
+                            ? 'text-slate-200' 
+                            : position === 3 
+                              ? 'text-amber-500' 
+                              : isCurrentUser 
+                                ? 'text-cyan-300 font-extrabold' 
+                                : 'text-slate-300'
+                      }`}>
+                        {(item.high_score || 0).toLocaleString()}
+                        <span className="text-[10px] text-slate-400 font-bold ml-1">pts</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block">
+                        Recorde pessoal
+                      </span>
                     </div>
-                    <span className="text-[10px] text-slate-500 block">
-                      Recorde pessoal
-                    </span>
                   </div>
                 </div>
               );

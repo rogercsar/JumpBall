@@ -32,6 +32,8 @@ import { useDialog } from '../contexts/DialogContext';
 // import { CameraPreview } from '../components/CameraPreview';
 import { TouchControls } from '../components/TouchControls';
 import { StageCard } from '../components/StageCard';
+import { PvPLobbyModal } from '../components/PvPLobbyModal';
+import { multiplayerService } from '../services/multiplayer';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 
 export function Game({ onNavigate }) {
@@ -54,7 +56,7 @@ export function Game({ onNavigate }) {
     setIsAudioMuted(muted);
   };
 
-  // Modo de Jogo: 'solo' (Individual) ou 'race_ai' (Corrida Contra a Máquina)
+  // Modo de Jogo: 'solo' (Individual) | 'race_ai' (vs Máquina) | 'race_pvp' (Duelo 1v1)
   const [gameMode, setGameMode] = useState('solo');
   const [aiDifficulty, setAiDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
   const [raceStats, setRaceStats] = useState({
@@ -62,8 +64,24 @@ export function Game({ onNavigate }) {
     botHeight: 0,
     distanceDiff: 0,
     leader: 'tied',
-    botLives: 3
+    botLives: 3,
+    opponentName: null
   });
+
+  // Estado do Modo Multiplayer 1v1 (PvP)
+  const [isPvPModalOpen, setIsPvPModalOpen] = useState(false);
+  const [pvpMatchConfig, setPvpMatchConfig] = useState(null);
+  const [challengeCodeFromUrl, setChallengeCodeFromUrl] = useState('');
+
+  // Detecta se o jogador acessou via link de desafio (?challenge=JPXXX)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const challenge = params.get('challenge');
+    if (challenge) {
+      setChallengeCodeFromUrl(challenge.toUpperCase());
+      setIsPvPModalOpen(true);
+    }
+  }, []);
 
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
@@ -316,15 +334,16 @@ export function Game({ onNavigate }) {
     }
   };
 
-  // Prepara a fase no modo 'ready' aguardando o clique em DAR PLAY
-  const startGame = useCallback((stage, modeOverride = null, diffOverride = null) => {
+  // Prepara a fase no modo 'ready' aguardando o clique em DAR PLAY (ou inicia direto no PvP)
+  const startGame = useCallback((stage, modeOverride = null, diffOverride = null, pvpConfigOverride = null) => {
     soundEngine.unlock();
     const activeMode = modeOverride || gameMode;
     const activeDiff = diffOverride || aiDifficulty;
+    const activePvP = pvpConfigOverride || pvpMatchConfig;
 
     setSelectedStage(stage);
     selectedStageRef.current = stage;
-    setGameState('ready');
+    setGameState(activeMode === 'race_pvp' ? 'playing' : 'ready');
     setCurrentScore(0);
     setCurrentHeight(0);
     setCurrentLives(3);
@@ -335,7 +354,8 @@ export function Game({ onNavigate }) {
       botHeight: 0,
       distanceDiff: 0,
       leader: 'tied',
-      botLives: 3
+      botLives: 3,
+      opponentName: activePvP?.opponent?.username
     });
 
     // Timeout breve para o Canvas renderizar no DOM
@@ -376,6 +396,13 @@ export function Game({ onNavigate }) {
         {
           mode: activeMode,
           aiDifficulty: activeDiff,
+          opponentData: activePvP?.opponent,
+          onLocalPlayerUpdate: activeMode === 'race_pvp' ? (state) => {
+            multiplayerService.sendPlayerState(state);
+          } : null,
+          onPvPFinish: activeMode === 'race_pvp' ? (status) => {
+            multiplayerService.sendGameEvent('player_finished', { status });
+          } : null,
           onRaceUpdate: (stats) => {
             setRaceStats(stats);
           },
@@ -386,8 +413,42 @@ export function Game({ onNavigate }) {
       );
 
       engineRef.current = engine;
+      if (activeMode === 'race_pvp') {
+        engine.start();
+      }
     }, 60);
-  }, [activeSkin, user, settings.controlMode, updateProfile, gameMode, aiDifficulty]);
+  }, [activeSkin, user, settings.controlMode, updateProfile, gameMode, aiDifficulty, pvpMatchConfig]);
+
+  // Sincronização de Telemetria do Duelo 1v1 PvP
+  useEffect(() => {
+    if (gameState === 'playing' && gameMode === 'race_pvp') {
+      const unsubState = multiplayerService.onPlayerState((state) => {
+        engineRef.current?.updateRemoteOpponent(state);
+      });
+
+      const unsubGame = multiplayerService.onGameEvent((data) => {
+        if (data.event === 'player_finished') {
+          if (data.status === 'win') {
+            engineRef.current?.updateRemoteOpponent({ finished: true });
+          }
+        }
+      });
+
+      return () => {
+        unsubState();
+        unsubGame();
+      };
+    }
+  }, [gameState, gameMode]);
+
+  // Inicia Duelo 1v1 PvP a partir do PvPLobbyModal
+  const handleStartPvPMatch = ({ stage, roomCode, isHost, opponent }) => {
+    const config = { roomCode, isHost, opponent };
+    setPvpMatchConfig(config);
+    setGameMode('race_pvp');
+    setIsPvPModalOpen(false);
+    startGame(stage, 'race_pvp', null, config);
+  };
 
   // Inicia a física e o movimento apenas quando o jogador clica em DAR PLAY
   const handleStartPlay = () => {
@@ -537,6 +598,14 @@ export function Game({ onNavigate }) {
               >
                 <Bot className="w-4 h-4" />
                 <span>Corrida vs Máquina</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPvPModalOpen(true)}
+                className="flex-1 md:flex-initial px-4 py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-md shadow-rose-500/25 active:scale-95 cursor-pointer"
+              >
+                <Swords className="w-4 h-4" />
+                <span>Duelo 1v1 (PvP) 🔥</span>
               </button>
             </div>
 
@@ -700,16 +769,26 @@ export function Game({ onNavigate }) {
             )}
           </div>
 
-          {/* HUD de Duelo da Corrida vs Máquina */}
-          {gameMode === 'race_ai' && (
-            <div className="w-full mb-1 glass-panel px-3 py-1 rounded-2xl border border-purple-500/30 bg-purple-950/30 shrink-0 flex items-center justify-between text-xs shadow-md">
+          {/* Painel do Modo Corrida 1v1 (vs Máquina ou vs Oponente Real) */}
+          {(gameMode === 'race_ai' || gameMode === 'race_pvp') && (
+            <div className={`w-full mb-1 glass-panel px-3 py-1 rounded-2xl border shrink-0 flex items-center justify-between text-xs shadow-md ${
+              gameMode === 'race_pvp'
+                ? 'border-rose-500/40 bg-rose-950/30'
+                : 'border-purple-500/30 bg-purple-950/30'
+            }`}>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-md bg-purple-500/25 border border-purple-400/40 text-purple-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                  <Swords className="w-3 h-3 text-pink-400" /> Corrida
+                <span className={`px-2 py-0.5 rounded-md border text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                  gameMode === 'race_pvp'
+                    ? 'bg-rose-500/25 border-rose-400/40 text-rose-300'
+                    : 'bg-purple-500/25 border-purple-400/40 text-purple-300'
+                }`}>
+                  <Swords className="w-3 h-3 text-pink-400" /> {gameMode === 'race_pvp' ? 'Duelo PvP' : 'Corrida'}
                 </span>
                 <span className="text-[11px] font-bold">
                   {raceStats.leader === 'player' ? (
                     <span className="text-emerald-400">Você lidera (+{raceStats.distanceDiff}m)</span>
+                  ) : raceStats.leader === 'opponent' ? (
+                    <span className="text-rose-400">@{raceStats.opponentName || 'Oponente'} lidera ({Math.abs(raceStats.distanceDiff)}m)</span>
                   ) : raceStats.leader === 'bot' ? (
                     <span className="text-rose-400">Bot lidera ({Math.abs(raceStats.distanceDiff)}m)</span>
                   ) : (
@@ -718,12 +797,12 @@ export function Game({ onNavigate }) {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-purple-200 font-semibold">
-                <span>🤖 IA: {raceStats.botHeight}m</span>
-                <div className="flex items-center gap-0.5" title={`${raceStats.botLives} vidas da IA`}>
+                <span>{gameMode === 'race_pvp' ? `⚔️ @${raceStats.opponentName || 'Oponente'}` : '🤖 IA'}: {raceStats.botHeight}m</span>
+                <div className="flex items-center gap-0.5" title={`${raceStats.botLives} vidas restantes`}>
                   {[1, 2, 3].map((num) => (
                     <Heart
                       key={num}
-                      className={`w-3 h-3 ${num <= raceStats.botLives ? 'text-purple-400 fill-purple-400' : 'text-slate-700'}`}
+                      className={`w-3 h-3 ${num <= raceStats.botLives ? (gameMode === 'race_pvp' ? 'text-rose-400 fill-rose-400' : 'text-purple-400 fill-purple-400') : 'text-slate-700'}`}
                     />
                   ))}
                 </div>
@@ -958,15 +1037,23 @@ export function Game({ onNavigate }) {
 
                 <div>
                   <span className="text-xs uppercase font-bold text-amber-400 tracking-wider">
-                    {lastGameResult?.isRace ? 'Vitória Épica na Corrida!' : 'Meta Alcançada com Sucesso!'}
+                    {lastGameResult?.isPvP
+                      ? `🏆 Você superou @${lastGameResult?.opponentName || 'Adversário'}!`
+                      : (lastGameResult?.isRace ? 'Vitória Épica na Corrida!' : 'Meta Alcançada com Sucesso!')}
                   </span>
                   <h2 className="text-3xl font-black text-white">
-                    {lastGameResult?.isRace ? 'Você Venceu a Máquina!' : 'Fase Concluída!'}
+                    {lastGameResult?.isPvP ? 'Vitória no Duelo 1v1!' : (lastGameResult?.isRace ? 'Você Venceu a Máquina!' : 'Fase Concluída!')}
                   </h2>
                 </div>
 
                 <div className="p-4 rounded-2xl glass-card w-full max-w-xs space-y-2 border border-slate-800 text-left text-xs">
-                  {lastGameResult?.isRace && (
+                  {lastGameResult?.isPvP && (
+                    <div className="flex justify-between pb-1 border-b border-emerald-500/30 text-emerald-400 font-bold">
+                      <span>Resultado Duelo:</span>
+                      <span>🏆 1º Lugar (Vitória)</span>
+                    </div>
+                  )}
+                  {lastGameResult?.isRace && !lastGameResult?.isPvP && (
                     <div className="flex justify-between pb-1 border-b border-emerald-500/30 text-emerald-400 font-bold">
                       <span>Resultado 1v1:</span>
                       <span>🏆 1º Lugar (Piloto Campeão)</span>
@@ -980,10 +1067,10 @@ export function Game({ onNavigate }) {
                     <span className="text-slate-400">Sua Altura:</span>
                     <span className="font-bold text-cyan-300">{lastGameResult?.maxHeight}m</span>
                   </div>
-                  {lastGameResult?.isRace && (
+                  {(lastGameResult?.isRace || lastGameResult?.isPvP) && (
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Altura do Bot IA:</span>
-                      <span className="font-bold text-purple-400">{lastGameResult?.botHeight || 0}m</span>
+                      <span className="text-slate-400">Altura do Adversário:</span>
+                      <span className="font-bold text-rose-400">{lastGameResult?.botHeight || 0}m</span>
                     </div>
                   )}
                   <div className="flex justify-between">
@@ -993,13 +1080,23 @@ export function Game({ onNavigate }) {
                 </div>
 
                 <div className="flex flex-col gap-2.5 w-56">
-                  <button
-                    onClick={handleNextStage}
-                    className="py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-1.5"
-                  >
-                    <span>PRÓXIMA FASE</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                  {lastGameResult?.isPvP ? (
+                    <button
+                      onClick={() => setIsPvPModalOpen(true)}
+                      className="py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm shadow-xl shadow-rose-500/25 flex items-center justify-center gap-1.5"
+                    >
+                      <Swords className="w-4 h-4" />
+                      <span>NOVO DUELO / REVANCHE</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNextStage}
+                      className="py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-1.5"
+                    >
+                      <span>PRÓXIMA FASE</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => startGame(selectedStage)}
                     className="py-2 rounded-xl text-slate-400 hover:text-white text-xs"
@@ -1018,6 +1115,17 @@ export function Game({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* MODAL DE DUELO 1V1 PVP */}
+      <PvPLobbyModal
+        isOpen={isPvPModalOpen}
+        onClose={() => setIsPvPModalOpen(false)}
+        onStartPvPMatch={handleStartPvPMatch}
+        currentStage={selectedStage || STAGES[0]}
+        userProfile={profile || { id: user?.id, username: user?.email?.split('@')[0] || 'Piloto' }}
+        activeSkin={activeSkin}
+        initialRoomCode={challengeCodeFromUrl}
+      />
     </div>
   );
 }
