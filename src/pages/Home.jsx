@@ -345,7 +345,7 @@ export function Home({ onNavigate }) {
         </div>
       </section>
 
-      {/* 5. VISÃO GERAL DAS 20 FASES CÓSMICAS (MAPA DE FASES) */}
+      {/* 5. VISÃO GERAL DAS FASES CÓSMICAS (MAPA DE FASES) */}
       <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/90 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

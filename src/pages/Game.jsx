@@ -484,7 +484,7 @@ export function Game({ onNavigate }) {
       }
       style={gameState === 'menu' ? { WebkitOverflowScrolling: 'touch' } : undefined}
     >
-      {/* 1. MENU DE SELEÇÃO DE FASES (20 Fases) */}
+      {/* 1. MENU DE SELEÇÃO DE FASES */}
       {gameState === 'menu' && (
         <div className="max-w-4xl mx-auto px-4 pt-4 pb-32 sm:py-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -505,7 +505,7 @@ export function Game({ onNavigate }) {
                   <h1 className="text-2xl sm:text-3xl font-black text-white">Seleção de Fases</h1>
                 </div>
                 <p className="text-xs text-slate-400 mt-1">
-                  Explore as 20 fases temáticas em modo individual ou dispute contra a máquina
+                  Explore as {STAGES.length} fases temáticas em modo individual ou dispute contra a máquina
                 </p>
               </div>
             </div>
@@ -567,12 +567,12 @@ export function Game({ onNavigate }) {
               </div>
             ) : (
               <div className="text-xs text-slate-400 hidden md:block">
-                Subida individual por 20 biomas cósmicos com pontuação e recordes.
+                Subida individual por {STAGES.length} biomas cósmicos com pontuação e recordes.
               </div>
             )}
           </div>
 
-          {/* Grid das 10 Fases */}
+          {/* Grid das Fases */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {STAGES.map((stage) => {
               const completedStages = profile?.stages_completed || 0;

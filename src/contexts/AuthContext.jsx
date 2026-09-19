@@ -78,6 +78,58 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  // Sincronização em Tempo Real via Supabase Realtime entre múltiplos dispositivos/abas
+  useEffect(() => {
+    if (!supabase || !isSupabaseConfigured || !user?.id || user.id.startsWith('offline-') || user.id.startsWith('guest-')) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`profile-realtime-sync-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
+        (payload) => {
+          if (payload.new) {
+            setProfile((prev) => {
+              const updated = { ...(prev || {}), ...payload.new };
+              localStore.saveProfile(updated);
+              try {
+                const saved = localStorage.getItem(LOCAL_SESSION_KEY);
+                if (saved) {
+                  const parsed = JSON.parse(saved);
+                  parsed.profile = updated;
+                  localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(parsed));
+                }
+              } catch (e) { /* ignore */ }
+              return updated;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    // Revalidação automática quando o usuário volta para a aba do jogo
+    const handleRevalidate = () => {
+      if (document.visibilityState === 'visible' && user?.id) {
+        fetchProfile(user.id);
+      }
+    };
+    window.addEventListener('visibilitychange', handleRevalidate);
+    window.addEventListener('focus', handleRevalidate);
+
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener('visibilitychange', handleRevalidate);
+      window.removeEventListener('focus', handleRevalidate);
+    };
+  }, [user?.id]);
+
   const checkLocalSession = () => {
     try {
       const saved = localStorage.getItem(LOCAL_SESSION_KEY);
@@ -98,6 +150,11 @@ export function AuthProvider({ children }) {
           setProfile(mergedProfile);
           localStore.saveProfile(mergedProfile);
           setIsGuest(Boolean(sessionData.isGuest));
+
+          // Proativamente sincroniza com o Supabase em segundo plano
+          if (supabase && isSupabaseConfigured && sessionData.user.id && !sessionData.user.id.startsWith('offline-') && !sessionData.user.id.startsWith('guest-')) {
+            fetchProfile(sessionData.user.id);
+          }
           return;
         }
       }
@@ -123,8 +180,7 @@ export function AuthProvider({ children }) {
         .maybeSingle();
 
       const local = localStore.getProfile();
-      // Se profiles no banco já tem stages_completed registrado (mesmo 0), respeita esse valor.
-      // Apenas se for nulo/indefinido faz fallback para o histórico ou local.
+      // Se profiles no banco já tem stages_completed registrado, respeita esse valor
       let resolvedStage = 0;
       if (data && data.stages_completed !== null && data.stages_completed !== undefined) {
         resolvedStage = Number(data.stages_completed);
@@ -161,6 +217,16 @@ export function AuthProvider({ children }) {
       setProfile(merged);
       localStore.saveProfile(merged);
 
+      // Atualiza também LOCAL_SESSION_KEY para manter a sessão sincronizada
+      try {
+        const saved = localStorage.getItem(LOCAL_SESSION_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          parsed.profile = merged;
+          localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(parsed));
+        }
+      } catch (e) { /* ignore */ }
+
       // Sincroniza via upsert com o Supabase para garantir que a linha exista com os dados corretos
       try {
         await supabase.from('profiles').upsert({
@@ -168,18 +234,16 @@ export function AuthProvider({ children }) {
           stages_completed: resolvedStage,
           high_score: bestHighScore,
           total_jumps: bestTotalJumps,
+          games_played: bestGamesPlayed,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
-      } catch (upErr) {
-        /* ignore */
-      }
-    } catch (e) {
-      console.warn('Perfil do Supabase inacessível, mantendo dados locais:', e);
+      } catch (uErr) { /* ignore */ }
+    } catch (err) {
+      console.warn('Aviso ao carregar perfil do Supabase:', err);
       setProfile(localStore.getProfile());
     }
   };
 
-  // Login com E-mail e Senha
   // Login com E-mail e Senha
   const login = async (email, password) => {
     if (!isSupabaseConfigured || !supabase) {

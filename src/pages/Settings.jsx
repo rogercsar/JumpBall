@@ -16,6 +16,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useDialog } from '../contexts/DialogContext';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { soundEngine } from '../game/audio';
+import { STAGES } from '../game/stages';
 import { TiltMeter } from '../components/TiltMeter';
 
 export function Settings({ orientation, requestOrientationPermission, permissionGranted, needsPermissionPrompt, calibrate }) {
@@ -382,7 +383,7 @@ export function Settings({ orientation, requestOrientationPermission, permission
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-white">Progresso das Fases</h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">
-                  {stagesCompleted} / 20 Fases Liberadas
+                  {stagesCompleted} / {STAGES.length} Fases Liberadas
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
