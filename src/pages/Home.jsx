@@ -63,380 +63,283 @@ export function Home({ onNavigate }) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-8">
-      {/* 1. HERO BANNER PRINCIPAL DO JOGO (DASHBOARD OTIMIZADO) */}
-      <section className="relative overflow-hidden rounded-3xl glass-panel p-4 sm:p-6 lg:p-7 border border-slate-800/90 bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900/90 shadow-2xl">
-        {/* Efeitos de iluminação cósmica no fundo */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-transparent to-transparent pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="text-center lg:text-left space-y-3.5 max-w-xl flex-1">
-            {/* Tag da Temporada, Patente e XP Integrado (Mais Compactos) */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[10px] font-black uppercase tracking-wider shadow-sm">
-                <Flame className="w-3 h-3 text-amber-400 animate-pulse" />
-                {maxAltitude.toLocaleString()}M
+      {/* 1. HERO BANNER PRINCIPAL DO JOGO (MINIMALISTA & CLEAN) */}
+      <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 border border-slate-800/80 bg-slate-950/60 shadow-xl">
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="text-center lg:text-left space-y-4 max-w-xl flex-1">
+            {/* Indicador de Status Discreto */}
+            <div className="flex items-center justify-center lg:justify-start gap-2.5 text-xs text-slate-400">
+              <span className="font-semibold text-slate-300">
+                {rank.title} • Nv. {playerLevel}
               </span>
-
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/80 border ${rank.border} text-[10px] font-bold text-slate-200 shadow-sm`}>
-                <RankIcon className="w-3 h-3 text-amber-400" />
-                <span>{rank.title} • Nv. {playerLevel}</span>
-              </span>
-
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/90 border border-slate-800 text-[10px] font-bold text-cyan-400">
-                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                <span>{playerXP.toLocaleString()} XP</span>
-              </span>
-
-              {/* Saldo de Gemas */}
+              <span className="text-slate-700">•</span>
               <button
                 type="button"
                 onClick={() => onNavigate('profile')}
-                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 text-[10px] font-black text-amber-300 shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                title="Ver Saldo de Gemas na Garagem"
+                className="font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                title="Ver saldo na Garagem"
               >
-                <span>💎 {profile?.gems ?? 100}</span>
+                💎 {profile?.gems ?? 100}
               </button>
             </div>
 
-            {/* Saudação e Título (Tamanho Reduzido) */}
-            <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight text-white leading-tight">
+            {/* Título & Subtítulo Elegantes */}
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
                 {user ? (
                   <>
-                    Pronto para o salto, <span className={`bg-gradient-to-r ${rank.gradient} bg-clip-text text-transparent`}>{profile?.username || 'Piloto'}</span>?
+                    Olá, <span className={`bg-gradient-to-r ${rank.gradient} bg-clip-text text-transparent`}>{profile?.username || 'Piloto'}</span>
                   </>
                 ) : (
                   <>
-                    JUMPBALL <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">TITAN {Math.round(maxAltitude / 1000)}K</span>
+                    JumpBall <span className="text-cyan-400">Titan</span>
                   </>
                 )}
               </h1>
-              <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
-                Desafie {STAGES.length} biomas cósmicos, colete gemas, sobreviva ao magma e dispute o topo do ranking.
+              <p className="text-slate-400 text-sm max-w-md leading-relaxed">
+                Desafie {STAGES.length} biomas cósmicos, colete gemas e dispute o topo do ranking.
               </p>
             </div>
 
-            {/* Barra de Progresso de Nível Gamer Compacta */}
-            <div className="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800/80 max-w-sm mx-auto lg:mx-0">
-              <div className="flex items-center justify-between text-[11px] mb-1">
-                <span className="font-semibold text-slate-400">Evolução da Patente</span>
-                <span className="font-bold text-cyan-400">{currentLevelProgress}%</span>
-              </div>
-              <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden p-[1px]">
-                <div
-                  className="bg-gradient-to-r from-cyan-500 to-rose-500 h-full rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
-                  style={{ width: `${currentLevelProgress}%` }}
-                />
-              </div>
-            </div>
-
-            {/* BOTÕES DE AÇÃO: PRINCIPAIS E RÁPIDOS */}
-            <div className="space-y-2 pt-1">
-              {/* Nível 1: Modos de Jogo */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:max-w-md">
+            {/* Botões de Ação Principais e Links Secundários */}
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-2.5 w-full max-w-md">
                 <button
                   onClick={() => onNavigate('game')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer truncate"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
-                  <Play className="w-4 h-4 fill-current shrink-0" />
-                  <span>JOGAR FASES</span>
+                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
+                  <span><span className="hidden sm:inline">JOGAR </span>FASES</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('game')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer truncate"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-orange-400 hover:text-orange-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-orange-500/30 hover:border-orange-500/50 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
-                  <Flame className="w-4 h-4 fill-current shrink-0" />
-                  <span>INFINITO 🔥</span>
+                  <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
+                  <span><span className="hidden sm:inline">MODO </span>INFINITO</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('game')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/35 hover:scale-[1.02] active:scale-95 transition-all border border-rose-400/30 cursor-pointer truncate"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-slate-800 hover:border-slate-700 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
-                  <Swords className="w-4 h-4 shrink-0" />
+                  <Swords className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   <span>DUELO 1V1</span>
                 </button>
               </div>
 
-              {/* Nível 2: Atalhos Rápidos */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+              {/* Links de Acesso Rápido Discretos */}
+              <div className="flex items-center justify-center lg:justify-start gap-4 text-xs font-medium text-slate-400 pt-1">
                 <button
                   onClick={() => onNavigate('ranking')}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-300 hover:text-amber-200 font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 hover:border-amber-500/50 transition-all active:scale-95 shadow-sm"
+                  className="hover:text-amber-400 transition-colors flex items-center gap-1"
                 >
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <Trophy className="w-3.5 h-3.5 text-amber-400/80" />
                   <span>Ranking</span>
                 </button>
-
+                <span className="text-slate-700">•</span>
                 <button
                   onClick={() => onNavigate('profile')}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 hover:border-cyan-500/40 transition-all active:scale-95 shadow-sm"
+                  className="hover:text-cyan-400 transition-colors flex items-center gap-1"
                 >
-                  <Palette className="w-3.5 h-3.5 text-cyan-400" />
+                  <Palette className="w-3.5 h-3.5 text-cyan-400/80" />
                   <span>Loja de Esferas</span>
                 </button>
-
+                <span className="text-slate-700">•</span>
                 <button
                   onClick={() => onNavigate('profile')}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-purple-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-purple-500/30 hover:border-purple-500/50 transition-all active:scale-95 shadow-sm"
+                  className="hover:text-purple-400 transition-colors flex items-center gap-1"
                 >
-                  <Award className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Missões & Troféus</span>
+                  <Award className="w-3.5 h-3.5 text-purple-400/80" />
+                  <span>Missões</span>
                 </button>
-
-                {!user && (
-                  <button
-                    onClick={() => onNavigate('login')}
-                    className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-800 hover:border-slate-700 transition-all active:scale-95"
-                  >
-                    <LogIn className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Entrar</span>
-                  </button>
-                )}
               </div>
             </div>
           </div>
 
-          {/* 2. HANGAR DA ESFERA (COMPACTO E INTERATIVO) */}
-          <div className="relative flex flex-col items-center justify-center p-3.5 sm:p-4 bg-slate-900/50 rounded-2xl border border-slate-800/80 shadow-xl shrink-0 w-full sm:w-64">
-            <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400/80 mb-2">
-              Esfera Ativa no Hangar
-            </span>
+          {/* 2. ESFERA ATIVA (ANIMADA COM LEVITAÇÃO & AURA CÓSMICA) */}
+          <div className="flex flex-col items-center justify-center p-5 bg-slate-900/30 rounded-2xl border border-slate-800/60 shrink-0 w-full sm:w-56 relative overflow-hidden">
+            {/* Aura cósmica suave com a cor de glow da esfera */}
+            <div
+              className="absolute w-28 h-28 rounded-full blur-2xl opacity-25 pointer-events-none animate-pulse-glow"
+              style={{ backgroundColor: currentSkin.glow || '#06b6d4' }}
+            />
 
-            <div className="relative w-28 h-28 rounded-full flex items-center justify-center">
-              {/* Aura pulsante de energia */}
-              <div
-                className="absolute inset-0 rounded-full animate-pulse-glow"
-                style={{
-                  background: `radial-gradient(circle, ${currentSkin.glow} 0%, rgba(6,182,212,0.12) 70%, transparent 100%)`
-                }}
-              />
-
-              {/* Esfera vetorial estilizada hiper-personalizada */}
-              <div
-                className="relative flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer active:scale-95"
-                onClick={() => onNavigate('profile')}
-                title="Personalizar Esfera no Hangar"
-              >
-                <SkinPreviewCanvas skinId={currentSkin.id} size={76} shadow={true} />
-              </div>
+            <div
+              className="relative flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 my-2 animate-float-ball"
+              onClick={() => onNavigate('profile')}
+              title="Personalizar Esfera na Loja"
+            >
+              <SkinPreviewCanvas skinId={currentSkin.id} size={84} shadow={true} animated={true} />
             </div>
 
-            <div className="mt-2 text-center space-y-2 w-full">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="text-xs font-black text-white">{currentSkin.name}</span>
-                <button
-                  onClick={() => onNavigate('profile')}
-                  className="text-[10px] text-cyan-400 hover:underline font-semibold"
-                >
-                  (Mudar)
-                </button>
-              </div>
-
-              {/* Mini Seletor Rápido de Skins no Próprio Dashboard */}
-              <div className="flex items-center justify-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
-                {BALL_SKINS.slice(0, 6).map((skin) => (
-                  <button
-                    key={skin.id}
-                    onClick={() => handleQuickEquipSkin(skin.id)}
-                    title={skin.name}
-                    className={`transition-transform flex items-center justify-center ${currentSkin.id === skin.id
-                        ? 'scale-125 ring-2 ring-cyan-400 rounded-full shadow-md'
-                        : 'opacity-70 hover:opacity-100 hover:scale-110'
-                      }`}
-                  >
-                    <SkinPreviewCanvas skinId={skin.id} size={20} shadow={false} />
-                  </button>
-                ))}
-              </div>
+            <div className="text-center mt-2 space-y-1 relative z-10">
+              <span className="text-xs font-bold text-white block truncate max-w-[160px]">
+                {currentSkin.name}
+              </span>
+              <button
+                onClick={() => onNavigate('profile')}
+                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold cursor-pointer"
+              >
+                Trocar Esfera
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. CARDS DE ESTATÍSTICAS GAMER (BATTLE STATS) */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 3. CARDS DE ESTATÍSTICAS (MINIMALISTAS) */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Recorde */}
         <div 
           onClick={() => onNavigate('ranking')}
-          className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-amber-950/10 shadow-lg cursor-pointer hover:scale-[1.02]"
-          title="Ver Classificação Global no Ranking"
+          className="glass-card rounded-2xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between space-y-2 cursor-pointer"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-              <span>Recorde Máximo</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-bold border border-amber-500/20">Ver Top 10</span>
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-              <Trophy className="w-4 h-4" />
-            </div>
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Recorde Solo</span>
+            <Trophy className="w-3.5 h-3.5 text-amber-400/80" />
           </div>
-          <div>
-            <div className="text-2xl sm:text-3xl font-black text-amber-400">
-              {highScore.toLocaleString()} <span className="text-xs font-bold text-amber-400/70">pts</span>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-1">Pontuação mais alta</p>
+          <div className="text-xl sm:text-2xl font-black text-amber-400">
+            {highScore.toLocaleString()} <span className="text-xs font-normal text-amber-400/70">pts</span>
           </div>
         </div>
 
         {/* Fases Cósmicas */}
-        <div className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-cyan-950/10 shadow-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Fases Concluídas</span>
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
+        <div 
+          onClick={() => onNavigate('game')}
+          className="glass-card rounded-2xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between space-y-2 cursor-pointer"
+        >
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Fases</span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400/80" />
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-black text-cyan-400">
-              {stagesCompleted} <span className="text-xs font-bold text-cyan-400/70">/ {STAGES.length}</span>
+            <div className="text-xl sm:text-2xl font-black text-cyan-400">
+              {stagesCompleted} <span className="text-xs font-normal text-cyan-400/70">/ {STAGES.length}</span>
             </div>
-            <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div className="w-full bg-slate-800 h-1 rounded-full mt-2 overflow-hidden">
               <div
-                className="bg-cyan-500 h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                className="bg-cyan-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
         </div>
 
-        {/* Modo Infinito (Sobrevivência do Magma) */}
+        {/* Modo Infinito */}
         <div 
           onClick={() => onNavigate('game')}
-          className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-orange-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-orange-950/10 shadow-lg cursor-pointer hover:scale-[1.02]"
-          title="Jogar Modo Infinito"
+          className="glass-card rounded-2xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between space-y-2 cursor-pointer"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Modo Infinito</span>
-            <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
-              <Flame className="w-4 h-4" />
-            </div>
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Modo Infinito</span>
+            <Flame className="w-3.5 h-3.5 text-orange-400/80" />
           </div>
-          <div>
-            <div className="text-2xl sm:text-3xl font-black text-orange-400">
-              {profile?.endless_high_score || 0} <span className="text-xs font-bold text-orange-400/70">metros</span>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-1">Recorde no magma</p>
+          <div className="text-xl sm:text-2xl font-black text-orange-400">
+            {profile?.endless_high_score || 0} <span className="text-xs font-normal text-orange-400/70">m</span>
           </div>
         </div>
 
         {/* Saldo de Gemas */}
         <div 
           onClick={() => onNavigate('profile')}
-          className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-yellow-500/40 transition-all flex flex-col justify-between space-y-3 bg-gradient-to-b from-slate-900/80 to-yellow-950/10 shadow-lg cursor-pointer hover:scale-[1.02]"
-          title="Ver Garagem de Skins e Rastros"
+          className="glass-card rounded-2xl p-4 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between space-y-2 cursor-pointer"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Gemas Acumuladas</span>
-            <div className="w-8 h-8 rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center">
-              <Sparkles className="w-4 h-4" />
-            </div>
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Gemas</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-400/80" />
           </div>
-          <div>
-            <div className="text-2xl sm:text-3xl font-black text-yellow-400">
-              {profile?.gems ?? 100} <span className="text-xs font-bold text-yellow-400/70">💎</span>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-1">Disponíveis para gastar</p>
+          <div className="text-xl sm:text-2xl font-black text-amber-300">
+            {profile?.gems ?? 100} <span className="text-xs font-normal text-amber-400/70">💎</span>
           </div>
         </div>
       </section>
 
-      {/* 4. MISSÕES & DESAFIOS DO PILOTO (QUEST LOG) */}
-      <section className="glass-panel rounded-3xl p-6 border border-slate-800/90 space-y-4">
+      {/* 4. MISSÕES DO PILOTO (CLEAN & DIRETAS) */}
+      <section className="glass-panel rounded-3xl p-6 border border-slate-800/80 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-rose-400" />
-            <h2 className="text-lg sm:text-xl font-bold text-white">Missões do Piloto Cósmico</h2>
-          </div>
-          <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700">
-            Recompensas Ativas
-          </span>
+          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <Target className="w-4 h-4 text-cyan-400" />
+            <span>Missões de Treinamento</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Missão 1 */}
-          <div className={`p-4 rounded-2xl border transition-all ${stagesCompleted >= 1
-              ? 'bg-emerald-950/20 border-emerald-500/40'
+          <div className={`p-3.5 rounded-2xl border transition-all ${stagesCompleted >= 1
+              ? 'bg-emerald-950/20 border-emerald-500/30'
               : 'glass-card border-slate-800/80'
             }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">PRIMEIRA VITÓRIA</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <h4 className="text-xs font-bold text-white">Conquistar Fase 1</h4>
               {stagesCompleted >= 1 ? (
-                <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Concluída
+                <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Concluída
                 </span>
               ) : (
-                <span className="text-[10px] font-bold text-slate-400">0 / 1</span>
+                <span className="text-[11px] text-slate-500 font-medium">0 / 1</span>
               )}
             </div>
-            <h4 className="text-sm font-bold text-white">Conquistar Fase 1</h4>
-            <p className="text-xs text-slate-400 mt-1">Vença a Floresta Esmeralda atingindo 1.800 metros de altura.</p>
+            <p className="text-xs text-slate-400">Vença a Floresta Esmeralda atingindo 1.800m.</p>
           </div>
 
           {/* Missão 2 */}
-          <div className={`p-4 rounded-2xl border transition-all ${totalJumps >= 100
-              ? 'bg-emerald-950/20 border-emerald-500/40'
+          <div className={`p-3.5 rounded-2xl border transition-all ${totalJumps >= 100
+              ? 'bg-emerald-950/20 border-emerald-500/30'
               : 'glass-card border-slate-800/80'
             }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-sky-400">SALTEADOR DE ELITE</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <h4 className="text-xs font-bold text-white">Mestre dos Saltos</h4>
               {totalJumps >= 100 ? (
-                <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Concluída
+                <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Concluída
                 </span>
               ) : (
-                <span className="text-[10px] font-bold text-slate-400">{Math.min(100, totalJumps)} / 100</span>
+                <span className="text-[11px] text-slate-500 font-medium">{Math.min(100, totalJumps)} / 100</span>
               )}
             </div>
-            <h4 className="text-sm font-bold text-white">Mestre das Molas</h4>
-            <p className="text-xs text-slate-400 mt-1">Acumule 100 saltos ao longo das suas partidas cósmicas.</p>
+            <p className="text-xs text-slate-400">Acumule 100 saltos ao longo das partidas.</p>
           </div>
 
           {/* Missão 3 */}
-          <div className={`p-4 rounded-2xl border transition-all ${highScore >= 5000
-              ? 'bg-emerald-950/20 border-emerald-500/40'
+          <div className={`p-3.5 rounded-2xl border transition-all ${highScore >= 5000
+              ? 'bg-emerald-950/20 border-emerald-500/30'
               : 'glass-card border-slate-800/80'
             }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">PONTUAÇÃO DE OURO</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <h4 className="text-xs font-bold text-white">Super Recordista</h4>
               {highScore >= 5000 ? (
-                <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Concluída
+                <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Concluída
                 </span>
               ) : (
-                <span className="text-[10px] font-bold text-slate-400">{highScore} / 5.000 pts</span>
+                <span className="text-[11px] text-slate-500 font-medium">{highScore} / 5.000 pts</span>
               )}
             </div>
-            <h4 className="text-sm font-bold text-white">Super Recordista</h4>
-            <p className="text-xs text-slate-400 mt-1">Supere a marca dos 5.000 pontos em qualquer uma das fases.</p>
+            <p className="text-xs text-slate-400">Supere 5.000 pontos em qualquer fase.</p>
           </div>
         </div>
       </section>
 
       {/* 5. VISÃO GERAL DAS FASES CÓSMICAS (MAPA DE FASES) */}
-      <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/90 space-y-6">
+      <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/80 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-lg sm:text-xl font-bold text-white">Trajetória Cósmica ({STAGES.length} Fases até {maxAltitude.toLocaleString('pt-BR')}m)</h2>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Heróis de Aço, Dragão Solar, Singularidade, Arcade Retrô e o Ápice Cósmico a 50.000m!
+            <h2 className="text-base sm:text-lg font-bold text-white">
+              Trajetória Cósmica
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {STAGES.length} fases com físicas, temas e mecânicas próprias até {maxAltitude.toLocaleString('pt-BR')}m.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onNavigate('game')}
-              className="px-4 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all"
-            >
-              <span>Ver no Jogo</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => onNavigate('game')}
+            className="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all self-start sm:self-auto"
+          >
+            <span>Ver no Jogo</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -447,37 +350,29 @@ export function Home({ onNavigate }) {
               <div
                 key={stage.id}
                 onClick={() => isUnlocked && onNavigate('game')}
-                className={`p-3.5 rounded-2xl border transition-all text-left relative overflow-hidden ${isFinished
-                    ? 'bg-emerald-950/20 border-emerald-500/40 text-slate-200 hover:scale-[1.02] cursor-pointer'
+                className={`p-3 rounded-2xl border transition-all text-left relative overflow-hidden ${isFinished
+                    ? 'bg-emerald-950/20 border-emerald-500/30 text-slate-200 hover:scale-[1.02] cursor-pointer'
                     : isUnlocked
-                      ? 'glass-card border-cyan-500/50 shadow-sm shadow-cyan-500/10 hover:scale-[1.02] cursor-pointer'
-                      : 'bg-slate-950/40 border-slate-800/50 opacity-60 cursor-not-allowed'
+                      ? 'glass-card border-cyan-500/40 hover:scale-[1.02] cursor-pointer'
+                      : 'bg-slate-950/40 border-slate-800/40 opacity-50 cursor-not-allowed'
                   }`}
               >
-                {/* Gradiente temático sutil */}
-                <div
-                  className="absolute inset-0 opacity-10 pointer-events-none"
-                  style={{
-                    background: `linear-gradient(135deg, ${stage.bgGradient[0]} 0%, ${stage.bgGradient[2]} 100%)`
-                  }}
-                />
-
-                <div className="flex items-center justify-between mb-2 relative z-10">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                    Fase {stage.number}
+                <div className="flex items-center justify-between mb-1.5 relative z-10">
+                  <span className="text-[10px] font-semibold text-slate-400">
+                    #{stage.number}
                   </span>
                   {isFinished ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   ) : isUnlocked ? (
-                    <Play className="w-3.5 h-3.5 text-cyan-400 fill-current" />
+                    <Play className="w-3 h-3 text-cyan-400 fill-current" />
                   ) : (
-                    <Lock className="w-3.5 h-3.5 text-slate-600" />
+                    <Lock className="w-3 h-3 text-slate-600" />
                   )}
                 </div>
                 <h4 className="text-xs font-bold text-white truncate relative z-10">{stage.title}</h4>
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/60 text-[10px] text-slate-400 relative z-10">
-                  <span className="text-cyan-300 font-semibold">{stage.targetHeight}m</span>
-                  <span className="font-bold">{stage.speedFactor}x</span>
+                <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-800/60 text-[10px] text-slate-400 relative z-10">
+                  <span className="text-cyan-300 font-medium">{stage.targetHeight}m</span>
+                  <span>{stage.speedFactor}x</span>
                 </div>
               </div>
             );

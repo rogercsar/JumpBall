@@ -29,8 +29,8 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
 
   const navItems = [
     { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'game', label: 'Jogar', icon: Gamepad2 },
     { id: 'ranking', label: 'Ranking', icon: Trophy },
+    { id: 'game', label: 'Jogar', icon: Gamepad2 },
     { id: 'profile', label: 'Perfil', icon: User },
     { id: 'settings', label: 'Ajustes', icon: SettingsIcon }
   ];
@@ -53,9 +53,6 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
               <span className="text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 bg-clip-text text-transparent">
                 JUMPBALL
               </span>
-              {/*<span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                PRO RUNNER
-              </span>*/}
             </div>
           </div>
 
@@ -65,6 +62,7 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentRoute === item.id;
+
                 return (
                   <button
                     key={item.id}
@@ -84,35 +82,6 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
 
           {/* Indicadores de Hardware e Status do Usuário */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Indicadores de Sensores comentados a pedido:
-            {user && (
-              <div 
-                title={hasOrientation ? 'Giroscópio / Acelerômetro Conectado' : 'Aguardando sensor de movimento'}
-                className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
-                  hasOrientation 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                    : 'bg-slate-800/60 text-slate-500 border-slate-700/50'
-                }`}
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span className="hidden lg:inline">{hasOrientation ? 'Giro Ativo' : 'Giro Desligado'}</span>
-              </div>
-            )}
-
-            {user && settings.cameraEnabled && (
-              <div
-                title={isCameraActive ? 'MediaPipe Hands Ativo' : 'Câmera em espera'}
-                className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${isCameraActive
-                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 animate-pulse'
-                    : 'bg-slate-800/60 text-slate-500 border-slate-700/50'
-                  }`}
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span className="hidden lg:inline">{isCameraActive ? 'Visão Ativa' : 'Câmera Off'}</span>
-              </div>
-            )}
-            */}
-
             {/* Perfil / Login */}
             {!user ? (
               <div className="flex items-center gap-2">
@@ -171,20 +140,22 @@ export function Navbar({ currentRoute, setCurrentRoute, hasOrientation, isCamera
         </div>
       </header>
 
-      {/* Barra de Navegação Inferior para Mobile (Moderna com Safe Area e visual ergonômico) */}
+      {/* Barra de Navegação Inferior para Mobile (Moderna com Botão Jogar no Meio Elevado) */}
       {user && currentRoute !== 'game' && (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-slate-800/90 bg-slate-950/95 backdrop-blur-xl pt-1.5 pb-[max(env(safe-area-inset-bottom),0.65rem)] px-3 flex justify-around items-center shadow-2xl">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentRoute === item.id;
+
             return (
               <button
                 key={item.id}
                 onClick={() => setCurrentRoute(item.id)}
-                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-2xl transition-all duration-200 relative ${isActive
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-2xl transition-all duration-200 relative ${
+                  isActive
                     ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 shadow-sm shadow-cyan-500/20 scale-105'
                     : 'text-slate-400 hover:text-slate-200 active:scale-95'
-                  }`}
+                }`}
               >
                 <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' : ''}`} />
                 <span className={`text-[10px] font-semibold tracking-tight ${isActive ? 'text-cyan-300 font-bold' : 'text-slate-400'}`}>

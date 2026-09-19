@@ -174,7 +174,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
     const chosenSkin = BALL_SKINS.find(s => s.id === skinId);
     if (!chosenSkin) return;
 
-    const isUnlocked = !chosenSkin.unlockStage || stagesCompleted >= chosenSkin.unlockStage || profile?.unlocked_skins?.includes(skinId);
+    const isUnlocked = chosenSkin.priceGems === 0 || profile?.unlocked_skins?.includes(skinId);
     if (isUnlocked) {
       await updateProfile({ ball_skin: skinId });
       showAlert({
@@ -186,14 +186,14 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
       return;
     }
 
-    // Se estiver bloqueada por fase, o jogador pode comprá-la com gemas
+    // Se estiver bloqueada, o jogador adquire na loja com gemas
     const cost = chosenSkin.priceGems || 500;
     const currentGems = profile?.gems ?? 100;
 
     if (currentGems < cost) {
       showAlert({
-        title: '🔒 Skin Bloqueada',
-        message: `"${chosenSkin.name}" é desbloqueada ao vencer a Fase ${chosenSkin.unlockStage} ou por ${cost} 💎 Gemas (Seu saldo: ${currentGems} 💎). Colete mais gemas jogando para liberá-la!`,
+        title: '💎 Gemas Insuficientes',
+        message: `A skin "${chosenSkin.name}" custa ${cost} 💎 Gemas (Seu saldo: ${currentGems} 💎). Colete mais gemas jogando para comprá-la na loja!`,
         variant: 'warning',
         confirmText: 'Entendido'
       });
@@ -301,7 +301,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
       current = Math.min(500, profile?.gems || 0);
       target = 500;
     } else if (ach.id === 'skin_collector') {
-      const unlockedCount = BALL_SKINS.filter(s => !s.unlockStage || stagesCompleted >= s.unlockStage || profile?.unlocked_skins?.includes(s.id)).length;
+      const unlockedCount = BALL_SKINS.filter(s => s.priceGems === 0 || profile?.unlocked_skins?.includes(s.id)).length;
       current = Math.min(6, unlockedCount);
       target = 6;
     } else if (ach.id === 'portal_master') {
@@ -552,13 +552,13 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
               <Palette className="w-5 h-5 text-cyan-400" />
               <div>
                 <h2 className="text-lg font-bold text-white">Garagem e Loja de Esferas ({BALL_SKINS.length})</h2>
-                <p className="text-xs text-slate-400">Desbloqueie avançando pelas fases ou compre instantaneamente com suas Gemas 💎!</p>
+                <p className="text-xs text-slate-400">Adquira novas esferas e heróis lendários utilizando suas Gemas 💎!</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="px-3 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-black text-xs shadow-sm">
-                {BALL_SKINS.filter(s => !s.unlockStage || stagesCompleted >= s.unlockStage || profile?.unlocked_skins?.includes(s.id)).length} / {BALL_SKINS.length} Liberadas
+                {BALL_SKINS.filter(s => s.priceGems === 0 || profile?.unlocked_skins?.includes(s.id)).length} / {BALL_SKINS.length} Liberadas
               </span>
             </div>
           </div>
@@ -596,7 +596,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
             {BALL_SKINS.filter(s => skinCategory === 'all' || s.category === skinCategory).map((skin) => {
               const isSelected = activeSkin.id === skin.id;
-              const isUnlocked = !skin.unlockStage || stagesCompleted >= skin.unlockStage || profile?.unlocked_skins?.includes(skin.id);
+              const isUnlocked = skin.priceGems === 0 || profile?.unlocked_skins?.includes(skin.id);
 
               return (
                 <button
@@ -610,11 +610,11 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                         : 'glass-card border-slate-800 hover:border-slate-700 hover:scale-[1.02]'
                   }`}
                 >
-                  {/* Badge de Bloqueio com Fase Requerida ou Preço em Gemas */}
+                  {/* Badge de Bloqueio com Preço em Gemas */}
                   {!isUnlocked && (
                     <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-bold flex items-center gap-0.5 shadow-sm">
                       <Lock className="w-2.5 h-2.5" />
-                      <span>{skin.priceGems || 500} 💎</span>
+                      <span>{skin.priceGems} 💎</span>
                     </div>
                   )}
 
@@ -641,7 +641,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                           ? 'text-amber-400/90' 
                           : 'text-slate-500'
                     }`}>
-                      {isSelected ? 'Equipado' : !isUnlocked ? `Fase ${skin.unlockStage} ou ${skin.priceGems || 500} 💎` : 'Selecionar'}
+                      {isSelected ? 'Equipado' : !isUnlocked ? `${skin.priceGems} 💎` : 'Selecionar'}
                     </span>
                   </div>
                 </button>

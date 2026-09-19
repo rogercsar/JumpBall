@@ -958,57 +958,57 @@ export const STAGES = [
 ];
 
 export const BALL_SKINS = [
-  // 6 Skins Iniciais (Desbloqueadas para todos os jogadores)
-  { id: 'neon-cyan', name: 'Esfera Neon', primary: '#06b6d4', glow: '#22d3ee', trail: '#0891b2', unlockStage: 0, priceGems: 0, category: 'starter' },
-  { id: 'plasma-pink', name: 'Pulso Plasma', primary: '#f43f5e', glow: '#fb7185', trail: '#e11d48', unlockStage: 0, priceGems: 0, category: 'starter' },
-  { id: 'solar-gold', name: 'Sol de Hélio', primary: '#eab308', glow: '#fde047', trail: '#ca8a04', unlockStage: 0, priceGems: 0, category: 'starter' },
-  { id: 'matrix-green', name: 'Córtex Matrix', primary: '#22c55e', glow: '#86efac', trail: '#16a34a', unlockStage: 0, priceGems: 0, category: 'starter' },
-  { id: 'cosmic-purple', name: 'Nebulosa Roxa', primary: '#a855f7', glow: '#d8b4fe', trail: '#9333ea', unlockStage: 0, priceGems: 0, category: 'starter' },
-  { id: 'fireball', name: 'Meteoro Ígneo', primary: '#f97316', glow: '#fdba74', trail: '#ea580c', unlockStage: 0, priceGems: 0, category: 'starter' },
+  // 6 Skins Iniciais (Gratuitas / Desbloqueadas)
+  { id: 'neon-cyan', name: 'Esfera Neon', primary: '#06b6d4', glow: '#22d3ee', trail: '#0891b2', priceGems: 0, category: 'starter' },
+  { id: 'plasma-pink', name: 'Pulso Plasma', primary: '#f43f5e', glow: '#fb7185', trail: '#e11d48', priceGems: 0, category: 'starter' },
+  { id: 'solar-gold', name: 'Sol de Hélio', primary: '#eab308', glow: '#fde047', trail: '#ca8a04', priceGems: 0, category: 'starter' },
+  { id: 'matrix-green', name: 'Córtex Matrix', primary: '#22c55e', glow: '#86efac', trail: '#16a34a', priceGems: 0, category: 'starter' },
+  { id: 'cosmic-purple', name: 'Nebulosa Roxa', primary: '#a855f7', glow: '#d8b4fe', trail: '#9333ea', priceGems: 0, category: 'starter' },
+  { id: 'fireball', name: 'Meteoro Ígneo', primary: '#f97316', glow: '#fdba74', trail: '#ea580c', priceGems: 0, category: 'starter' },
 
-  // Fase 15 (Exército e Táticas Especiais)
-  { id: 'army-camo', name: 'Camuflagem Militar', primary: '#4d7c0f', glow: '#84cc16', trail: '#365314', unlockStage: 15, priceGems: 300, category: 'army' },
-  { id: 'tactical-specops', name: 'Força Especial Tática', primary: '#1e293b', glow: '#64748b', trail: '#0f172a', unlockStage: 15, priceGems: 350, category: 'army' },
+  // Forças Táticas & Militares
+  { id: 'army-camo', name: 'Camuflagem Militar', primary: '#4d7c0f', glow: '#84cc16', trail: '#365314', priceGems: 300, category: 'army' },
+  { id: 'tactical-specops', name: 'Força Especial Tática', primary: '#1e293b', glow: '#64748b', trail: '#0f172a', priceGems: 350, category: 'army' },
 
-  // Fase 16 (Heróis Lendários)
-  { id: 'iron-hero', name: 'Homem de Ferro', primary: '#b91c1c', glow: '#facc15', trail: '#7f1d1d', unlockStage: 16, priceGems: 600, category: 'heroes' },
-  { id: 'spider-hero', name: 'Homem-Aranha', primary: '#dc2626', glow: '#38bdf8', trail: '#1d4ed8', unlockStage: 16, priceGems: 600, category: 'heroes' },
+  // Heróis Lendários
+  { id: 'iron-hero', name: 'Homem de Ferro', primary: '#b91c1c', glow: '#facc15', trail: '#7f1d1d', priceGems: 600, category: 'heroes' },
+  { id: 'spider-hero', name: 'Homem-Aranha', primary: '#dc2626', glow: '#38bdf8', trail: '#1d4ed8', priceGems: 600, category: 'heroes' },
 
-  // Fase 17 (Heróis)
-  { id: 'super-steel', name: 'Superman', primary: '#2563eb', glow: '#ef4444', trail: '#eab308', unlockStage: 17, priceGems: 650, category: 'heroes' },
-  { id: 'dark-bat', name: 'Batman', primary: '#18181b', glow: '#eab308', trail: '#09090b', unlockStage: 17, priceGems: 650, category: 'heroes' },
+  // Heróis
+  { id: 'super-steel', name: 'Superman', primary: '#2563eb', glow: '#ef4444', trail: '#eab308', priceGems: 650, category: 'heroes' },
+  { id: 'dark-bat', name: 'Batman', primary: '#18181b', glow: '#eab308', trail: '#09090b', priceGems: 650, category: 'heroes' },
 
-  // Fase 18 (Heróis)
-  { id: 'thunder-god', name: 'Thor', primary: '#64748b', glow: '#60a5fa', trail: '#38bdf8', unlockStage: 18, priceGems: 700, category: 'heroes' },
-  { id: 'captain-shield', name: 'Capitão América', primary: '#1d4ed8', glow: '#ef4444', trail: '#f8fafc', unlockStage: 18, priceGems: 700, category: 'heroes' },
+  // Heróis
+  { id: 'thunder-god', name: 'Thor', primary: '#64748b', glow: '#60a5fa', trail: '#38bdf8', priceGems: 700, category: 'heroes' },
+  { id: 'captain-shield', name: 'Capitão América', primary: '#1d4ed8', glow: '#ef4444', trail: '#f8fafc', priceGems: 700, category: 'heroes' },
 
-  // Fase 19 (Heróis)
-  { id: 'wolverine-claw', name: 'Wolverine', primary: '#eab308', glow: '#3b82f6', trail: '#854d0e', unlockStage: 19, priceGems: 750, category: 'heroes' },
-  { id: 'gamma-titan', name: 'Hulk Titã', primary: '#15803d', glow: '#4ade80', trail: '#166534', unlockStage: 19, priceGems: 750, category: 'heroes' },
+  // Heróis
+  { id: 'wolverine-claw', name: 'Wolverine', primary: '#eab308', glow: '#3b82f6', trail: '#854d0e', priceGems: 750, category: 'heroes' },
+  { id: 'gamma-titan', name: 'Hulk Titã', primary: '#15803d', glow: '#4ade80', trail: '#166534', priceGems: 750, category: 'heroes' },
 
-  // Fase 20 (Heróis)
-  { id: 'vibranium-panther', name: 'Pantera Negra', primary: '#09090b', glow: '#c084fc', trail: '#6b21a8', unlockStage: 20, priceGems: 800, category: 'heroes' },
-  { id: 'speed-lightning', name: 'Flash Velocista', primary: '#dc2626', glow: '#fde047', trail: '#ca8a04', unlockStage: 20, priceGems: 800, category: 'heroes' },
+  // Heróis
+  { id: 'vibranium-panther', name: 'Pantera Negra', primary: '#09090b', glow: '#c084fc', trail: '#6b21a8', priceGems: 800, category: 'heroes' },
+  { id: 'speed-lightning', name: 'Flash Velocista', primary: '#dc2626', glow: '#fde047', trail: '#ca8a04', priceGems: 800, category: 'heroes' },
 
-  // Fase 21 (Heróis)
-  { id: 'red-mercenary', name: 'Deadpool', primary: '#e11d48', glow: '#475569', trail: '#881337', unlockStage: 21, priceGems: 850, category: 'heroes' },
-  { id: 'mystic-supreme', name: 'Doutor Estranho', primary: '#c2410c', glow: '#4ade80', trail: '#4338ca', unlockStage: 21, priceGems: 850, category: 'heroes' },
+  // Heróis
+  { id: 'red-mercenary', name: 'Deadpool', primary: '#e11d48', glow: '#475569', trail: '#881337', priceGems: 850, category: 'heroes' },
+  { id: 'mystic-supreme', name: 'Doutor Estranho', primary: '#c2410c', glow: '#4ade80', trail: '#4338ca', priceGems: 850, category: 'heroes' },
 
-  // Fase 22 (Astronautas & Exploração Espacial)
-  { id: 'apollo-astronaut', name: 'Astronauta Apollo', primary: '#f8fafc', glow: '#fde047', trail: '#94a3b8', unlockStage: 22, priceGems: 900, category: 'space' },
-  { id: 'void-cosmonaut', name: 'Cosmonauta do Vazio', primary: '#0f172a', glow: '#06b6d4', trail: '#0284c7', unlockStage: 22, priceGems: 900, category: 'space' },
+  // Astronautas & Exploração Espacial
+  { id: 'apollo-astronaut', name: 'Astronauta Apollo', primary: '#f8fafc', glow: '#fde047', trail: '#94a3b8', priceGems: 900, category: 'space' },
+  { id: 'void-cosmonaut', name: 'Cosmonauta do Vazio', primary: '#0f172a', glow: '#06b6d4', trail: '#0284c7', priceGems: 900, category: 'space' },
 
-  // Fase 23 (Táticas Especiais)
-  { id: 'stealth-pilot', name: 'Piloto Stealth', primary: '#334155', glow: '#f59e0b', trail: '#1e293b', unlockStage: 23, priceGems: 950, category: 'army' },
-  { id: 'cyber-shinobi', name: 'Ninja Cibernético', primary: '#581c87', glow: '#22c55e', trail: '#3b0764', unlockStage: 23, priceGems: 950, category: 'heroes' },
+  // Táticas Especiais
+  { id: 'stealth-pilot', name: 'Piloto Stealth', primary: '#334155', glow: '#f59e0b', trail: '#1e293b', priceGems: 950, category: 'army' },
+  { id: 'cyber-shinobi', name: 'Ninja Cibernético', primary: '#581c87', glow: '#22c55e', trail: '#3b0764', priceGems: 950, category: 'heroes' },
 
-  // Fase 24 (Guerreiros Lendários)
-  { id: 'spartan-gladiator', name: 'Gladiador Espartano', primary: '#92400e', glow: '#f59e0b', trail: '#78350f', unlockStage: 24, priceGems: 1000, category: 'heroes' },
-  { id: 'solar-ronin', name: 'Samurai Solar', primary: '#be123c', glow: '#fbbf24', trail: '#881337', unlockStage: 24, priceGems: 1000, category: 'heroes' },
+  // Guerreiros Lendários
+  { id: 'spartan-gladiator', name: 'Gladiador Espartano', primary: '#92400e', glow: '#f59e0b', trail: '#78350f', priceGems: 1000, category: 'heroes' },
+  { id: 'solar-ronin', name: 'Samurai Solar', primary: '#be123c', glow: '#fbbf24', trail: '#881337', priceGems: 1000, category: 'heroes' },
 
-  // Fase 25 (Lendárias Cósmicas)
-  { id: 'space-corsair', name: 'Corsário Espacial', primary: '#1e1b4b', glow: '#10b981', trail: '#0f172a', unlockStage: 25, priceGems: 1100, category: 'space' },
-  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', unlockStage: 25, priceGems: 1200, category: 'heroes' }
+  // Lendárias Cósmicas
+  { id: 'space-corsair', name: 'Corsário Espacial', primary: '#1e1b4b', glow: '#10b981', trail: '#0f172a', priceGems: 1100, category: 'space' },
+  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', priceGems: 1200, category: 'heroes' }
 ];
 
 export const BALL_TRAILS = [

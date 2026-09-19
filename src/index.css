@@ -83,6 +83,20 @@
   animation: pulseGlow 2.5s infinite ease-in-out;
 }
 
+/* Animação de levitação suave da esfera */
+@keyframes floatBall {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-ball {
+  animation: floatBall 3s ease-in-out infinite;
+}
+
 /* Estilização para o Canvas de Jogo */
 #gameCanvas {
   touch-action: none;
