@@ -138,13 +138,32 @@ export function AuthProvider({ children }) {
         if (sessionData?.user) {
           const localProf = localStore.getProfile();
           const sessProf = sessionData.profile || {};
+          const metaProf = sessionData.user?.user_metadata || {};
           const mergedProfile = {
             ...localProf,
             ...sessProf,
             stages_completed: sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0),
-            high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0),
-            total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0),
-            games_played: Math.max(localProf.games_played || 0, sessProf.games_played || 0)
+            high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0, Number(metaProf.high_score || 0)),
+            total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0, Number(metaProf.total_jumps || 0)),
+            games_played: Math.max(localProf.games_played || 0, sessProf.games_played || 0),
+            gems: Math.max(localProf.gems ?? 100, Number(sessProf.gems || 0), Number(metaProf.gems || 0)),
+            unlocked_skins: Array.from(new Set([
+              'neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball',
+              ...(localProf.unlocked_skins || []),
+              ...(sessProf.unlocked_skins || []),
+              ...(metaProf.unlocked_skins || [])
+            ])),
+            unlocked_trails: Array.from(new Set([
+              'default',
+              ...(localProf.unlocked_trails || []),
+              ...(sessProf.unlocked_trails || []),
+              ...(metaProf.unlocked_trails || [])
+            ])),
+            achievements: Array.from(new Set([
+              ...(localProf.achievements || []),
+              ...(sessProf.achievements || []),
+              ...(metaProf.achievements || [])
+            ]))
           };
           setUser(sessionData.user);
           setProfile(mergedProfile);
@@ -179,6 +198,17 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .maybeSingle();
 
+      // Recupera metadados salvos na nuvem via Supabase Auth (onde ficam armazenados gemas, skins, rastros e conquistas multiplataforma)
+      let cloudMeta = {};
+      try {
+        const { data: authUserData } = await supabase.auth.getUser();
+        if (authUserData?.user?.user_metadata) {
+          cloudMeta = authUserData.user.user_metadata;
+        }
+      } catch (authErr) {
+        /* ignore */
+      }
+
       const local = localStore.getProfile();
       // Se profiles no banco já tem stages_completed registrado, respeita esse valor
       let resolvedStage = 0;
@@ -198,12 +228,65 @@ export function AuthProvider({ children }) {
         } catch (hErr) {
           /* ignore */
         }
-        resolvedStage = Math.max(maxStageFromHistory, local.stages_completed || 0);
+        resolvedStage = Math.max(
+          maxStageFromHistory, 
+          local.stages_completed || 0,
+          Number(cloudMeta.stages_completed || 0)
+        );
       }
 
-      const bestHighScore = Math.max(data?.high_score || 0, local.high_score || 0);
-      const bestTotalJumps = Math.max(data?.total_jumps || 0, local.total_jumps || 0);
+      const bestHighScore = Math.max(
+        data?.high_score || 0, 
+        local.high_score || 0,
+        Number(cloudMeta.high_score || 0)
+      );
+      const bestTotalJumps = Math.max(
+        data?.total_jumps || 0, 
+        local.total_jumps || 0,
+        Number(cloudMeta.total_jumps || 0)
+      );
       const bestGamesPlayed = Math.max(data?.games_played || 0, local.games_played || 0);
+
+      // Gemas: prioriza o maior saldo conhecido entre nuvem e local
+      const resolvedGems = Math.max(
+        local.gems ?? 100,
+        cloudMeta.gems !== undefined && cloudMeta.gems !== null ? Number(cloudMeta.gems) : 0,
+        data?.gems !== undefined && data?.gems !== null ? Number(data.gems) : 0
+      );
+
+      // Skins desbloqueadas: união de tudo que o jogador desbloqueou no PC, celular ou nuvem
+      const resolvedUnlockedSkins = Array.from(new Set([
+        'neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball',
+        ...(local.unlocked_skins || []),
+        ...(Array.isArray(cloudMeta.unlocked_skins) ? cloudMeta.unlocked_skins : []),
+        ...(data?.unlocked_skins || [])
+      ]));
+
+      // Rastros desbloqueados: união completa
+      const resolvedUnlockedTrails = Array.from(new Set([
+        'default',
+        ...(local.unlocked_trails || []),
+        ...(Array.isArray(cloudMeta.unlocked_trails) ? cloudMeta.unlocked_trails : []),
+        ...(data?.unlocked_trails || [])
+      ]));
+
+      // Conquistas permanentes: união completa
+      const resolvedAchievements = Array.from(new Set([
+        ...(local.achievements || []),
+        ...(Array.isArray(cloudMeta.achievements) ? cloudMeta.achievements : []),
+        ...(data?.achievements || [])
+      ]));
+
+      // Progresso diário: mescla progresso mais recente
+      const resolvedDailyQuests = cloudMeta.daily_quests_progress || local.daily_quests_progress || data?.daily_quests_progress || { date: '', progress: {}, claimed: {} };
+
+      const resolvedBallSkin = data?.ball_skin || cloudMeta.ball_skin || local.ball_skin || 'neon-cyan';
+      const resolvedTrail = cloudMeta.selected_trail || local.selected_trail || data?.selected_trail || 'default';
+      const resolvedEndlessScore = Math.max(
+        local.endless_high_score || 0, 
+        Number(cloudMeta.endless_high_score || 0), 
+        data?.endless_high_score || 0
+      );
 
       const merged = {
         ...local,
@@ -213,23 +296,14 @@ export function AuthProvider({ children }) {
         high_score: bestHighScore,
         total_jumps: bestTotalJumps,
         games_played: bestGamesPlayed,
-        gems: (data?.gems !== undefined && data.gems !== null) ? Math.max(Number(data.gems), Number(local.gems || 0)) : (local.gems ?? 100),
-        ball_skin: data?.ball_skin || local.ball_skin || 'neon-cyan',
-        unlocked_skins: Array.from(new Set([
-          ...(local.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']),
-          ...(data?.unlocked_skins || [])
-        ])),
-        unlocked_trails: Array.from(new Set([
-          ...(local.unlocked_trails || ['default']),
-          ...(data?.unlocked_trails || [])
-        ])),
-        selected_trail: local.selected_trail || data?.selected_trail || 'default',
-        achievements: Array.from(new Set([
-          ...(local.achievements || []),
-          ...(data?.achievements || [])
-        ])),
-        daily_quests_progress: local.daily_quests_progress || data?.daily_quests_progress || { date: '', progress: {}, claimed: {} },
-        endless_high_score: Math.max(local.endless_high_score || 0, data?.endless_high_score || 0)
+        gems: resolvedGems,
+        ball_skin: resolvedBallSkin,
+        selected_trail: resolvedTrail,
+        unlocked_skins: resolvedUnlockedSkins,
+        unlocked_trails: resolvedUnlockedTrails,
+        achievements: resolvedAchievements,
+        daily_quests_progress: resolvedDailyQuests,
+        endless_high_score: resolvedEndlessScore
       };
 
       setProfile(merged);
@@ -244,6 +318,33 @@ export function AuthProvider({ children }) {
           localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(parsed));
         }
       } catch (e) { /* ignore */ }
+
+      // Se a máquina atual possuía dados mais avançados que a nuvem, envia de volta para a nuvem
+      // para que celulares ou outros computadores sincronizem instantaneamente
+      if (
+        cloudMeta.gems === undefined ||
+        resolvedUnlockedSkins.length > (cloudMeta.unlocked_skins?.length || 0) ||
+        resolvedAchievements.length > (cloudMeta.achievements?.length || 0) ||
+        resolvedGems > (Number(cloudMeta.gems) || 0)
+      ) {
+        try {
+          supabase.auth.updateUser({
+            data: {
+              gems: resolvedGems,
+              unlocked_skins: resolvedUnlockedSkins,
+              unlocked_trails: resolvedUnlockedTrails,
+              selected_trail: resolvedTrail,
+              ball_skin: resolvedBallSkin,
+              achievements: resolvedAchievements,
+              daily_quests_progress: resolvedDailyQuests,
+              endless_high_score: resolvedEndlessScore,
+              stages_completed: resolvedStage,
+              high_score: bestHighScore,
+              total_jumps: bestTotalJumps
+            }
+          });
+        } catch (syncErr) { /* ignore */ }
+      }
 
       // Sincroniza via upsert com o Supabase para garantir que a linha exista com os dados corretos
       try {
@@ -509,6 +610,28 @@ export function AuthProvider({ children }) {
           if (upErr) {
             console.error('Erro ao sincronizar perfil com o Supabase:', upErr);
           }
+        }
+
+        // Sincroniza metadados completos na nuvem (gemas, skins, rastros, conquistas, missões)
+        // Isso garante sincronização 100% perfeita e instantânea entre Celular e Computador!
+        try {
+          await supabase.auth.updateUser({
+            data: {
+              gems: updated.gems,
+              unlocked_skins: updated.unlocked_skins,
+              unlocked_trails: updated.unlocked_trails,
+              selected_trail: updated.selected_trail,
+              ball_skin: updated.ball_skin,
+              achievements: updated.achievements,
+              daily_quests_progress: updated.daily_quests_progress,
+              endless_high_score: updated.endless_high_score,
+              stages_completed: updated.stages_completed,
+              high_score: updated.high_score,
+              total_jumps: updated.total_jumps
+            }
+          });
+        } catch (metaErr) {
+          console.warn('Aviso ao sincronizar metadados na nuvem:', metaErr);
         }
       } catch (err) {
         console.error('Erro ao sincronizar perfil com o Supabase:', err);
