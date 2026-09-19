@@ -726,26 +726,37 @@ class SoundEngine {
       const audio = new Audio();
       audio.loop = true;
       audio.preload = 'auto';
+      audio.referrerPolicy = 'no-referrer';
       audio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.bgmVolume));
-      audio.src = this.customBgmUrl;
+
+      let hasPlayed = false;
 
       audio.onerror = () => {
+        if (!audio.src || audio.src === window.location.href) return;
         console.warn('Erro ao carregar fonte de áudio:', audio.error);
         this.customAudioPlaying = false;
-        if (onErrorCallback) onErrorCallback(audio.error);
+        if (onErrorCallback && !hasPlayed) {
+          onErrorCallback(audio.error);
+        }
       };
 
+      audio.src = this.customBgmUrl;
       this.customAudio = audio;
+
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
+            hasPlayed = true;
             this.customAudioPlaying = true;
           })
           .catch((err) => {
+            if (err.name === 'AbortError') return;
             console.warn('Falha ao reproduzir áudio personalizado:', err);
             this.customAudioPlaying = false;
-            if (onErrorCallback) onErrorCallback(err);
+            if (onErrorCallback && !hasPlayed) {
+              onErrorCallback(err);
+            }
           });
       }
     } catch (err) {
@@ -758,9 +769,10 @@ class SoundEngine {
   stopCustomAudio() {
     if (this.customAudio) {
       try {
+        this.customAudio.onerror = null;
+        this.customAudio.oncanplay = null;
         this.customAudio.pause();
-        this.customAudio.src = '';
-        this.customAudio.load();
+        this.customAudio.removeAttribute('src');
       } catch (e) { /* ignore */ }
     }
     this.customAudio = null;
