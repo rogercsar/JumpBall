@@ -1008,7 +1008,27 @@ export const BALL_SKINS = [
 
   // Lendárias Cósmicas
   { id: 'space-corsair', name: 'Corsário Espacial', primary: '#1e1b4b', glow: '#10b981', trail: '#0f172a', priceGems: 420, category: 'space' },
-  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', priceGems: 450, category: 'heroes' }
+  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', priceGems: 450, category: 'heroes' },
+
+  // ==========================================
+  // HEROÍNAS, GUERREIRAS & PRINCESAS (16 SKINS)
+  // ==========================================
+  { id: 'barbie-chic', name: 'Barbie Fashion', primary: '#ec4899', glow: '#facc15', trail: '#f472b6', priceGems: 200, category: 'heroines', tags: ['heroines', 'princesas', 'fantasia'] },
+  { id: 'black-widow', name: 'Viúva Negra', primary: '#0f172a', glow: '#ef4444', trail: '#991b1b', priceGems: 220, category: 'heroines', tags: ['heroines', 'heroes', 'aventura', 'desafio'] },
+  { id: 'wonder-woman', name: 'Mulher-Maravilha', primary: '#dc2626', glow: '#f59e0b', trail: '#2563eb', priceGems: 240, category: 'heroines', tags: ['heroines', 'heroes', 'guerreiras', 'mitologia'] },
+  { id: 'moana-wayfinder', name: 'Moana Navegadora', primary: '#f97316', glow: '#06b6d4', trail: '#0284c7', priceGems: 220, category: 'heroines', tags: ['heroines', 'natureza', 'oceanos', 'aventura'] },
+  { id: 'elsa-frost', name: 'Elsa Rainha do Gelo', primary: '#38bdf8', glow: '#ffffff', trail: '#7dd3fc', priceGems: 240, category: 'heroines', tags: ['heroines', 'fantasia', 'princesas', 'magia'] },
+  { id: 'mulan-warrior', name: 'Mulan Guerreira', primary: '#be123c', glow: '#10b981', trail: '#881337', priceGems: 220, category: 'heroines', tags: ['heroines', 'guerreiras', 'aventura'] },
+  { id: 'harley-rebel', name: 'Arlequina Caos', primary: '#f43f5e', glow: '#06b6d4', trail: '#1e293b', priceGems: 260, category: 'heroines', tags: ['heroines', 'heroes', 'desafio', 'arcade'] },
+  { id: 'storm-mutant', name: 'Tempestade', primary: '#e2e8f0', glow: '#0ea5e9', trail: '#38bdf8', priceGems: 260, category: 'heroines', tags: ['heroines', 'heroes', 'magia', 'natureza'] },
+  { id: 'scarlet-witch', name: 'Feiticeira Escarlate', primary: '#991b1b', glow: '#f43f5e', trail: '#dc2626', priceGems: 280, category: 'heroines', tags: ['heroines', 'heroes', 'magia', 'fantasia'] },
+  { id: 'captain-marvel', name: 'Capitã Marvel', primary: '#1e3a8a', glow: '#f59e0b', trail: '#dc2626', priceGems: 280, category: 'heroines', tags: ['heroines', 'heroes', 'scifi', 'espaco'] },
+  { id: 'princess-peach', name: 'Princesa Peach', primary: '#f472b6', glow: '#fbbf24', trail: '#06b6d4', priceGems: 200, category: 'heroines', tags: ['heroines', 'princesas', 'games', 'arcade'] },
+  { id: 'rapunzel-magic', name: 'Rapunzel Solar', primary: '#7c3aed', glow: '#facc15', trail: '#a855f7', priceGems: 220, category: 'heroines', tags: ['heroines', 'princesas', 'fantasia', 'magia'] },
+  { id: 'merida-brave', name: 'Merida Arqueira', primary: '#15803d', glow: '#ea580c', trail: '#78350f', priceGems: 220, category: 'heroines', tags: ['heroines', 'guerreiras', 'natureza', 'aventura'] },
+  { id: 'ahsoka-tano', name: 'Ahsoka Guerreira', primary: '#ea580c', glow: '#ffffff', trail: '#0284c7', priceGems: 300, category: 'heroines', tags: ['heroines', 'scifi', 'espaco', 'guerreiras'] },
+  { id: 'lara-croft', name: 'Lara Aventureira', primary: '#3f6212', glow: '#d97706', trail: '#713f12', priceGems: 240, category: 'heroines', tags: ['heroines', 'aventura', 'natureza', 'desafio'] },
+  { id: 'gamora-blade', name: 'Gamora Guardiã', primary: '#16a34a', glow: '#cbd5e1', trail: '#064e3b', priceGems: 260, category: 'heroines', tags: ['heroines', 'scifi', 'espaco', 'guerreiras'] }
 ];
 
 export const BALL_TRAILS = [

@@ -164,7 +164,8 @@ export function AuthProvider({ children }) {
               ...(localProf.achievements || []),
               ...(sessProf.achievements || []),
               ...(metaProf.achievements || [])
-            ]))
+            ])),
+            user_interests: sessProf.user_interests || metaProf.user_interests || localProf.user_interests || []
           };
           setUser(sessionData.user);
           setProfile(mergedProfile);
@@ -289,6 +290,9 @@ export function AuthProvider({ children }) {
         Number(cloudMeta.endless_high_score || 0), 
         data?.endless_high_score || 0
       );
+      const resolvedInterests = Array.isArray(cloudMeta.user_interests)
+        ? cloudMeta.user_interests
+        : (data?.user_interests || local.user_interests || []);
 
       const merged = {
         ...local,
@@ -306,7 +310,8 @@ export function AuthProvider({ children }) {
         unlocked_trails: resolvedUnlockedTrails,
         achievements: resolvedAchievements,
         daily_quests_progress: resolvedDailyQuests,
-        endless_high_score: resolvedEndlessScore
+        endless_high_score: resolvedEndlessScore,
+        user_interests: resolvedInterests
       };
 
       setProfile(merged);
@@ -329,7 +334,8 @@ export function AuthProvider({ children }) {
         resolvedUnlockedSkins.length > (cloudMeta.unlocked_skins?.length || 0) ||
         resolvedAchievements.length > (cloudMeta.achievements?.length || 0) ||
         resolvedGems > (Number(cloudMeta.gems) || 0) ||
-        (resolvedBirthDate && !cloudMeta.birth_date)
+        (resolvedBirthDate && !cloudMeta.birth_date) ||
+        (resolvedInterests.length > 0 && !cloudMeta.user_interests)
       ) {
         try {
           supabase.auth.updateUser({
@@ -345,7 +351,8 @@ export function AuthProvider({ children }) {
               endless_high_score: resolvedEndlessScore,
               stages_completed: resolvedStage,
               high_score: bestHighScore,
-              total_jumps: bestTotalJumps
+              total_jumps: bestTotalJumps,
+              user_interests: resolvedInterests
             }
           });
         } catch (syncErr) { /* ignore */ }
@@ -634,7 +641,8 @@ export function AuthProvider({ children }) {
               endless_high_score: updated.endless_high_score,
               stages_completed: updated.stages_completed,
               high_score: updated.high_score,
-              total_jumps: updated.total_jumps
+              total_jumps: updated.total_jumps,
+              user_interests: updated.user_interests
             }
           });
         } catch (metaErr) {

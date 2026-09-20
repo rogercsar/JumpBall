@@ -20,6 +20,80 @@ import { multiplayerService } from '../services/multiplayer';
 import { STAGES } from '../game/stages';
 import { soundEngine } from '../game/audio';
 
+export const DUEL_THEME_PRESETS = [
+  {
+    id: 'default',
+    label: 'Original da Fase',
+    color: '#38bdf8',
+    previewGradient: 'from-slate-900 to-slate-950'
+  },
+  {
+    id: 'cyberpunk',
+    label: 'Cyberpunk Neon',
+    color: '#ec4899',
+    previewGradient: 'from-purple-950 via-fuchsia-950 to-slate-950',
+    themeData: {
+      theme: 'neon',
+      bgGradient: ['#180026', '#3b0764', '#581c87'],
+      platformColor: '#ec4899',
+      platformBorder: '#f472b6',
+      ballGlow: '#f43f5e'
+    }
+  },
+  {
+    id: 'enchanted',
+    label: 'Reino Encantado',
+    color: '#c084fc',
+    previewGradient: 'from-pink-950 via-purple-950 to-slate-950',
+    themeData: {
+      theme: 'crystal',
+      bgGradient: ['#2e0854', '#581c87', '#701a75'],
+      platformColor: '#d946ef',
+      platformBorder: '#f0abfc',
+      ballGlow: '#e879f9'
+    }
+  },
+  {
+    id: 'volcano',
+    label: 'Inferno de Magma',
+    color: '#ea580c',
+    previewGradient: 'from-red-950 via-orange-950 to-slate-950',
+    themeData: {
+      theme: 'volcano',
+      bgGradient: ['#1c0505', '#450a0a', '#7f1d1d'],
+      platformColor: '#ea580c',
+      platformBorder: '#fdba74',
+      ballGlow: '#f97316'
+    }
+  },
+  {
+    id: 'ocean',
+    label: 'Abismo Aquático',
+    color: '#06b6d4',
+    previewGradient: 'from-cyan-950 via-blue-950 to-slate-950',
+    themeData: {
+      theme: 'ocean',
+      bgGradient: ['#031726', '#062d47', '#0a4b73'],
+      platformColor: '#06b6d4',
+      platformBorder: '#67e8f9',
+      ballGlow: '#22d3ee'
+    }
+  },
+  {
+    id: 'golden',
+    label: 'Templo Dourado',
+    color: '#eab308',
+    previewGradient: 'from-amber-950 via-yellow-950 to-slate-950',
+    themeData: {
+      theme: 'temple',
+      bgGradient: ['#291a03', '#4d3205', '#714b08'],
+      platformColor: '#eab308',
+      platformBorder: '#fef08a',
+      ballGlow: '#fbbf24'
+    }
+  }
+];
+
 export function PvPLobbyModal({
   isOpen,
   onClose,
@@ -31,6 +105,8 @@ export function PvPLobbyModal({
 }) {
   const [activeTab, setActiveTab] = useState(initialRoomCode ? 'join' : 'create'); // 'create' | 'join'
   const [selectedStageId, setSelectedStageId] = useState(currentStage?.id || 1);
+  const [selectedThemePreset, setSelectedThemePreset] = useState('default');
+  const [duelGravity, setDuelGravity] = useState('normal'); // 'low' | 'normal' | 'high'
   const [joinCodeInput, setJoinCodeInput] = useState(initialRoomCode || '');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -137,15 +213,27 @@ export function PvPLobbyModal({
     soundEngine.unlock();
 
     try {
+      const themePresetObj = DUEL_THEME_PRESETS.find(t => t.id === selectedThemePreset);
+      const themeConfig = themePresetObj?.themeData || {};
+      const customizedStage = {
+        ...currentSelectedStage,
+        ...themeConfig,
+        name: selectedThemePreset !== 'default' 
+          ? `${currentSelectedStage.name} • ${themePresetObj.label}` 
+          : currentSelectedStage.name,
+        gravity: duelGravity === 'low' ? 0.22 : (duelGravity === 'high' ? 0.40 : currentSelectedStage.gravity),
+        jumpForce: duelGravity === 'low' ? -10.5 : (duelGravity === 'high' ? -12.8 : currentSelectedStage.jumpForce)
+      };
+
       const result = await multiplayerService.createRoom(
-        currentSelectedStage,
+        customizedStage,
         userProfile,
         activeSkin
       );
       setConnectedRoom({
         code: result.roomCode,
         isHost: true,
-        stage: currentSelectedStage
+        stage: customizedStage
       });
     } catch (err) {
       setErrorMessage(err.message || 'Erro ao criar sala de duelo.');
@@ -508,12 +596,73 @@ export function PvPLobbyModal({
                       </div>
                       <div>
                         <div className="font-bold text-white text-sm">{currentSelectedStage.name}</div>
-                        <div className="text-xs text-slate-400 capitalize">Bioma: {currentSelectedStage.theme}</div>
+                        <div className="text-xs text-slate-400 capitalize">Bioma Base: {currentSelectedStage.theme}</div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-black text-amber-400">{currentSelectedStage.targetHeight}m</div>
                       <div className="text-[10px] text-slate-400">Altitude Alvo</div>
+                    </div>
+                  </div>
+
+                  {/* Seletor de Bioma / Tema Customizado do Duelo */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                        Personalizar Bioma da Arena:
+                      </span>
+                      <span className="text-[10px] text-pink-400 font-bold bg-pink-500/10 px-2 py-0.5 rounded-md border border-pink-500/20">
+                        Poder do Host
+                      </span>
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {DUEL_THEME_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => setSelectedThemePreset(preset.id)}
+                          className={`p-2.5 rounded-xl border text-left transition-all flex items-center gap-2 ${
+                            selectedThemePreset === preset.id
+                              ? 'bg-slate-800 border-pink-500 text-white font-bold shadow-md shadow-pink-500/20 scale-[1.02]'
+                              : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                          }`}
+                        >
+                          <span
+                            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                            style={{ backgroundColor: preset.color }}
+                          />
+                          <span className="text-xs truncate">{preset.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Ajuste de Gravidade do Duelo */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-300 flex items-center justify-between">
+                      <span>Física do Duelo (Gravidade):</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: 'low', label: 'Lunar / Baixa 🚀', desc: 'Flutuação alta' },
+                        { id: 'normal', label: 'Normal ⚖️', desc: 'Calibrado' },
+                        { id: 'high', label: 'Pesada 🔥', desc: 'Frenético' }
+                      ].map((grav) => (
+                        <button
+                          key={grav.id}
+                          type="button"
+                          onClick={() => setDuelGravity(grav.id)}
+                          className={`p-2 rounded-xl border text-center transition-all ${
+                            duelGravity === grav.id
+                              ? 'bg-slate-800 border-cyan-400 text-cyan-300 font-bold shadow-md shadow-cyan-500/10'
+                              : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                          }`}
+                        >
+                          <div className="text-[11px] font-bold">{grav.label}</div>
+                          <div className="text-[9px] text-slate-500">{grav.desc}</div>
+                        </button>
+                      ))}
                     </div>
                   </div>
 

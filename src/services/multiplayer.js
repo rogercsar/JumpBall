@@ -46,11 +46,17 @@ class MultiplayerService {
       stage: {
         id: stage.id,
         number: stage.number,
-        name: stage.name,
+        name: stage.name || stage.title,
+        title: stage.title || stage.name,
         targetHeight: stage.targetHeight,
         theme: stage.theme,
         gravity: stage.gravity,
-        jumpForce: stage.jumpForce
+        jumpForce: stage.jumpForce,
+        bgGradient: stage.bgGradient,
+        platformColor: stage.platformColor,
+        platformBorder: stage.platformBorder,
+        ballGlow: stage.ballGlow,
+        hazards: stage.hazards
       },
       user: {
         id: userProfile?.id || `host_${Date.now()}`,

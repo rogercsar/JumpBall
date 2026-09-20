@@ -34,6 +34,8 @@ import { useDialog } from '../contexts/DialogContext';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 import { BALL_SKINS, BALL_TRAILS, ACHIEVEMENTS, getDailyQuests, STAGES } from '../game/stages';
 import { getActiveCommemorativeStages, getUpcomingCommemorativeStages } from '../game/events';
+import { getRecommendedSkins, INTEREST_TOPICS } from '../game/recommendation';
+import { InterestsQuizModal } from '../components/InterestsQuizModal';
 import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
 const PAGE_SIZE = 10;
@@ -96,7 +98,22 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
   const currentSkinId = profile?.ball_skin || 'neon-cyan';
   const activeSkin = BALL_SKINS.find(s => s.id === currentSkinId) || BALL_SKINS[0];
   const stagesCompleted = Math.max(profile?.stages_completed || 0, localStore.getProfile()?.stages_completed || 0);
-  const [skinCategory, setSkinCategory] = useState('all'); // 'all' | 'heroes' | 'army' | 'space' | 'starter'
+  const [skinCategory, setSkinCategory] = useState('all'); // 'all' | 'recommended' | 'heroines' | 'heroes' | 'army' | 'space' | 'starter'
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+
+  // Skins recomendadas de acordo com as preferências e interesses do usuário
+  const userInterests = profile?.user_interests || [];
+  const recommendedSkins = React.useMemo(() => {
+    return getRecommendedSkins(userInterests, profile?.unlocked_skins || [], 12);
+  }, [userInterests, profile?.unlocked_skins]);
+
+  const handleSaveInterests = async (newInterests) => {
+    if (updateProfile) {
+      await updateProfile({ user_interests: newInterests });
+    }
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2500);
+  };
 
   // Fases Comemorativas (Ativas no momento e Próximas)
   const activeEvents = getActiveCommemorativeStages(profile);
@@ -662,16 +679,49 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsQuizOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-pink-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                title="Personalizar interesses e preferências"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>🎯 Quiz de Interesses ({userInterests.length})</span>
+              </button>
+
               <span className="px-3 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-black text-xs shadow-sm">
                 {BALL_SKINS.filter(s => s.priceGems === 0 || profile?.unlocked_skins?.includes(s.id)).length} / {BALL_SKINS.length} Liberadas
               </span>
             </div>
           </div>
 
+          {/* Banner de Recomendações Ativas */}
+          {skinCategory === 'recommended' && (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-pink-950/40 via-purple-950/40 to-slate-900 border border-pink-500/30 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-300">
+                <span className="text-xl">✨</span>
+                <span>
+                  {userInterests.length > 0
+                    ? `Skins selecionadas com alta afinidade para os seus temas favoritos!`
+                    : `Responda ao Quiz de Interesses para uma curadoria sob medida para você.`}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsQuizOpen(true)}
+                className="text-pink-400 hover:text-pink-300 font-bold underline underline-offset-2 shrink-0 cursor-pointer"
+              >
+                {userInterests.length > 0 ? 'Editar temas' : 'Descobrir meu estilo'}
+              </button>
+            </div>
+          )}
+
           {/* Filtros de Categoria de Skins */}
           <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
             {[
               { id: 'all', label: 'Todas', count: BALL_SKINS.length },
+              { id: 'recommended', label: '⭐ Para Você', count: recommendedSkins.length },
+              { id: 'heroines', label: '🦸‍♀️ Heroínas & Princesas', count: BALL_SKINS.filter(s => s.category === 'heroines').length },
               { id: 'heroes', label: 'Heróis', count: BALL_SKINS.filter(s => s.category === 'heroes').length },
               { id: 'army', label: 'Militar & Tática', count: BALL_SKINS.filter(s => s.category === 'army').length },
               { id: 'space', label: 'Espaço', count: BALL_SKINS.filter(s => s.category === 'space').length },
@@ -683,13 +733,15 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                 onClick={() => setSkinCategory(cat.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                   skinCategory === cat.id
-                    ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20 font-black'
+                    ? (cat.id === 'recommended' || cat.id === 'heroines'
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md shadow-pink-500/25 font-black'
+                        : 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20 font-black')
                     : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
                 }`}
               >
                 <span>{cat.label}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${
-                  skinCategory === cat.id ? 'bg-slate-950/20 text-slate-950 font-black' : 'bg-slate-800 text-slate-400 font-semibold'
+                  skinCategory === cat.id ? 'bg-slate-950/20 text-current font-black' : 'bg-slate-800 text-slate-400 font-semibold'
                 }`}>
                   {cat.count}
                 </span>
@@ -699,7 +751,10 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
 
           {/* Grid de Skins */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
-            {BALL_SKINS.filter(s => skinCategory === 'all' || s.category === skinCategory).map((skin) => {
+            {(skinCategory === 'recommended'
+              ? recommendedSkins
+              : BALL_SKINS.filter(s => skinCategory === 'all' || s.category === skinCategory)
+            ).map((skin) => {
               const isSelected = activeSkin.id === skin.id;
               const isUnlocked = skin.priceGems === 0 || profile?.unlocked_skins?.includes(skin.id);
 
@@ -720,6 +775,13 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                     <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-bold flex items-center gap-0.5 shadow-sm">
                       <Lock className="w-2.5 h-2.5" />
                       <span>{skin.priceGems} 💎</span>
+                    </div>
+                  )}
+
+                  {/* Badge de Afinidade se for aba de recomendadas */}
+                  {skinCategory === 'recommended' && skin.affinity && (
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-pink-500/20 border border-pink-500/40 text-pink-300 text-[8px] font-black shadow-sm">
+                      {skin.affinity}% ⭐
                     </div>
                   )}
 
@@ -1226,6 +1288,14 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
           )}
         </div>
       )}
+
+      {/* Modal de Questionário de Interesses e Preferências */}
+      <InterestsQuizModal
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+        currentInterests={userInterests}
+        onSaveInterests={handleSaveInterests}
+      />
     </div>
   );
 }

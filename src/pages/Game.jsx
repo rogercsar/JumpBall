@@ -27,6 +27,7 @@ import {
 import { GameEngine } from '../game/engine';
 import { STAGES, BALL_SKINS } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
+import { getRecommendedStages } from '../game/recommendation';
 import { soundEngine } from '../game/audio';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSettings } from '../contexts/SettingsContext';
@@ -104,6 +105,12 @@ export function Game({ onNavigate }) {
   const activeEventStages = React.useMemo(() => {
     return getActiveCommemorativeStages(profile);
   }, [profile]);
+
+  // Fases recomendadas por afinidade com os interesses do jogador
+  const userInterests = profile?.user_interests || [];
+  const recommendedStages = React.useMemo(() => {
+    return getRecommendedStages(userInterests, profile?.stages_completed || 0, 3);
+  }, [userInterests, profile?.stages_completed]);
 
   // Detecta se o jogador acessou via link de desafio (?challenge=JPXXX)
   useEffect(() => {
@@ -826,6 +833,41 @@ export function Game({ onNavigate }) {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Seção de Fases Recomendadas no Estilo do Piloto */}
+              {userInterests.length > 0 && recommendedStages.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
+                      <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                        Fases no Seu Estilo
+                        <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                          Recomendadas para Você
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {recommendedStages.map((stage) => {
+                      const completedStages = profile?.stages_completed || 0;
+                      const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
+                      const isCompleted = stage.number <= completedStages;
+
+                      return (
+                        <StageCard
+                          key={`rec_${stage.id}`}
+                          stage={stage}
+                          isUnlocked={isUnlocked}
+                          isCompleted={isCompleted}
+                          onSelect={startGame}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}

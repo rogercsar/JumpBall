@@ -233,6 +233,32 @@ export function Home({ onNavigate }) {
         </section>
       )}
 
+      {/* BANNER DE CONVITE PARA O QUIZ DE INTERESSES (SE AINDA NÃO SELECIONOU) */}
+      {(!profile?.user_interests || profile.user_interests.length === 0) && (
+        <section className="relative overflow-hidden rounded-3xl p-5 border border-pink-500/30 bg-gradient-to-r from-pink-950/25 via-purple-950/25 to-slate-950 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 text-center sm:text-left">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-2xl shadow-md shadow-pink-500/20 shrink-0 animate-pulse">
+              ✨
+            </div>
+            <div>
+              <h3 className="text-sm sm:text-base font-black text-white">
+                Descubra suas Heroínas e Skins Favoritas!
+              </h3>
+              <p className="text-xs text-slate-300">
+                Responda ao Quiz de Interesses na Garagem para desbloquear recomendações sob medida para o seu estilo.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate('profile')}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs shadow-lg shadow-pink-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+          >
+            RESPONDER QUIZ
+          </button>
+        </section>
+      )}
+
       {/* 3. CARDS DE ESTATÍSTICAS (MINIMALISTAS) */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Recorde */}

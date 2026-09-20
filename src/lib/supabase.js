@@ -74,6 +74,7 @@ export const localStore = {
       achievements: [],
       daily_quests_progress: { date: '', progress: {}, claimed: {} },
       birth_date: null,
+      user_interests: [],
       created_at: new Date().toISOString()
     };
     const data = localStorage.getItem(STORAGE_KEYS.PROFILE);

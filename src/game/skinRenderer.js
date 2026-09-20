@@ -780,6 +780,623 @@ function drawSkinEmblem(ctx, skinId, r) {
       break;
     }
 
+    // ==========================================
+    // 6. HEROÍNAS, GUERREIRAS & PRINCESAS (16 SKINS)
+    // ==========================================
+
+    case 'barbie-chic': {
+      // Barbie Fashion: Coração icônico, estrela dourada cintilante e laço rosa
+      ctx.shadowColor = '#f472b6';
+      ctx.shadowBlur = 10;
+
+      // Coração no centro
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      const topY = -r * 0.15;
+      ctx.moveTo(0, r * 0.35);
+      ctx.bezierCurveTo(-r * 0.5, r * 0.05, -r * 0.5, -r * 0.4, 0, topY);
+      ctx.bezierCurveTo(r * 0.5, -r * 0.4, r * 0.5, r * 0.05, 0, r * 0.35);
+      ctx.fill();
+
+      // Silhueta interna rosa vibrante
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.26);
+      ctx.bezierCurveTo(-r * 0.38, 0, -r * 0.38, -r * 0.32, 0, -r * 0.1);
+      ctx.bezierCurveTo(r * 0.38, -r * 0.32, r * 0.38, 0, 0, r * 0.26);
+      ctx.fill();
+
+      // Micro-estrelas douradas cintilantes
+      ctx.fillStyle = '#fef08a';
+      const drawStar = (x, y, s) => {
+        ctx.beginPath();
+        ctx.moveTo(x, y - s);
+        ctx.lineTo(x + s * 0.3, y - s * 0.3);
+        ctx.lineTo(x + s, y);
+        ctx.lineTo(x + s * 0.3, y + s * 0.3);
+        ctx.lineTo(x, y + s);
+        ctx.lineTo(x - s * 0.3, y + s * 0.3);
+        ctx.lineTo(x - s, y);
+        ctx.lineTo(x - s * 0.3, y - s * 0.3);
+        ctx.closePath();
+        ctx.fill();
+      };
+      drawStar(r * 0.25, -r * 0.3, r * 0.16);
+      drawStar(-r * 0.28, r * 0.2, r * 0.12);
+      break;
+    }
+
+    case 'black-widow': {
+      // Viúva Negra: Ampulheta vermelha luminosa e placas táticas de combate
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 12;
+
+      // Anel tático de grafite
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.65, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Ampulheta vermelha esculpida
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      // Triângulo superior
+      ctx.moveTo(-r * 0.32, -r * 0.45);
+      ctx.lineTo(r * 0.32, -r * 0.45);
+      ctx.lineTo(0, -r * 0.02);
+      ctx.closePath();
+      ctx.fill();
+
+      // Triângulo inferior
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.02);
+      ctx.lineTo(r * 0.32, r * 0.45);
+      ctx.lineTo(-r * 0.32, r * 0.45);
+      ctx.closePath();
+      ctx.fill();
+
+      // Linha de mira central luminosa
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-r * 0.04, -r * 0.08, r * 0.08, r * 0.16);
+      break;
+    }
+
+    case 'wonder-woman': {
+      // Mulher-Maravilha: Tiara real dourada, estrela vermelha e Laço da Verdade
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 10;
+
+      // Tiara real pontiaguda no topo
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.6, -r * 0.25);
+      ctx.lineTo(0, -r * 0.55);
+      ctx.lineTo(r * 0.6, -r * 0.25);
+      ctx.lineTo(r * 0.45, -r * 0.15);
+      ctx.lineTo(0, -r * 0.35);
+      ctx.lineTo(-r * 0.45, -r * 0.15);
+      ctx.closePath();
+      ctx.fill();
+
+      // Estrela vermelha central da tiara
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      const sc = -r * 0.35;
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const x = Math.cos(a) * r * 0.14;
+        const y = sc + Math.sin(a) * r * 0.14;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Emblema com as asas em 'W' douradas
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.5, r * 0.05);
+      ctx.lineTo(-r * 0.2, r * 0.35);
+      ctx.lineTo(0, r * 0.1);
+      ctx.lineTo(r * 0.2, r * 0.35);
+      ctx.lineTo(r * 0.5, r * 0.05);
+      ctx.stroke();
+      break;
+    }
+
+    case 'moana-wayfinder': {
+      // Moana: Espiral sagrada do Coração de Te Fiti e runas oceânicas
+      ctx.shadowColor = '#22d3ee';
+      ctx.shadowBlur = 10;
+
+      // Amuleto de pedra polida
+      ctx.fillStyle = '#065f46';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 0.46, r * 0.52, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#047857';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Espiral sagrada de Te Fiti em turquesa incandescente
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let theta = 0; theta < Math.PI * 4.5; theta += 0.15) {
+        const radiusSp = (theta / (Math.PI * 4.5)) * r * 0.32;
+        const x = Math.cos(theta) * radiusSp;
+        const y = Math.sin(theta) * radiusSp;
+        if (theta === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Ponto de luz no centro da espiral
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'elsa-frost': {
+      // Elsa: Floco de neve cristalino fractal e aura de gelo pura
+      ctx.shadowColor = '#bae6fd';
+      ctx.shadowBlur = 12;
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+
+      // 6 ramos do floco de neve
+      for (let i = 0; i < 6; i++) {
+        const ang = (i * Math.PI) / 3;
+        const cos = Math.cos(ang);
+        const sin = Math.sin(ang);
+
+        // Haste principal
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(cos * r * 0.62, sin * r * 0.62);
+        ctx.stroke();
+
+        // Ramificações laterais
+        const midR = r * 0.38;
+        const mx = cos * midR;
+        const my = sin * midR;
+        const bAng1 = ang + Math.PI / 4;
+        const bAng2 = ang - Math.PI / 4;
+
+        ctx.beginPath();
+        ctx.moveTo(mx, my);
+        ctx.lineTo(mx + Math.cos(bAng1) * r * 0.16, my + Math.sin(bAng1) * r * 0.16);
+        ctx.moveTo(mx, my);
+        ctx.lineTo(mx + Math.cos(bAng2) * r * 0.16, my + Math.sin(bAng2) * r * 0.16);
+        ctx.stroke();
+      }
+
+      // Diamante central
+      ctx.fillStyle = '#7dd3fc';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.16);
+      ctx.lineTo(r * 0.16, 0);
+      ctx.lineTo(0, r * 0.16);
+      ctx.lineTo(-r * 0.16, 0);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'mulan-warrior': {
+      // Mulan: Flor de magnólia de jade e lâmina da espada ancestral
+      ctx.shadowColor = '#34d399';
+      ctx.shadowBlur = 8;
+
+      // Lâmina vertical de aço ancestral
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(-r * 0.05, -r * 0.65, r * 0.1, r * 1.3);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-r * 0.05, -r * 0.65, r * 0.05, r * 1.3);
+
+      // Flor de Magnólia de Jade no centro
+      ctx.fillStyle = '#6ee7b7';
+      for (let i = 0; i < 5; i++) {
+        const ang = (i * 2 * Math.PI) / 5;
+        ctx.beginPath();
+        ctx.ellipse(
+          Math.cos(ang) * r * 0.22,
+          Math.sin(ang) * r * 0.22,
+          r * 0.16,
+          r * 0.09,
+          ang,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      // Núcleo dourado imperial da flor
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.12, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'harley-rebel': {
+      // Arlequina: Bicolor (Rosa/Ciano), losangos de cartas e coração
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = 8;
+
+      // Divisão vertical sutil
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.65);
+      ctx.lineTo(0, r * 0.65);
+      ctx.stroke();
+
+      // Losangos pretos e vermelhos (naipe de arlequim)
+      const drawDiamond = (x, y, sz, col) => {
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.moveTo(x, y - sz);
+        ctx.lineTo(x + sz * 0.7, y);
+        ctx.lineTo(x, y + sz);
+        ctx.lineTo(x - sz * 0.7, y);
+        ctx.closePath();
+        ctx.fill();
+      };
+
+      drawDiamond(-r * 0.28, -r * 0.18, r * 0.2, '#0f172a');
+      drawDiamond(r * 0.28, -r * 0.18, r * 0.2, '#ffffff');
+      drawDiamond(0, r * 0.22, r * 0.22, '#ef4444');
+
+      // Pequeno coração rebelde
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(-r * 0.06, -r * 0.38, r * 0.05, 0, Math.PI * 2);
+      ctx.arc(r * 0.06, -r * 0.38, r * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'storm-mutant': {
+      // Tempestade: Relâmpagos bifurcados e olhos incandescentes celestiais
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 12;
+
+      // Olhos brilhantes de poder cósmico
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.24, -r * 0.12, r * 0.16, r * 0.08, -0.15, 0, Math.PI * 2);
+      ctx.ellipse(r * 0.24, -r * 0.12, r * 0.16, r * 0.08, 0.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Grande raio bifurcado cortando a esfera
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.1, -r * 0.65);
+      ctx.lineTo(r * 0.15, -r * 0.1);
+      ctx.lineTo(-r * 0.08, r * 0.05);
+      ctx.lineTo(r * 0.2, r * 0.65);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(r * 0.05, 0);
+      ctx.lineTo(-r * 0.35, r * 0.3);
+      ctx.stroke();
+      break;
+    }
+
+    case 'scarlet-witch': {
+      // Feiticeira Escarlate: Tiara/coroa da Feiticeira e orbes de magia do caos
+      ctx.shadowColor = '#dc2626';
+      ctx.shadowBlur = 12;
+
+      // Tiara/Coroa pontiaguda icônica
+      ctx.fillStyle = '#b91c1c';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.55, -r * 0.15);
+      ctx.lineTo(-r * 0.35, -r * 0.55);
+      ctx.lineTo(-r * 0.15, -r * 0.25);
+      ctx.lineTo(0, -r * 0.62);
+      ctx.lineTo(r * 0.15, -r * 0.25);
+      ctx.lineTo(r * 0.35, -r * 0.55);
+      ctx.lineTo(r * 0.55, -r * 0.15);
+      ctx.lineTo(0, -r * 0.05);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#f87171';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Orbe de Magia do Caos cintilante
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(0, r * 0.22, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Anel de distorção de realidade
+      ctx.strokeStyle = '#fda4af';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.22, r * 0.42, r * 0.15, Math.PI / 6, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+
+    case 'captain-marvel': {
+      // Capitã Marvel: Estrela de 8 pontas de Hala e faixas diagonais
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 12;
+
+      // Faixas douradas do uniforme Starforce
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.6, r * 0.2);
+      ctx.lineTo(0, -r * 0.1);
+      ctx.lineTo(r * 0.6, r * 0.2);
+      ctx.stroke();
+
+      // Estrela de 8 pontas de Hala no centro
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const ang = (i * Math.PI) / 4;
+        const outer = (i % 2 === 0) ? r * 0.42 : r * 0.18;
+        const x = Math.cos(ang) * outer;
+        const y = -r * 0.08 + Math.sin(ang) * outer;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Núcleo branco incandescente de energia binária
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.08, r * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'princess-peach': {
+      // Princesa Peach: Coroa real dourada com rubis e amuleto turquesa
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 8;
+
+      // Coroa dourada real
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.45, -r * 0.1);
+      ctx.lineTo(-r * 0.45, -r * 0.45);
+      ctx.lineTo(-r * 0.2, -r * 0.25);
+      ctx.lineTo(0, -r * 0.55);
+      ctx.lineTo(r * 0.2, -r * 0.25);
+      ctx.lineTo(r * 0.45, -r * 0.45);
+      ctx.lineTo(r * 0.45, -r * 0.1);
+      ctx.closePath();
+      ctx.fill();
+
+      // Rubis da coroa
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-r * 0.3, -r * 0.2, r * 0.06, 0, Math.PI * 2);
+      ctx.arc(r * 0.3, -r * 0.2, r * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Joia/Amuleto turquesa oval no peito
+      ctx.fillStyle = '#06b6d4';
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.22, r * 0.18, r * 0.24, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      break;
+    }
+
+    case 'rapunzel-magic': {
+      // Rapunzel: Flor mágica do Sol de Corona e fios de luz dourada
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 10;
+
+      // Fios de cabelo solar ondulando
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.58, -Math.PI * 0.6, Math.PI * 0.6);
+      ctx.stroke();
+
+      // Flor Dourada do Sol com 8 pétalas brilhantes
+      ctx.fillStyle = '#fbbf24';
+      for (let i = 0; i < 8; i++) {
+        const ang = (i * Math.PI) / 4;
+        ctx.beginPath();
+        ctx.ellipse(
+          Math.cos(ang) * r * 0.22,
+          Math.sin(ang) * r * 0.22,
+          r * 0.16,
+          r * 0.07,
+          ang,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      // Núcleo brilhante da flor solar
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'merida-brave': {
+      // Merida: Arco e flecha dourados e labareda mágica de fogo-fátuo
+      ctx.shadowColor = '#ea580c';
+      ctx.shadowBlur = 8;
+
+      // Arco curvo de teixo celta
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(-r * 0.15, 0, r * 0.48, -Math.PI * 0.45, Math.PI * 0.45);
+      ctx.stroke();
+
+      // Corda do arco esticada
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(r * 0.22, -r * 0.38);
+      ctx.lineTo(-r * 0.15, 0);
+      ctx.lineTo(r * 0.22, r * 0.38);
+      ctx.stroke();
+
+      // Flecha de mira apontando para a direita
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.15, 0);
+      ctx.lineTo(r * 0.48, 0);
+      ctx.stroke();
+
+      // Ponta de flecha triangular
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(r * 0.58, 0);
+      ctx.lineTo(r * 0.42, -r * 0.1);
+      ctx.lineTo(r * 0.42, r * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'ahsoka-tano': {
+      // Ahsoka: Padrões geométricos Togruta azuis e brancos e sabres duplos
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 10;
+
+      // Montrais listrados no topo (listras azuis e brancas)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.5, -r * 0.45);
+      ctx.lineTo(0, -r * 0.15);
+      ctx.lineTo(r * 0.5, -r * 0.45);
+      ctx.lineTo(0, -r * 0.62);
+      ctx.closePath();
+      ctx.fill();
+
+      // Listras azuis nos montrais
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.35, -r * 0.45);
+      ctx.lineTo(-r * 0.2, -r * 0.25);
+      ctx.lineTo(-r * 0.1, -r * 0.32);
+      ctx.lineTo(-r * 0.25, -r * 0.52);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(r * 0.35, -r * 0.45);
+      ctx.lineTo(r * 0.2, -r * 0.25);
+      ctx.lineTo(r * 0.1, -r * 0.32);
+      ctx.lineTo(r * 0.25, -r * 0.52);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sabres de luz brancos puros cruzados
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.38, r * 0.38); ctx.lineTo(r * 0.28, -r * 0.05);
+      ctx.moveTo(r * 0.38, r * 0.38); ctx.lineTo(-r * 0.28, -r * 0.05);
+      ctx.stroke();
+      break;
+    }
+
+    case 'lara-croft': {
+      // Lara Croft: Bússola arcaica aventureira e coldres táticos
+      ctx.shadowColor = '#d97706';
+      ctx.shadowBlur = 8;
+
+      // Bússola redonda de bronze
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.48, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Ponteiro Norte/Sul da bússola
+      ctx.fillStyle = '#ef4444'; // Norte vermelho
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.42);
+      ctx.lineTo(r * 0.12, 0);
+      ctx.lineTo(-r * 0.12, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#e2e8f0'; // Sul branco
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.42);
+      ctx.lineTo(r * 0.12, 0);
+      ctx.lineTo(-r * 0.12, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Parafuso central da bússola
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.08, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'gamora-blade': {
+      // Gamora: Marcas faciais alienígenas prateadas e lâmina Godslayer
+      ctx.shadowColor = '#cbd5e1';
+      ctx.shadowBlur = 8;
+
+      // Marcas faciais prateadas simétricas acima dos olhos
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.45, -r * 0.25);
+      ctx.lineTo(-r * 0.15, -r * 0.2);
+      ctx.lineTo(-r * 0.1, -r * 0.4);
+
+      ctx.moveTo(r * 0.45, -r * 0.25);
+      ctx.lineTo(r * 0.15, -r * 0.2);
+      ctx.lineTo(r * 0.1, -r * 0.4);
+      ctx.stroke();
+
+      // Lâmina Godslayer no peito
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.1);
+      ctx.lineTo(r * 0.15, r * 0.48);
+      ctx.lineTo(0, r * 0.4);
+      ctx.lineTo(-r * 0.15, r * 0.48);
+      ctx.closePath();
+      ctx.fill();
+
+      // Guarda e cabo dourado da lâmina
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-r * 0.12, -r * 0.05, r * 0.24, r * 0.06);
+      break;
+    }
+
     default:
       break;
   }
