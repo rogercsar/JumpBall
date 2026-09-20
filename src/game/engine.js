@@ -1691,51 +1691,158 @@ export class GameEngine {
   }
 
   spawnEnvironmentalHazard(theme) {
-    let type = 'debris';
-    let color = '#94a3b8';
+    let type = 'cosmic_shard';
+    let color = this.stage.platformColor || '#0ea5e9';
     let radius = 13;
-    let vy = Math.random() * 1.5 + 3.0;
+    let vy = Math.random() * 1.5 + 3.2;
 
     switch (theme) {
       case 'forest':
-      case 'spring':
       case 'autumn':
+      case 'spring_season':
       case 'wood':
         type = 'branch';
         color = '#854d0e';
         radius = 14;
         break;
-      case 'rock':
-      case 'volcano':
-        type = 'rock';
-        color = theme === 'volcano' ? '#f97316' : '#78716c';
-        radius = 15;
-        vy = Math.random() * 1.8 + 3.5;
+
+      case 'desert':
+      case 'dune_storm':
+      case 'pyramids':
+        type = 'sandstone_shard';
+        color = '#d97706';
+        radius = 14;
+        vy = Math.random() * 1.8 + 3.4;
         break;
-      case 'iron':
-      case 'steampunk':
-        type = 'iron_bar';
-        color = '#f59e0b';
-        radius = 12;
-        vy = Math.random() * 1.6 + 3.8;
-        break;
+
+      case 'ice':
       case 'arctic':
+      case 'winter':
         type = 'icicle';
         color = '#38bdf8';
         radius = 12;
+        vy = Math.random() * 2.0 + 4.2;
+        break;
+
+      case 'volcano':
+      case 'obsidian':
+      case 'dragon':
+        type = 'magma_rock';
+        color = '#ea580c';
+        radius = 15;
+        vy = Math.random() * 1.8 + 3.6;
+        break;
+
+      case 'storm':
+      case 'canyon':
+        type = 'thunder_shard';
+        color = '#0284c7';
+        radius = 13;
         vy = Math.random() * 2.0 + 4.0;
         break;
-      case 'ocean':
-      case 'underwater':
-        type = 'jellyfish';
-        color = '#e879f9';
+
+      case 'crystal':
+      case 'magic_cube':
+      case 'candy':
+        type = 'crystal_shard';
+        color = '#ec4899';
         radius = 13;
-        vy = Math.random() * 1.0 + 2.2;
+        vy = Math.random() * 1.6 + 3.3;
         break;
-      default:
-        type = 'debris';
-        color = '#a855f7';
+
+      case 'cosmos':
+      case 'asteroid':
+      case 'singularity':
+      case 'quantum':
+      case 'solar':
+        type = 'meteorite';
+        color = '#475569';
+        radius = 15;
+        vy = Math.random() * 2.2 + 3.8;
+        break;
+
+      case 'ocean':
+      case 'waterfall':
+      case 'rain':
+      case 'ship':
+      case 'underwater':
+        type = Math.random() < 0.5 ? 'jellyfish' : 'water_drop';
+        color = '#06b6d4';
+        radius = 13;
+        vy = Math.random() * 1.2 + 2.8;
+        break;
+
+      case 'cyberpunk':
+      case 'computer':
+      case 'internet':
+      case 'arcade':
+      case 'metropolis':
+        type = 'cyber_chip';
+        color = '#00f0ff';
+        radius = 13;
+        vy = Math.random() * 1.8 + 3.5;
+        break;
+
+      case 'indigenous':
+      case 'ruins':
+      case 'olympus':
+        type = 'tribal_spear';
+        color = '#15803d';
+        radius = 14;
+        vy = Math.random() * 1.6 + 3.6;
+        break;
+
+      case 'heroes':
+      case 'geometry':
+        type = 'energy_shuriken';
+        color = '#6366f1';
+        radius = 13;
+        vy = Math.random() * 2.0 + 4.0;
+        break;
+
+      case 'iron':
+      case 'steampunk':
+        type = 'gear';
+        color = '#b45309';
+        radius = 13;
+        vy = Math.random() * 1.8 + 3.8;
+        break;
+
+      case 'aurora':
+      case 'sky':
+        type = 'aurora_prism';
+        color = '#2dd4bf';
         radius = 12;
+        vy = Math.random() * 1.4 + 3.0;
+        break;
+
+      case 'carnival':
+      case 'music':
+        type = 'circus_star';
+        color = '#f43f5e';
+        radius = 13;
+        vy = Math.random() * 1.6 + 3.4;
+        break;
+
+      case 'soccer':
+        type = 'spiked_ball';
+        color = '#e2e8f0';
+        radius = 14;
+        vy = Math.random() * 1.8 + 3.6;
+        break;
+
+      case 'rock':
+        type = 'rock';
+        color = '#78716c';
+        radius = 14;
+        vy = Math.random() * 1.8 + 3.5;
+        break;
+
+      default:
+        type = 'cosmic_shard';
+        color = this.stage.platformColor || '#0ea5e9';
+        radius = 13;
+        vy = Math.random() * 1.5 + 3.2;
         break;
     }
 
@@ -1748,7 +1855,8 @@ export class GameEngine {
       angle: Math.random() * Math.PI * 2,
       vRot: (Math.random() - 0.5) * 0.08,
       type: type,
-      color: color
+      color: color,
+      theme: theme
     });
   }
 
@@ -1762,7 +1870,7 @@ export class GameEngine {
       ctx.rotate(h.angle);
 
       if (h.type === 'branch') {
-        // Galho de árvore caindo com folhas
+        // 1. Galho de árvore com folhas (Florestas e Madeiras)
         ctx.strokeStyle = '#78350f';
         ctx.lineWidth = 5;
         ctx.lineCap = 'round';
@@ -1777,18 +1885,374 @@ export class GameEngine {
         ctx.lineTo(6, 9);
         ctx.stroke();
 
-        ctx.fillStyle = this.stage.theme === 'autumn' ? '#ea580c' : '#22c55e';
+        ctx.fillStyle = h.theme === 'autumn' ? '#ea580c' : '#22c55e';
         ctx.beginPath();
         ctx.ellipse(8, 10, 5, 3, 0.4, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
         ctx.ellipse(-10, -4, 4, 2, -0.3, 0, Math.PI * 2);
         ctx.fill();
+      } else if (h.type === 'sandstone_shard') {
+        // 2. Fragmento de Arenito Ancestral com Hieróglifo (Desertos e Pirâmides)
+        ctx.fillStyle = '#b45309';
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(13, 8);
+        ctx.lineTo(-13, 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Hieróglifo dourado entalhado
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.lineTo(0, 4);
+        ctx.moveTo(-4, -4);
+        ctx.lineTo(4, -4);
+        ctx.stroke();
+      } else if (h.type === 'icicle') {
+        // 3. Estalactite de Gelo Cristalina Afiada (Gelo e Ártico)
+        const iceGrad = ctx.createLinearGradient(0, -14, 0, 14);
+        iceGrad.addColorStop(0, '#ffffff');
+        iceGrad.addColorStop(0.4, '#bae6fd');
+        iceGrad.addColorStop(1, '#0284c7');
+        ctx.fillStyle = iceGrad;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-7, -13);
+        ctx.lineTo(7, -13);
+        ctx.lineTo(0, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Reflexo de faceta interna
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(0, -12);
+        ctx.lineTo(0, 11);
+        ctx.stroke();
+      } else if (h.type === 'magma_rock') {
+        // 4. Rocha de Basalto Incandescente com Veias de Magma (Vulcão e Dragão)
+        ctx.fillStyle = '#1c1917';
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-13, -6);
+        ctx.lineTo(-4, -14);
+        ctx.lineTo(10, -9);
+        ctx.lineTo(14, 5);
+        ctx.lineTo(3, 14);
+        ctx.lineTo(-9, 11);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Fissuras ardentes de lava pulsante
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-7, -3);
+        ctx.lineTo(0, 2);
+        ctx.lineTo(7, -1);
+        ctx.lineTo(2, 8);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(0, 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'thunder_shard') {
+        // 5. Rocha Eletrizada com Raios (Tempestade e Cânion)
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-9, -12);
+        ctx.lineTo(11, -8);
+        ctx.lineTo(13, 8);
+        ctx.lineTo(-3, 13);
+        ctx.lineTo(-12, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Raio de plasma elétrico central
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-4, -9);
+        ctx.lineTo(2, -2);
+        ctx.lineTo(-2, 2);
+        ctx.lineTo(4, 9);
+        ctx.stroke();
+      } else if (h.type === 'crystal_shard') {
+        // 6. Cristal Lapidado Mágico (Caverna de Cristais e Magia)
+        ctx.fillStyle = '#ec4899';
+        ctx.strokeStyle = '#fbcfe8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(11, -4);
+        ctx.lineTo(7, 12);
+        ctx.lineTo(-7, 12);
+        ctx.lineTo(-11, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Facetas internas do cristal
+        ctx.fillStyle = '#f472b6';
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(6, -4);
+        ctx.lineTo(0, 4);
+        ctx.lineTo(-6, -4);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'meteorite') {
+        // 7. Meteorito Cósmico com Crateras (Cosmos, Asteroides e Quântico)
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-12, -8);
+        ctx.lineTo(-3, -14);
+        ctx.lineTo(9, -11);
+        ctx.lineTo(14, 2);
+        ctx.lineTo(8, 13);
+        ctx.lineTo(-6, 12);
+        ctx.lineTo(-13, 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Crateras circulares sombreadas
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(-3, -4, 3.5, 0, Math.PI * 2);
+        ctx.arc(5, 3, 2.5, 0, Math.PI * 2);
+        ctx.arc(-4, 5, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      } else if (h.type === 'water_drop') {
+        // 8. Gota d'Água Aerodinâmica (Oceanos, Chuva e Cachoeiras)
+        const dropGrad = ctx.createLinearGradient(0, -14, 0, 10);
+        dropGrad.addColorStop(0, '#ffffff');
+        dropGrad.addColorStop(0.3, '#38bdf8');
+        dropGrad.addColorStop(1, '#0284c7');
+        ctx.fillStyle = dropGrad;
+        ctx.strokeStyle = '#bae6fd';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.quadraticCurveTo(11, 0, 8, 8);
+        ctx.quadraticCurveTo(0, 14, -8, 8);
+        ctx.quadraticCurveTo(-11, 0, 0, -14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.beginPath();
+        ctx.arc(-3, 3, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'jellyfish') {
+        // 8.2 Água-Viva Bioluminescente (Oceano Profundo)
+        ctx.fillStyle = 'rgba(232, 121, 249, 0.85)';
+        ctx.strokeStyle = '#f472b6';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, -4, 10, Math.PI, 0, false);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-6, -4); ctx.quadraticCurveTo(-7, 4, -4, 10);
+        ctx.moveTo(0, -4); ctx.quadraticCurveTo(2, 5, 0, 12);
+        ctx.moveTo(6, -4); ctx.quadraticCurveTo(8, 4, 5, 10);
+        ctx.stroke();
+      } else if (h.type === 'cyber_chip') {
+        // 9. Microchip Tecnológico Cyberpunk (Cyberpunk, Arcade, Internet e Computador)
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 1.8;
+        this.roundRect(ctx, -11, -11, 22, 22, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pinos conectores laterais dourados
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(-13, -7, 2, 3);
+        ctx.fillRect(-13, 4, 2, 3);
+        ctx.fillRect(11, -7, 2, 3);
+        ctx.fillRect(11, 4, 2, 3);
+
+        // Circuito central neon
+        ctx.strokeStyle = '#ec4899';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-5, -5);
+        ctx.lineTo(0, -5);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(5, 5);
+        ctx.stroke();
+
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.arc(4, -4, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'tribal_spear') {
+        // 10. Ponta de Lança Sagrada / Dardo Rúnico (Indígena e Ruínas)
+        ctx.fillStyle = '#78716c';
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -15);
+        ctx.lineTo(8, -2);
+        ctx.lineTo(3, 8);
+        ctx.lineTo(-3, 8);
+        ctx.lineTo(-8, -2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Tiras de amarração e pena cerimonial
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-3, 8);
+        ctx.lineTo(3, 8);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.ellipse(0, 13, 3, 6, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'energy_shuriken') {
+        // 11. Shuriken de Energia de Herói (Heróis e Geometria)
+        ctx.fillStyle = '#4f46e5';
+        ctx.strokeStyle = '#818cf8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(4, -4);
+        ctx.lineTo(14, 0);
+        ctx.lineTo(4, 4);
+        ctx.lineTo(0, 14);
+        ctx.lineTo(-4, 4);
+        ctx.lineTo(-14, 0);
+        ctx.lineTo(-4, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath();
+        ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'gear') {
+        // 12. Engrenagem Mecânica Dentada (Ferro e Steampunk)
+        ctx.fillStyle = '#b45309';
+        ctx.strokeStyle = '#fed7aa';
+        ctx.lineWidth = 1.4;
+
+        // Dentes da engrenagem
+        const teeth = 6;
+        ctx.beginPath();
+        for (let i = 0; i < teeth * 2; i++) {
+          const r = i % 2 === 0 ? 13 : 9;
+          const a = (i * Math.PI) / teeth;
+          const gx = Math.cos(a) * r;
+          const gy = Math.sin(a) * r;
+          if (i === 0) ctx.moveTo(gx, gy);
+          else ctx.lineTo(gx, gy);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Orifício central do eixo
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (h.type === 'aurora_prism') {
+        // 13. Prisma de Aurora Boreal (Aurora e Céu)
+        const prismGrad = ctx.createLinearGradient(-10, -10, 10, 10);
+        prismGrad.addColorStop(0, '#2dd4bf');
+        prismGrad.addColorStop(0.5, '#38bdf8');
+        prismGrad.addColorStop(1, '#a855f7');
+        ctx.fillStyle = prismGrad;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(11, 0);
+        ctx.lineTo(0, 14);
+        ctx.lineTo(-11, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (h.type === 'circus_star') {
+        // 14. Estrela Mágica de Circo / Carnaval (Música e Carnaval)
+        ctx.fillStyle = '#f43f5e';
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const aExt = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          const aInt = aExt + Math.PI / 5;
+          ctx.lineTo(Math.cos(aExt) * 13, Math.sin(aExt) * 13);
+          ctx.lineTo(Math.cos(aInt) * 6, Math.sin(aInt) * 6);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (h.type === 'spiked_ball') {
+        // 15. Bola de Ferro com Espinhos (Futebol e Desafio)
+        ctx.fillStyle = '#475569';
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 4 espinhos cônicos salientes
+        ctx.fillStyle = '#ef4444';
+        for (let i = 0; i < 4; i++) {
+          const a = (i * Math.PI) / 2;
+          ctx.save();
+          ctx.rotate(a);
+          ctx.beginPath();
+          ctx.moveTo(-3, 7);
+          ctx.lineTo(0, 14);
+          ctx.lineTo(3, 7);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
       } else if (h.type === 'rock') {
-        // Rocha / Bloco de pedra caindo
+        // 16. Rocha / Pedregulho de Granito
         ctx.fillStyle = h.color;
         ctx.strokeStyle = '#292524';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
         ctx.moveTo(-12, -7);
         ctx.lineTo(-3, -14);
@@ -1799,66 +2263,29 @@ export class GameEngine {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-
-        ctx.strokeStyle = '#44403c';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(-3, -14);
-        ctx.lineTo(2, 0);
-        ctx.lineTo(14, 6);
-        ctx.stroke();
-      } else if (h.type === 'iron_bar') {
-        // Barra de ferro incandescente
-        ctx.shadowColor = '#f97316';
-        ctx.shadowBlur = this.isMobile ? 0 : 10;
-        const grad = ctx.createLinearGradient(-15, -6, 15, 6);
-        grad.addColorStop(0, '#f97316');
-        grad.addColorStop(0.5, '#fef08a');
-        grad.addColorStop(1, '#ea580c');
-        ctx.fillStyle = grad;
-        ctx.strokeStyle = '#9a3412';
-        ctx.lineWidth = 1.5;
-        this.roundRect(ctx, -14, -6, 28, 12, 3);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#7c2d12';
-        ctx.beginPath();
-        ctx.arc(-8, 0, 2, 0, Math.PI * 2);
-        ctx.arc(8, 0, 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (h.type === 'icicle') {
-        // Estalactite de gelo afiada
-        ctx.fillStyle = 'rgba(186, 230, 253, 0.9)';
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(-7, -13);
-        ctx.lineTo(7, -13);
-        ctx.lineTo(0, 14);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-      } else if (h.type === 'jellyfish') {
-        // Água-viva
-        ctx.fillStyle = 'rgba(232, 121, 249, 0.85)';
-        ctx.beginPath();
-        ctx.arc(0, -4, 10, Math.PI, 0, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = '#f472b6';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(-6, -4); ctx.quadraticCurveTo(-7, 4, -4, 10);
-        ctx.moveTo(0, -4); ctx.quadraticCurveTo(2, 5, 0, 12);
-        ctx.moveTo(6, -4); ctx.quadraticCurveTo(8, 4, 5, 10);
-        ctx.stroke();
       } else {
-        // Destroço padrão
-        ctx.fillStyle = h.color;
+        // 17. Fragmento Cósmico Multifacetado (Fallback Estilizado com Cores da Fase)
+        ctx.fillStyle = h.color || this.stage.platformColor || '#0ea5e9';
+        ctx.strokeStyle = this.stage.platformBorder || '#ffffff';
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(0, 0, h.radius, 0, Math.PI * 2);
+        ctx.moveTo(0, -13);
+        ctx.lineTo(12, -4);
+        ctx.lineTo(8, 11);
+        ctx.lineTo(-9, 10);
+        ctx.lineTo(-12, -3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Faceta sombreada angular
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+        ctx.beginPath();
+        ctx.moveTo(0, -13);
+        ctx.lineTo(0, 4);
+        ctx.lineTo(8, 11);
+        ctx.lineTo(12, -4);
+        ctx.closePath();
         ctx.fill();
       }
 
