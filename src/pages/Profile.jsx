@@ -540,13 +540,14 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
                     </p>
                   </div>
                 </div>
-                <Link
-                  to="/game"
-                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-pink-500/20 transition-all hover:scale-105 active:scale-95"
+                <button
+                  type="button"
+                  onClick={() => onNavigate && onNavigate('game')}
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-pink-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                 >
                   <PartyPopper className="w-3.5 h-3.5" />
                   JOGAR FASE
-                </Link>
+                </button>
               </div>
             )}
           </div>
