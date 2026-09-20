@@ -29,9 +29,10 @@ import { STAGES, BALL_SKINS } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
 import { getRecommendedStages } from '../game/recommendation';
 import { soundEngine } from '../game/audio';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuth, resolveInterestsList } from '../contexts/AuthContext.jsx';
 import { useSettings } from '../contexts/SettingsContext';
 import { useDialog } from '../contexts/DialogContext';
+import { InterestsQuizModal } from '../components/InterestsQuizModal';
 // Hooks de hardware comentados conforme solicitação (preservados para uso futuro):
 // import { useDeviceOrientation } from '../hooks/useDeviceOrientation';
 // import { useMediaPipeHands } from '../hooks/useMediaPipeHands';
@@ -107,10 +108,20 @@ export function Game({ onNavigate }) {
   }, [profile]);
 
   // Fases recomendadas por afinidade com os interesses do jogador
-  const userInterests = profile?.user_interests || [];
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const userInterests = React.useMemo(() => {
+    return resolveInterestsList(profile?.user_interests);
+  }, [profile?.user_interests]);
+
   const recommendedStages = React.useMemo(() => {
     return getRecommendedStages(userInterests, profile?.stages_completed || 0, 3);
   }, [userInterests, profile?.stages_completed]);
+
+  const handleSaveInterests = async (newInterests) => {
+    if (updateProfile) {
+      await updateProfile({ user_interests: newInterests });
+    }
+  };
 
   // Detecta se o jogador acessou via link de desafio (?challenge=JPXXX)
   useEffect(() => {
@@ -838,7 +849,7 @@ export function Game({ onNavigate }) {
               )}
 
               {/* Seção de Fases Recomendadas no Estilo do Piloto */}
-              {userInterests.length > 0 && recommendedStages.length > 0 && (
+              {userInterests.length > 0 && recommendedStages.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -850,12 +861,21 @@ export function Game({ onNavigate }) {
                         </span>
                       </h3>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsQuizOpen(true)}
+                      className="px-3 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-pink-400 hover:text-pink-300 border border-pink-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Ajustar Interesses</span>
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {recommendedStages.map((stage) => {
                       const completedStages = profile?.stages_completed || 0;
-                      const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
+                      // Fases recomendadas pelo estilo do jogador ficam acessíveis imediatamente
+                      const isUnlocked = true;
                       const isCompleted = stage.number <= completedStages;
 
                       return (
@@ -869,6 +889,23 @@ export function Game({ onNavigate }) {
                       );
                     })}
                   </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-950/25 via-purple-950/25 to-slate-900 border border-pink-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl animate-bounce">🎯</span>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-white">Descubra Fases no Seu Estilo</h4>
+                      <p className="text-[11px] text-slate-300">Personalize seus interesses (Heroínas, Sci-Fi, Magia, Ação) para curadoria de fases feitas para você.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsQuizOpen(true)}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs shadow-md shadow-pink-500/20 whitespace-nowrap cursor-pointer hover:scale-105 active:scale-95 transition-all"
+                  >
+                    DEFINIR MEUS TEMAS
+                  </button>
                 </div>
               )}
 
@@ -1413,6 +1450,14 @@ export function Game({ onNavigate }) {
         userProfile={profile || { id: user?.id, username: user?.email?.split('@')[0] || 'Piloto' }}
         activeSkin={activeSkin}
         initialRoomCode={challengeCodeFromUrl}
+      />
+
+      {/* MODAL DE QUIZ DE INTERESSES */}
+      <InterestsQuizModal
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+        currentInterests={userInterests}
+        onSaveInterests={handleSaveInterests}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Check, Sparkles, Compass, Heart, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { INTEREST_TOPICS } from '../game/recommendation';
@@ -9,8 +9,25 @@ export function InterestsQuizModal({
   currentInterests = [],
   onSaveInterests
 }) {
-  const [selected, setSelected] = useState(() => currentInterests || []);
+  const [selected, setSelected] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      let safeList = [];
+      if (Array.isArray(currentInterests)) {
+        safeList = currentInterests.filter(Boolean);
+      } else if (typeof currentInterests === 'string') {
+        try {
+          const parsed = JSON.parse(currentInterests);
+          if (Array.isArray(parsed)) safeList = parsed.filter(Boolean);
+        } catch (e) {
+          safeList = currentInterests.split(',').map(s => s.trim()).filter(Boolean);
+        }
+      }
+      setSelected(safeList);
+    }
+  }, [isOpen, currentInterests]);
 
   if (!isOpen) return null;
 

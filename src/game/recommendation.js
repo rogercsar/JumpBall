@@ -73,7 +73,7 @@ export const INTEREST_TOPICS = [
 ];
 
 /**
- * Mapeamento de temas das 50 fases para tags de interesses
+ * Mapeamento completo de todos os temas das 50 fases para tags de interesses
  */
 const STAGE_THEME_TAGS = {
   forest: ['natureza', 'aventura'],
@@ -81,51 +81,94 @@ const STAGE_THEME_TAGS = {
   ocean: ['natureza', 'oceanos'],
   storm: ['desafio', 'natureza', 'magia'],
   crystal: ['fantasia', 'magia'],
-  volcano: ['desafio', 'natureza'],
-  neon: ['retro', 'games', 'scifi'],
+  volcano: ['desafio', 'natureza', 'volcano'],
+  neon: ['retro', 'games', 'scifi', 'arcade'],
   ice: ['fantasia', 'magia', 'natureza'],
   sky: ['aventura', 'natureza'],
   cosmos: ['scifi', 'espaco'],
+  cyberpunk: ['scifi', 'retro', 'games', 'arcade'],
+  waterfall: ['natureza', 'oceanos', 'aventura'],
+  indigenous: ['aventura', 'natureza', 'mitologia'],
+  rain: ['natureza', 'desafio'],
+  wind: ['aventura', 'natureza'],
+  canyon: ['aventura', 'natureza', 'desafio'],
+  ruins: ['mitologia', 'aventura', 'fantasia'],
+  sunset: ['natureza', 'fantasia'],
+  orbit: ['scifi', 'espaco'],
   quantum: ['scifi', 'espaco', 'desafio'],
-  arcade: ['retro', 'games'],
-  temple: ['mitologia', 'aventura'],
-  aurora: ['fantasia', 'natureza', 'magia']
+  metropolis: ['scifi', 'arcade', 'games'],
+  aurora: ['fantasia', 'natureza', 'magia'],
+  carnival: ['arcade', 'games', 'fantasia'],
+  pyramids: ['mitologia', 'aventura'],
+  steampunk: ['retro', 'arcade', 'aventura', 'guerreiras'],
+  rock: ['desafio', 'aventura', 'natureza'],
+  iron: ['heroes', 'desafio', 'army'],
+  wood: ['natureza', 'aventura'],
+  heroes: ['heroes', 'guerreiras', 'mitologia', 'desafio'],
+  dragon: ['desafio', 'mitologia', 'volcano', 'fantasia'],
+  arcade: ['retro', 'games', 'arcade'],
+  temple: ['mitologia', 'aventura', 'fantasia']
 };
+
+/**
+ * Função defensiva para normalizar a lista de interesses
+ */
+function resolveInterests(input) {
+  if (!input) return [];
+  if (Array.isArray(input)) {
+    return input.filter(item => typeof item === 'string' && item.trim().length > 0);
+  }
+  if (typeof input === 'string') {
+    try {
+      const parsed = JSON.parse(input);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(item => typeof item === 'string' && item.trim().length > 0);
+      }
+    } catch (e) {
+      return input.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
 
 /**
  * Calcula a pontuação de afinidade de uma skin com base nos interesses selecionados
  */
 export function calculateSkinAffinity(skin, selectedInterestIds = []) {
-  if (!selectedInterestIds || selectedInterestIds.length === 0) {
+  const safeInterests = resolveInterests(selectedInterestIds);
+  if (safeInterests.length === 0) {
     return 75; // Valor neutro base
   }
 
-  const selectedTopics = INTEREST_TOPICS.filter(t => selectedInterestIds.includes(t.id));
+  const selectedTopics = INTEREST_TOPICS.filter(t => safeInterests.includes(t.id));
   const activeTags = new Set(selectedTopics.flatMap(t => t.tags));
 
   let matchPoints = 0;
 
   // Categoria direta
-  if (skin.category === 'heroines' && (selectedInterestIds.includes('heroines') || selectedInterestIds.includes('fantasy'))) {
+  if (skin.category === 'heroines' && (safeInterests.includes('heroines') || safeInterests.includes('fantasy'))) {
     matchPoints += 3;
   }
-  if (skin.category === 'heroes' && (selectedInterestIds.includes('heroes') || selectedInterestIds.includes('heroines'))) {
+  if (skin.category === 'heroes' && (safeInterests.includes('heroes') || safeInterests.includes('heroines'))) {
+    matchPoints += 2.5;
+  }
+  if (skin.category === 'space' && safeInterests.includes('scifi')) {
+    matchPoints += 3;
+  }
+  if (skin.category === 'army' && safeInterests.includes('heroes')) {
     matchPoints += 2;
-  }
-  if (skin.category === 'space' && selectedInterestIds.includes('scifi')) {
-    matchPoints += 3;
   }
 
   // Tags específicas da skin
   if (skin.tags && Array.isArray(skin.tags)) {
     skin.tags.forEach(tag => {
       if (activeTags.has(tag)) {
-        matchPoints += 2;
+        matchPoints += 2.2;
       }
     });
   }
 
-  const ratio = Math.min(1, Math.max(0.45, matchPoints / 5.5));
+  const ratio = Math.min(1, Math.max(0.40, matchPoints / 6.0));
   return Math.round(ratio * 100);
 }
 
@@ -133,10 +176,11 @@ export function calculateSkinAffinity(skin, selectedInterestIds = []) {
  * Retorna as melhores skins recomendadas para o usuário
  */
 export function getRecommendedSkins(selectedInterestIds = [], unlockedIds = [], limit = 8) {
+  const safeInterests = resolveInterests(selectedInterestIds);
   const unlockedSet = new Set(unlockedIds);
 
   const scoredSkins = BALL_SKINS.map(skin => {
-    const affinity = calculateSkinAffinity(skin, selectedInterestIds);
+    const affinity = calculateSkinAffinity(skin, safeInterests);
     const isUnlocked = unlockedSet.has(skin.id);
     return {
       ...skin,
@@ -147,10 +191,13 @@ export function getRecommendedSkins(selectedInterestIds = [], unlockedIds = [], 
 
   // Ordena por afinidade decrescente e prioriza skins que o jogador ainda não comprou (para incentivar descoberta)
   scoredSkins.sort((a, b) => {
+    if (b.affinity !== a.affinity) {
+      return b.affinity - a.affinity;
+    }
     if (a.isUnlocked !== b.isUnlocked) {
       return a.isUnlocked ? 1 : -1;
     }
-    return b.affinity - a.affinity;
+    return 0;
   });
 
   return scoredSkins.slice(0, limit);
@@ -160,12 +207,13 @@ export function getRecommendedSkins(selectedInterestIds = [], unlockedIds = [], 
  * Retorna as fases recomendadas que combinam com o perfil do jogador
  */
 export function getRecommendedStages(selectedInterestIds = [], currentCompletedStages = 0, limit = 6) {
-  if (!selectedInterestIds || selectedInterestIds.length === 0) {
+  const safeInterests = resolveInterests(selectedInterestIds);
+  if (safeInterests.length === 0) {
     // Retorna as fases mais próximas do nível atual do jogador
     return STAGES.slice(Math.max(0, currentCompletedStages - 1), currentCompletedStages + limit);
   }
 
-  const selectedTopics = INTEREST_TOPICS.filter(t => selectedInterestIds.includes(t.id));
+  const selectedTopics = INTEREST_TOPICS.filter(t => safeInterests.includes(t.id));
   const activeTags = new Set(selectedTopics.flatMap(t => t.tags));
 
   const scoredStages = STAGES.map(stage => {
@@ -177,20 +225,33 @@ export function getRecommendedStages(selectedInterestIds = [], currentCompletedS
 
     const isUnlocked = stage.number <= Math.max(1, currentCompletedStages + 1);
     const isCompleted = stage.number <= currentCompletedStages;
+    const affinityPercent = Math.min(99, Math.round(55 + (matches * 15)));
 
     return {
       ...stage,
       matchScore: matches,
+      affinityPercent,
       isUnlocked,
       isCompleted
     };
   });
 
-  // Prioriza fases com maior correspondência temática
+  // Prioriza fases com maior correspondência temática com os interesses do jogador!
   scoredStages.sort((a, b) => {
-    if (a.isUnlocked !== b.isUnlocked) return a.isUnlocked ? -1 : 1;
-    return b.matchScore - a.matchScore;
+    if (b.matchScore !== a.matchScore) {
+      return b.matchScore - a.matchScore;
+    }
+    if (a.isUnlocked !== b.isUnlocked) {
+      return a.isUnlocked ? -1 : 1;
+    }
+    return a.number - b.number;
   });
+
+  // Retorna prioritariamente fases com matchScore > 0
+  const matched = scoredStages.filter(s => s.matchScore > 0);
+  if (matched.length > 0) {
+    return matched.slice(0, limit);
+  }
 
   return scoredStages.slice(0, limit);
 }

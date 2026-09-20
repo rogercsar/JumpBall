@@ -22,7 +22,7 @@ import {
   Swords,
   PartyPopper
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuth, resolveInterestsList } from '../contexts/AuthContext.jsx';
 import { STAGES, BALL_SKINS } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
 import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
@@ -36,6 +36,7 @@ export function Home({ onNavigate }) {
   const totalJumps = profile?.total_jumps || 0;
   const gamesPlayed = profile?.games_played || 0;
   const progressPercent = Math.min(100, Math.round((stagesCompleted / STAGES.length) * 100));
+  const userInterests = resolveInterestsList(profile?.user_interests);
 
   // Eventos comemorativos ativos na data atual
   const activeEvents = React.useMemo(() => getActiveCommemorativeStages(profile), [profile]);
@@ -234,7 +235,7 @@ export function Home({ onNavigate }) {
       )}
 
       {/* BANNER DE CONVITE PARA O QUIZ DE INTERESSES (SE AINDA NÃO SELECIONOU) */}
-      {(!profile?.user_interests || profile.user_interests.length === 0) && (
+      {userInterests.length === 0 && (
         <section className="relative overflow-hidden rounded-3xl p-5 border border-pink-500/30 bg-gradient-to-r from-pink-950/25 via-purple-950/25 to-slate-950 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3.5 text-center sm:text-left">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-2xl shadow-md shadow-pink-500/20 shrink-0 animate-pulse">

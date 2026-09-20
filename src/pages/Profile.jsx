@@ -29,7 +29,7 @@ import {
   PartyPopper,
   X
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuth, resolveInterestsList } from '../contexts/AuthContext.jsx';
 import { useDialog } from '../contexts/DialogContext';
 import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 import { BALL_SKINS, BALL_TRAILS, ACHIEVEMENTS, getDailyQuests, STAGES } from '../game/stages';
@@ -102,7 +102,10 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
 
   // Skins recomendadas de acordo com as preferências e interesses do usuário
-  const userInterests = profile?.user_interests || [];
+  const userInterests = React.useMemo(() => {
+    return resolveInterestsList(profile?.user_interests);
+  }, [profile?.user_interests]);
+
   const recommendedSkins = React.useMemo(() => {
     return getRecommendedSkins(userInterests, profile?.unlocked_skins || [], 12);
   }, [userInterests, profile?.unlocked_skins]);

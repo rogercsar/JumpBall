@@ -4,6 +4,32 @@ import { supabase, isSupabaseConfigured, localStore } from '../lib/supabase';
 
 const LOCAL_SESSION_KEY = 'jumpball_active_session';
 
+/**
+ * Normaliza e resolve interesses do usuário de forma robusta e segura,
+ * aceitando arrays, strings serializadas JSON ou listas separadas por vírgula.
+ */
+export const resolveInterestsList = (...candidates) => {
+  for (const cand of candidates) {
+    if (!cand) continue;
+    if (Array.isArray(cand) && cand.length > 0) {
+      return cand.filter(item => typeof item === 'string' && item.trim().length > 0);
+    }
+    if (typeof cand === 'string' && cand.trim().length > 0) {
+      try {
+        const parsed = JSON.parse(cand);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.filter(item => typeof item === 'string' && item.trim().length > 0);
+        }
+      } catch (e) {
+        const parts = cand.split(',').map(s => s.trim()).filter(Boolean);
+        if (parts.length > 0) return parts;
+      }
+    }
+  }
+  return [];
+};
+
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -97,7 +123,14 @@ export function AuthProvider({ children }) {
         (payload) => {
           if (payload.new) {
             setProfile((prev) => {
-              const updated = { ...(prev || {}), ...payload.new };
+              const updated = {
+                ...(prev || {}),
+                ...payload.new,
+                user_interests: resolveInterestsList(payload.new?.user_interests, prev?.user_interests),
+                unlocked_skins: Array.from(new Set([...(prev?.unlocked_skins || []), ...(payload.new?.unlocked_skins || [])])),
+                unlocked_trails: Array.from(new Set([...(prev?.unlocked_trails || []), ...(payload.new?.unlocked_trails || [])])),
+                achievements: Array.from(new Set([...(prev?.achievements || []), ...(payload.new?.achievements || [])]))
+              };
               localStore.saveProfile(updated);
               try {
                 const saved = localStorage.getItem(LOCAL_SESSION_KEY);
@@ -165,7 +198,7 @@ export function AuthProvider({ children }) {
               ...(sessProf.achievements || []),
               ...(metaProf.achievements || [])
             ])),
-            user_interests: sessProf.user_interests || metaProf.user_interests || localProf.user_interests || []
+            user_interests: resolveInterestsList(metaProf.user_interests, sessProf.user_interests, localProf.user_interests)
           };
           setUser(sessionData.user);
           setProfile(mergedProfile);
@@ -290,9 +323,11 @@ export function AuthProvider({ children }) {
         Number(cloudMeta.endless_high_score || 0), 
         data?.endless_high_score || 0
       );
-      const resolvedInterests = Array.isArray(cloudMeta.user_interests)
-        ? cloudMeta.user_interests
-        : (data?.user_interests || local.user_interests || []);
+      const resolvedInterests = resolveInterestsList(
+        cloudMeta.user_interests,
+        data?.user_interests,
+        local.user_interests
+      );
 
       const merged = {
         ...local,
@@ -335,7 +370,7 @@ export function AuthProvider({ children }) {
         resolvedAchievements.length > (cloudMeta.achievements?.length || 0) ||
         resolvedGems > (Number(cloudMeta.gems) || 0) ||
         (resolvedBirthDate && !cloudMeta.birth_date) ||
-        (resolvedInterests.length > 0 && !cloudMeta.user_interests)
+        (resolvedInterests.length > 0 && (!cloudMeta.user_interests || resolveInterestsList(cloudMeta.user_interests).length === 0))
       ) {
         try {
           supabase.auth.updateUser({
@@ -574,6 +609,10 @@ export function AuthProvider({ children }) {
       ...(updates.achievements || [])
     ]));
 
+    const mergedInterests = updates.user_interests !== undefined
+      ? resolveInterestsList(updates.user_interests)
+      : resolveInterestsList(base.user_interests);
+
     const updated = { 
       ...base, 
       ...updates,
@@ -588,7 +627,8 @@ export function AuthProvider({ children }) {
       stages_completed: updates.stages_completed !== undefined ? updates.stages_completed : (base.stages_completed || 0),
       high_score: Math.max(base.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
       total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (base.total_jumps || 0),
-      games_played: (updates.games_played !== undefined) ? updates.games_played : (base.games_played || 0)
+      games_played: (updates.games_played !== undefined) ? updates.games_played : (base.games_played || 0),
+      user_interests: mergedInterests
     };
 
     setProfile(updated);

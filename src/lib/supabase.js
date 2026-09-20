@@ -96,7 +96,8 @@ export const localStore = {
           daily_quests_progress: (parsed.daily_quests_progress && typeof parsed.daily_quests_progress === 'object')
             ? parsed.daily_quests_progress
             : defaultProfile.daily_quests_progress,
-          endless_high_score: Number(parsed.endless_high_score || 0)
+          endless_high_score: Number(parsed.endless_high_score || 0),
+          user_interests: Array.isArray(parsed.user_interests) ? parsed.user_interests : []
         };
       } catch (e) { /* ignore */ }
     }
@@ -117,7 +118,8 @@ export const localStore = {
         unlocked_skins: Array.from(new Set([...(existing.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']), ...(profile.unlocked_skins || [])])),
         unlocked_trails: Array.from(new Set([...(existing.unlocked_trails || ['default']), ...(profile.unlocked_trails || [])])),
         achievements: Array.from(new Set([...(existing.achievements || []), ...(profile.achievements || [])])),
-        daily_quests_progress: profile.daily_quests_progress || existing.daily_quests_progress || { date: '', progress: {}, claimed: {} }
+        daily_quests_progress: profile.daily_quests_progress || existing.daily_quests_progress || { date: '', progress: {}, claimed: {} },
+        user_interests: profile.user_interests !== undefined ? profile.user_interests : (existing.user_interests || [])
       };
       localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(merged));
     } catch (e) {

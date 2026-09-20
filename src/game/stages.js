@@ -959,56 +959,56 @@ export const STAGES = [
 
 export const BALL_SKINS = [
   // 6 Skins Iniciais (Gratuitas / Desbloqueadas)
-  { id: 'neon-cyan', name: 'Esfera Neon', primary: '#06b6d4', glow: '#22d3ee', trail: '#0891b2', priceGems: 0, category: 'starter' },
-  { id: 'plasma-pink', name: 'Pulso Plasma', primary: '#f43f5e', glow: '#fb7185', trail: '#e11d48', priceGems: 0, category: 'starter' },
-  { id: 'solar-gold', name: 'Sol de Hélio', primary: '#eab308', glow: '#fde047', trail: '#ca8a04', priceGems: 0, category: 'starter' },
-  { id: 'matrix-green', name: 'Córtex Matrix', primary: '#22c55e', glow: '#86efac', trail: '#16a34a', priceGems: 0, category: 'starter' },
-  { id: 'cosmic-purple', name: 'Nebulosa Roxa', primary: '#a855f7', glow: '#d8b4fe', trail: '#9333ea', priceGems: 0, category: 'starter' },
-  { id: 'fireball', name: 'Meteoro Ígneo', primary: '#f97316', glow: '#fdba74', trail: '#ea580c', priceGems: 0, category: 'starter' },
+  { id: 'neon-cyan', name: 'Esfera Neon', primary: '#06b6d4', glow: '#22d3ee', trail: '#0891b2', priceGems: 0, category: 'starter', tags: ['scifi', 'arcade', 'retro'] },
+  { id: 'plasma-pink', name: 'Pulso Plasma', primary: '#f43f5e', glow: '#fb7185', trail: '#e11d48', priceGems: 0, category: 'starter', tags: ['fantasia', 'magia', 'arcade'] },
+  { id: 'solar-gold', name: 'Sol de Hélio', primary: '#eab308', glow: '#fde047', trail: '#ca8a04', priceGems: 0, category: 'starter', tags: ['mitologia', 'heroes', 'desafio'] },
+  { id: 'matrix-green', name: 'Córtex Matrix', primary: '#22c55e', glow: '#86efac', trail: '#16a34a', priceGems: 0, category: 'starter', tags: ['scifi', 'arcade', 'retro'] },
+  { id: 'cosmic-purple', name: 'Nebulosa Roxa', primary: '#a855f7', glow: '#d8b4fe', trail: '#9333ea', priceGems: 0, category: 'starter', tags: ['scifi', 'espaco', 'magia'] },
+  { id: 'fireball', name: 'Meteoro Ígneo', primary: '#f97316', glow: '#fdba74', trail: '#ea580c', priceGems: 0, category: 'starter', tags: ['desafio', 'volcano', 'natureza'] },
 
   // Forças Táticas & Militares (a partir de 160 💎)
-  { id: 'army-camo', name: 'Camuflagem Militar', primary: '#4d7c0f', glow: '#84cc16', trail: '#365314', priceGems: 160, category: 'army' },
-  { id: 'tactical-specops', name: 'Força Especial Tática', primary: '#1e293b', glow: '#64748b', trail: '#0f172a', priceGems: 180, category: 'army' },
+  { id: 'army-camo', name: 'Camuflagem Militar', primary: '#4d7c0f', glow: '#84cc16', trail: '#365314', priceGems: 160, category: 'army', tags: ['army', 'aventura', 'guerreiras'] },
+  { id: 'tactical-specops', name: 'Força Especial Tática', primary: '#1e293b', glow: '#64748b', trail: '#0f172a', priceGems: 180, category: 'army', tags: ['army', 'desafio', 'guerreiras'] },
 
   // Heróis Lendários
-  { id: 'iron-hero', name: 'Homem de Ferro', primary: '#b91c1c', glow: '#facc15', trail: '#7f1d1d', priceGems: 200, category: 'heroes' },
-  { id: 'spider-hero', name: 'Homem-Aranha', primary: '#dc2626', glow: '#38bdf8', trail: '#1d4ed8', priceGems: 200, category: 'heroes' },
+  { id: 'iron-hero', name: 'Homem de Ferro', primary: '#b91c1c', glow: '#facc15', trail: '#7f1d1d', priceGems: 200, category: 'heroes', tags: ['heroes', 'scifi', 'arcade'] },
+  { id: 'spider-hero', name: 'Homem-Aranha', primary: '#dc2626', glow: '#38bdf8', trail: '#1d4ed8', priceGems: 200, category: 'heroes', tags: ['heroes', 'aventura', 'arcade'] },
 
   // Heróis
-  { id: 'super-steel', name: 'Superman', primary: '#2563eb', glow: '#ef4444', trail: '#eab308', priceGems: 220, category: 'heroes' },
-  { id: 'dark-bat', name: 'Batman', primary: '#18181b', glow: '#eab308', trail: '#09090b', priceGems: 220, category: 'heroes' },
+  { id: 'super-steel', name: 'Superman', primary: '#2563eb', glow: '#ef4444', trail: '#eab308', priceGems: 220, category: 'heroes', tags: ['heroes', 'scifi', 'mitologia'] },
+  { id: 'dark-bat', name: 'Batman', primary: '#18181b', glow: '#eab308', trail: '#09090b', priceGems: 220, category: 'heroes', tags: ['heroes', 'desafio', 'aventura'] },
 
   // Heróis
-  { id: 'thunder-god', name: 'Thor', primary: '#64748b', glow: '#60a5fa', trail: '#38bdf8', priceGems: 240, category: 'heroes' },
-  { id: 'captain-shield', name: 'Capitão América', primary: '#1d4ed8', glow: '#ef4444', trail: '#f8fafc', priceGems: 240, category: 'heroes' },
+  { id: 'thunder-god', name: 'Thor', primary: '#64748b', glow: '#60a5fa', trail: '#38bdf8', priceGems: 240, category: 'heroes', tags: ['heroes', 'mitologia', 'magia'] },
+  { id: 'captain-shield', name: 'Capitão América', primary: '#1d4ed8', glow: '#ef4444', trail: '#f8fafc', priceGems: 240, category: 'heroes', tags: ['heroes', 'army', 'guerreiras'] },
 
   // Heróis
-  { id: 'wolverine-claw', name: 'Wolverine', primary: '#eab308', glow: '#3b82f6', trail: '#854d0e', priceGems: 260, category: 'heroes' },
-  { id: 'gamma-titan', name: 'Hulk Titã', primary: '#15803d', glow: '#4ade80', trail: '#166534', priceGems: 260, category: 'heroes' },
+  { id: 'wolverine-claw', name: 'Wolverine', primary: '#eab308', glow: '#3b82f6', trail: '#854d0e', priceGems: 260, category: 'heroes', tags: ['heroes', 'desafio', 'guerreiras'] },
+  { id: 'gamma-titan', name: 'Hulk Titã', primary: '#15803d', glow: '#4ade80', trail: '#166534', priceGems: 260, category: 'heroes', tags: ['heroes', 'desafio', 'natureza'] },
 
   // Heróis
-  { id: 'vibranium-panther', name: 'Pantera Negra', primary: '#09090b', glow: '#c084fc', trail: '#6b21a8', priceGems: 280, category: 'heroes' },
-  { id: 'speed-lightning', name: 'Flash Velocista', primary: '#dc2626', glow: '#fde047', trail: '#ca8a04', priceGems: 280, category: 'heroes' },
+  { id: 'vibranium-panther', name: 'Pantera Negra', primary: '#09090b', glow: '#c084fc', trail: '#6b21a8', priceGems: 280, category: 'heroes', tags: ['heroes', 'guerreiras', 'scifi'] },
+  { id: 'speed-lightning', name: 'Flash Velocista', primary: '#dc2626', glow: '#fde047', trail: '#ca8a04', priceGems: 280, category: 'heroes', tags: ['heroes', 'scifi', 'arcade'] },
 
   // Heróis
-  { id: 'red-mercenary', name: 'Deadpool', primary: '#e11d48', glow: '#475569', trail: '#881337', priceGems: 300, category: 'heroes' },
-  { id: 'mystic-supreme', name: 'Doutor Estranho', primary: '#c2410c', glow: '#4ade80', trail: '#4338ca', priceGems: 300, category: 'heroes' },
+  { id: 'red-mercenary', name: 'Deadpool', primary: '#e11d48', glow: '#475569', trail: '#881337', priceGems: 300, category: 'heroes', tags: ['heroes', 'arcade', 'desafio'] },
+  { id: 'mystic-supreme', name: 'Doutor Estranho', primary: '#c2410c', glow: '#4ade80', trail: '#4338ca', priceGems: 300, category: 'heroes', tags: ['heroes', 'magia', 'fantasia'] },
 
   // Astronautas & Exploração Espacial
-  { id: 'apollo-astronaut', name: 'Astronauta Apollo', primary: '#f8fafc', glow: '#fde047', trail: '#94a3b8', priceGems: 320, category: 'space' },
-  { id: 'void-cosmonaut', name: 'Cosmonauta do Vazio', primary: '#0f172a', glow: '#06b6d4', trail: '#0284c7', priceGems: 320, category: 'space' },
+  { id: 'apollo-astronaut', name: 'Astronauta Apollo', primary: '#f8fafc', glow: '#fde047', trail: '#94a3b8', priceGems: 320, category: 'space', tags: ['scifi', 'espaco'] },
+  { id: 'void-cosmonaut', name: 'Cosmonauta do Vazio', primary: '#0f172a', glow: '#06b6d4', trail: '#0284c7', priceGems: 320, category: 'space', tags: ['scifi', 'espaco', 'desafio'] },
 
   // Táticas Especiais
-  { id: 'stealth-pilot', name: 'Piloto Stealth', primary: '#334155', glow: '#f59e0b', trail: '#1e293b', priceGems: 350, category: 'army' },
-  { id: 'cyber-shinobi', name: 'Ninja Cibernético', primary: '#581c87', glow: '#22c55e', trail: '#3b0764', priceGems: 350, category: 'heroes' },
+  { id: 'stealth-pilot', name: 'Piloto Stealth', primary: '#334155', glow: '#f59e0b', trail: '#1e293b', priceGems: 350, category: 'army', tags: ['army', 'scifi', 'guerreiras'] },
+  { id: 'cyber-shinobi', name: 'Ninja Cibernético', primary: '#581c87', glow: '#22c55e', trail: '#3b0764', priceGems: 350, category: 'heroes', tags: ['heroes', 'retro', 'arcade', 'guerreiras'] },
 
   // Guerreiros Lendários
-  { id: 'spartan-gladiator', name: 'Gladiador Espartano', primary: '#92400e', glow: '#f59e0b', trail: '#78350f', priceGems: 380, category: 'heroes' },
-  { id: 'solar-ronin', name: 'Samurai Solar', primary: '#be123c', glow: '#fbbf24', trail: '#881337', priceGems: 380, category: 'heroes' },
+  { id: 'spartan-gladiator', name: 'Gladiador Espartano', primary: '#92400e', glow: '#f59e0b', trail: '#78350f', priceGems: 380, category: 'heroes', tags: ['mitologia', 'guerreiras', 'aventura', 'heroes'] },
+  { id: 'solar-ronin', name: 'Samurai Solar', primary: '#be123c', glow: '#fbbf24', trail: '#881337', priceGems: 380, category: 'heroes', tags: ['mitologia', 'guerreiras', 'aventura'] },
 
   // Lendárias Cósmicas
-  { id: 'space-corsair', name: 'Corsário Espacial', primary: '#1e1b4b', glow: '#10b981', trail: '#0f172a', priceGems: 420, category: 'space' },
-  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', priceGems: 450, category: 'heroes' },
+  { id: 'space-corsair', name: 'Corsário Espacial', primary: '#1e1b4b', glow: '#10b981', trail: '#0f172a', priceGems: 420, category: 'space', tags: ['scifi', 'espaco', 'aventura'] },
+  { id: 'god-slayer', name: 'Deus do Olimpo', primary: '#f59e0b', glow: '#ffffff', trail: '#d97706', priceGems: 450, category: 'heroes', tags: ['mitologia', 'heroes', 'desafio'] },
 
   // ==========================================
   // HEROÍNAS, GUERREIRAS & PRINCESAS (16 SKINS)
