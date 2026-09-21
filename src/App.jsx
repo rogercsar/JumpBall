@@ -11,6 +11,7 @@ import { Settings } from './pages/Settings';
 import { Ranking } from './pages/Ranking';
 import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { RankingToast } from './components/RankingToast';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -66,6 +67,9 @@ function AppContent() {
         hasOrientation={isSupported && (permissionGranted || orientation.gamma !== 0)}
         isCameraActive={false}
       />
+
+      {/* Notificação Discreta de Ranking em Tempo Real */}
+      <RankingToast />
 
       {/* Roteamento de Telas */}
       <main className={`flex-1 flex flex-col ${activeRoute === 'game' ? 'h-full min-h-0 overflow-hidden' : ''}`}>

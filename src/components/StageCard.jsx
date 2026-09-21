@@ -89,6 +89,7 @@ const ICON_MAP = {
 
 export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {
   const IconComponent = ICON_MAP[stage.icon] || Sparkles;
+  const isBoss = Boolean(stage.isBossStage);
 
   return (
     <div
@@ -96,32 +97,50 @@ export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {
       className={`relative rounded-3xl p-5 border transition-all select-none overflow-hidden ${
         !isUnlocked
           ? 'opacity-60 bg-slate-900/40 border-slate-800 cursor-not-allowed'
-          : 'glass-card border-slate-800/80 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+          : isBoss
+            ? 'glass-card border-amber-500/60 bg-gradient-to-br from-amber-950/25 via-slate-900/95 to-slate-950 hover:border-amber-400 hover:shadow-xl hover:shadow-amber-500/20 cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+            : 'glass-card border-slate-800/80 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
       }`}
     >
       {/* Fundo temático com gradiente sutil */}
       <div 
-        className="absolute inset-0 opacity-15 pointer-events-none"
+        className={`absolute inset-0 pointer-events-none ${isBoss ? 'opacity-25' : 'opacity-15'}`}
         style={{
           background: `linear-gradient(135deg, ${stage.bgGradient[0]} 0%, ${stage.bgGradient[2]} 100%)`
         }}
       />
 
+      {isBoss && (
+        <div className="relative z-10 flex items-center justify-between mb-2 pb-1 border-b border-amber-500/20">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-black uppercase tracking-wider animate-pulse">
+            <span>👑</span>
+            <span>BATALHA DE CHEFÃO</span>
+          </div>
+          {stage.hasParallelUniverseAttack && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-500/30 text-purple-300">
+              🌌 Universo Paralelo
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="relative z-10 flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-950 font-black shadow-md"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-950 font-black shadow-md shrink-0"
             style={{
-              background: `linear-gradient(135deg, ${stage.platformColor}, ${stage.platformBorder})`
+              background: isBoss
+                ? 'linear-gradient(135deg, #f59e0b, #ef4444)'
+                : `linear-gradient(135deg, ${stage.platformColor}, ${stage.platformBorder})`
             }}
           >
-            <IconComponent className="w-5 h-5 text-slate-950" />
+            <IconComponent className={`w-5 h-5 ${isBoss ? 'text-white' : 'text-slate-950'}`} />
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
               Fase {stage.number}
             </span>
-            <h3 className="text-base font-bold text-white leading-tight">
+            <h3 className={`text-base font-bold leading-tight ${isBoss ? 'text-amber-200' : 'text-white'}`}>
               {stage.title}
             </h3>
           </div>
@@ -138,7 +157,7 @@ export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {
               <CheckCircle2 className="w-4 h-4" />
             </span>
           ) : (
-            <span className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center">
+            <span className={`p-1.5 rounded-lg border flex items-center justify-center ${isBoss ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'}`}>
               <Play className="w-4 h-4 fill-current" />
             </span>
           )}
@@ -152,14 +171,26 @@ export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {
 
       {/* Meta e Obstáculos */}
       <div className="relative z-10 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1 text-cyan-300 font-semibold">
-          <ArrowUp className="w-3.5 h-3.5" />
-          <span>Meta: {stage.targetHeight}m</span>
-        </div>
+        {isBoss ? (
+          <div className="flex items-center gap-1.5 text-amber-300 font-bold text-[11px]">
+            <span>⚔️ Vida: {stage.bossHP} HP</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-cyan-300 font-semibold">
+            <ArrowUp className="w-3.5 h-3.5" />
+            <span>Meta: {stage.targetHeight}m</span>
+          </div>
+        )}
 
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-          Velocidade {stage.speedFactor}x
-        </span>
+        {isBoss ? (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            💎 +{stage.rewardGems} Gemas
+          </span>
+        ) : (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+            Velocidade {stage.speedFactor}x
+          </span>
+        )}
       </div>
     </div>
   );

@@ -22,10 +22,12 @@ import {
   Flame,
   PartyPopper,
   Cake,
-  Gift
+  Gift,
+  Crown,
+  Globe
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
-import { STAGES, BALL_SKINS } from '../game/stages';
+import { STAGES, BALL_SKINS, WORLDS } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
 import { getRecommendedStages } from '../game/recommendation';
 import { soundEngine } from '../game/audio';
@@ -101,6 +103,12 @@ export function Game({ onNavigate }) {
   const [isPvPModalOpen, setIsPvPModalOpen] = useState(false);
   const [pvpMatchConfig, setPvpMatchConfig] = useState(null);
   const [challengeCodeFromUrl, setChallengeCodeFromUrl] = useState('');
+
+  // Seleção de Mundo Temático (1 a 10 ou 'all')
+  const [selectedWorldId, setSelectedWorldId] = useState(() => {
+    const completed = profile?.stages_completed || 0;
+    return Math.min(10, Math.max(1, Math.floor(completed / 5) + 1));
+  });
 
   // Fases comemorativas ativas na semana atual (Aniversário, Natal, Páscoa, etc.)
   const activeEventStages = React.useMemo(() => {
@@ -330,9 +338,10 @@ export function Game({ onNavigate }) {
       games_played: newGamesPlayed
     };
 
-    // Crédito das gemas coletadas na partida + bônus de evento se venceu a fase festiva
+    // Crédito das gemas coletadas na partida + bônus de evento/chefão se venceu
     const eventRewardGems = (isWin && isEventStage) ? (stageObj?.rewardGems || 500) : 0;
-    const gemsEarned = Math.round(result.gems || 0) + eventRewardGems;
+    const bossRewardGems = (isWin && stageObj?.isBossStage) ? (stageObj?.rewardGems || 200) : 0;
+    const gemsEarned = Math.round(result.gems || 0) + eventRewardGems + bossRewardGems;
     const portalsVal = Math.round(result.portals || 0);
 
     // Registra progresso nas missões diárias
@@ -447,12 +456,18 @@ export function Game({ onNavigate }) {
         },
         (result) => {
           setGameState('victory');
+          const isBoss = Boolean(stage?.isBossStage);
           const enhancedResult = {
             ...result,
             stage,
             isEvent: Boolean(stage?.isEvent),
+            isBossStage: isBoss,
+            bossName: stage?.bossName,
+            bossRewardGems: isBoss ? (stage?.rewardGems || 200) : 0,
             eventRewardGems: stage?.rewardGems || 0,
-            celebrationTitle: stage?.celebrationTitle || stage?.name
+            celebrationTitle: isBoss
+              ? `👑 CHEFÃO DERROTADO: ${stage?.bossName}!`
+              : (stage?.celebrationTitle || stage?.name)
           };
           setLastGameResult(enhancedResult);
           saveGameResult(enhancedResult, stage);
@@ -909,9 +924,135 @@ export function Game({ onNavigate }) {
                 </div>
               )}
 
-              {/* Grid das Fases Regulares */}
+              {/* Seletor dos 10 Mundos Temáticos e Batalhas de Chefão */}
+              <div className="mb-6 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+                      <Globe className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
+                        MUNDOS & CHEFÕES
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                          10 Mundos · 50 Fases
+                        </span>
+                      </h2>
+                      <p className="text-xs text-slate-400">
+                        Cada mundo possui 5 fases. Na 5ª fase enfrente o Chefão Guardião!
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedWorldId('all')}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${
+                      selectedWorldId === 'all'
+                        ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20 scale-105'
+                        : 'bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60 hover:bg-slate-700/60'
+                    }`}
+                  >
+                    Ver Todas as 50 Fases
+                  </button>
+                </div>
+
+                {/* Abas Horizontais dos Mundos com Scroll Suave */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                  {WORLDS.map((w) => {
+                    const completedStages = profile?.stages_completed || 0;
+                    const isWorldUnlocked = w.stageRange[0] <= Math.max(1, completedStages + 1);
+                    const worldStagesCompleted = Math.max(
+                      0,
+                      Math.min(5, completedStages - w.stageRange[0] + 1)
+                    );
+                    const isWorldCompleted = completedStages >= w.stageRange[1];
+                    const isSelected = selectedWorldId === w.id;
+
+                    return (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => setSelectedWorldId(w.id)}
+                        className={`group relative flex items-center gap-2 px-3 py-2 rounded-2xl border shrink-0 transition-all text-left ${
+                          isSelected
+                            ? 'bg-slate-800/90 border-cyan-400/80 shadow-lg shadow-cyan-500/10 scale-105 ring-1 ring-cyan-400/40'
+                            : !isWorldUnlocked
+                              ? 'bg-slate-900/40 border-slate-800 opacity-60 hover:opacity-80'
+                              : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/50'
+                        }`}
+                      >
+                        <div
+                          className="w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs shadow-inner shrink-0"
+                          style={{
+                            backgroundColor: isSelected ? w.accentColor : '#1e293b',
+                            color: isSelected ? '#020617' : '#94a3b8'
+                          }}
+                        >
+                          {isWorldCompleted ? '✓' : w.id}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`text-xs font-bold whitespace-nowrap ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                              {w.shortName}
+                            </span>
+                            <span className="text-[10px]" title={`Chefão: ${w.bossName}`}>
+                              👑
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <div className="w-12 h-1 bg-slate-950 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-cyan-400 transition-all duration-300"
+                                style={{ width: `${(worldStagesCompleted / 5) * 100}%` }}
+                              />
+                            </div>
+                            <span className="text-[9px] font-mono text-slate-400">
+                              {worldStagesCompleted}/5
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Banner Informativo do Mundo Selecionado */}
+                {selectedWorldId !== 'all' && (() => {
+                  const currentWorld = WORLDS.find((w) => w.id === selectedWorldId) || WORLDS[0];
+                  return (
+                    <div className="p-3.5 rounded-2xl border border-slate-800/80 bg-gradient-to-r from-slate-900/90 via-slate-800/50 to-slate-900/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-black text-white">
+                            {currentWorld.name}
+                          </h3>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            Fases {currentWorld.stageRange[0]} a {currentWorld.stageRange[1]}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {currentWorld.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 self-start sm:self-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
+                        <span>👑</span>
+                        <span>Chefão: {currentWorld.bossName} ({currentWorld.bossTitle})</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Grid das Fases Filtradas por Mundo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {STAGES.map((stage) => {
+              {STAGES.filter((stage) => {
+                if (selectedWorldId === 'all') return true;
+                const world = WORLDS.find((w) => w.id === selectedWorldId);
+                if (!world) return true;
+                return stage.number >= world.stageRange[0] && stage.number <= world.stageRange[1];
+              }).map((stage) => {
                 const completedStages = profile?.stages_completed || 0;
                 // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
                 const isUnlocked = stage.number <= Math.max(1, completedStages + 1);

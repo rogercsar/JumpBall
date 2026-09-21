@@ -177,6 +177,34 @@ export class GameEngine {
     this.thrustSoundTimer = 0;
     this.highestPlatformY = this.height;
 
+    // Sistema de Chefão / Boss Fight
+    this.isBossFight = Boolean(this.stage.isBossStage);
+    if (this.isBossFight) {
+      this.boss = {
+        name: this.stage.bossName || 'Guardião Titânico',
+        title: this.stage.bossTitle || 'Soberano das Alturas',
+        maxHp: this.stage.bossHP || 6,
+        hp: this.stage.bossHP || 6,
+        x: this.width / 2,
+        y: 105,
+        radius: 36,
+        color: this.stage.bossColor || '#f59e0b',
+        glow: this.stage.bossGlow || '#fbbf24',
+        floatAngle: 0,
+        attackTimer: 2.2,
+        hasParallelUniverseAttack: Boolean(this.stage.hasParallelUniverseAttack),
+        parallelTriggered: false,
+        isParallelUniverse: false,
+        parallelTimer: 0,
+        hitFlash: 0,
+        projectiles: []
+      };
+    } else {
+      this.boss = null;
+    }
+    this.playerMissiles = [];
+    this.quantumCrystal = null;
+
     // Configuração de Física da Fase - Salto Normal Reduzido para maior controle e precisão
     this.gravity = stage.gravity || 0.34;
     const baseJump = stage.jumpForce || -11.8;
@@ -577,6 +605,12 @@ export class GameEngine {
       vx = Math.random() > 0.5 ? 2 : -2;
     }
 
+    // Bateria de Energia anti-Chefão na Boss Fight
+    let hasBossBattery = false;
+    if (this.isBossFight && type === 'standard' && Math.random() < 0.32) {
+      hasBossBattery = true;
+    }
+
     const platform = {
       x: pX,
       y: y,
@@ -586,12 +620,15 @@ export class GameEngine {
       vx: vx,
       broken: false,
       opacity: 1,
-      hasSpikes: false
+      hasSpikes: false,
+      hasBossBattery: hasBossBattery,
+      batteryActive: hasBossBattery,
+      batteryCooldown: 0
     };
 
     // Chance de espinhos na plataforma baseada no tema ou desafios da fase
     const spikeThemes = ['forest', 'autumn', 'spring', 'wood', 'rock', 'iron', 'volcano', 'steampunk', 'ninja', 'medieval', 'darkmatter'];
-    if (type === 'standard' && (spikeThemes.includes(this.stage.theme) || hazards.includes('spikes'))) {
+    if (type === 'standard' && !hasBossBattery && (spikeThemes.includes(this.stage.theme) || hazards.includes('spikes'))) {
       if (Math.random() < 0.15) {
         platform.hasSpikes = true;
       }
@@ -920,6 +957,24 @@ export class GameEngine {
           this.ball.y = p.y - this.ball.radius;
           this.jumpsCount++;
 
+          // Disparo de míssil contra o Chefão ao saltar em plataforma com bateria ativa
+          if (this.isBossFight && p.hasBossBattery && p.batteryActive) {
+            p.batteryActive = false;
+            p.batteryCooldown = 3.5;
+            this.playerMissiles.push({
+              x: this.ball.x,
+              y: p.y - 14,
+              vx: (this.ball.vx * 0.22) + (Math.random() - 0.5) * 1.6,
+              vy: -15,
+              radius: 6,
+              color: '#38bdf8',
+              glow: '#00f0ff'
+            });
+            soundEngine.playSpring();
+            this.particles.emitSuperJumpBurst(this.ball.x, p.y, '#38bdf8');
+            this.triggerCameraShake(4, 100);
+          }
+
           let springBoostMultiplier = 1.0;
           if (this.activePowerUps.springBoost > 0) {
             springBoostMultiplier = 1.45;
@@ -969,6 +1024,19 @@ export class GameEngine {
           p.vx = -Math.abs(p.vx);
         }
       }
+    }
+
+    // Recarga de Baterias do Chefão e Atualização da Luta de Boss
+    if (this.isBossFight) {
+      for (const p of this.platforms) {
+        if (p.hasBossBattery && !p.batteryActive) {
+          p.batteryCooldown -= dt * 0.0166;
+          if (p.batteryCooldown <= 0) {
+            p.batteryActive = true;
+          }
+        }
+      }
+      this.updateBoss(dt);
     }
 
     // 6. Coleta de Gemas (Atração por Ímã ou Mochila)
@@ -1198,13 +1266,17 @@ export class GameEngine {
 
     // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada - apenas no modo normal ou corrida)
     if (!this.isEndless) {
-      const goalY = -this.stage.targetHeight + (this.height - 120);
-      if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
-        if (this.mode === 'race_pvp' && this.onPvPFinish) {
-          this.onPvPFinish('win');
+      if (this.isBossFight) {
+        // Na Boss Fight, a vitória ocorre ao zerar o HP do Chefão (tratado em updateBoss/handleBossDefeat)
+      } else {
+        const goalY = -this.stage.targetHeight + (this.height - 120);
+        if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
+          if (this.mode === 'race_pvp' && this.onPvPFinish) {
+            this.onPvPFinish('win');
+          }
+          this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
+          return;
         }
-        this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
-        return;
       }
     }
 
@@ -2496,6 +2568,36 @@ export class GameEngine {
         }
       }
 
+      // Desenhar Bateria de Energia do Chefão acoplada à plataforma
+      if (p.hasBossBattery) {
+        const battX = p.x + p.width / 2;
+        const battY = screenY;
+        const isActive = p.batteryActive;
+
+        // Suporte metálico
+        ctx.fillStyle = isActive ? '#0284c7' : '#334155';
+        ctx.strokeStyle = isActive ? '#38bdf8' : '#64748b';
+        ctx.lineWidth = 1.5;
+        this.roundRect(ctx, battX - 12, battY - 8, 24, 8, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Núcleo energético pulsante
+        ctx.fillStyle = isActive ? '#38bdf8' : '#475569';
+        ctx.shadowColor = isActive ? '#00f0ff' : 'transparent';
+        ctx.shadowBlur = isActive ? 10 : 0;
+        ctx.beginPath();
+        ctx.arc(battX, battY - 9, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isActive) {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(battX, battY - 9, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       ctx.restore();
     }
 
@@ -3074,6 +3176,12 @@ export class GameEngine {
     // 6.9. HUD de Power-Ups Ativos
     this.drawPowerUpsHUD(ctx);
 
+    // 6.95. Batalha de Chefão: Efeitos, Projéteis, Universo Paralelo e Barra de Vida
+    if (this.isBossFight) {
+      this.drawBossBattle(ctx);
+      this.drawBossHPBar(ctx);
+    }
+
     ctx.restore(); // Fecha o ctx.save() do Camera Shake
   }
 
@@ -3223,6 +3331,392 @@ export class GameEngine {
 
       startY += 26;
     }
+    ctx.restore();
+  }
+
+  // ==========================================
+  // SISTEMA DE CHEFÃO (BOSS FIGHT)
+  // ==========================================
+
+  updateBoss(dt) {
+    if (!this.boss || this.boss.hp <= 0 || this.finished) return;
+
+    // 1. Movimento flutuante lateral do Chefão no topo da tela
+    this.boss.floatAngle += dt * 0.035;
+    this.boss.x = (this.width / 2) + Math.sin(this.boss.floatAngle) * (this.width * 0.32);
+
+    if (this.boss.hitFlash > 0) {
+      this.boss.hitFlash--;
+    }
+
+    // 2. Ataque do Universo Paralelo (Fase 40 / Fase 50)
+    if (this.boss.hasParallelUniverseAttack && !this.boss.parallelTriggered && this.boss.hp <= Math.ceil(this.boss.maxHp / 2)) {
+      this.boss.parallelTriggered = true;
+      this.boss.isParallelUniverse = true;
+      this.boss.parallelTimer = 9.0;
+      this.gravity = this.stage.gravity * 0.55; // Redução gravitacional quântica
+      this.quantumCrystal = {
+        x: Math.max(60, Math.min(this.width - 60, this.width / 2 + (Math.random() - 0.5) * (this.width * 0.5))),
+        y: this.cameraY + 240,
+        radius: 14,
+        pulse: 0,
+        collected: false
+      };
+      this.triggerCameraShake(12, 320);
+      soundEngine.playPortalTravel();
+    }
+
+    // 3. Gerenciamento do Universo Paralelo Ativo
+    if (this.boss.isParallelUniverse) {
+      this.boss.parallelTimer -= dt * 0.0166;
+      if (this.quantumCrystal && !this.quantumCrystal.collected) {
+        this.quantumCrystal.pulse += dt * 0.08;
+
+        // Colisão da bola com o Cristal Quântico de Estabilização
+        const distToCrystal = Math.hypot(this.ball.x - this.quantumCrystal.x, this.ball.y - this.quantumCrystal.y);
+        if (distToCrystal < this.ball.radius + this.quantumCrystal.radius) {
+          this.quantumCrystal.collected = true;
+          this.boss.isParallelUniverse = false;
+          this.gravity = this.stage.gravity; // Restaura gravidade original
+          this.boss.hp = Math.max(0, this.boss.hp - 2); // Dano massivo no Boss!
+          this.boss.hitFlash = 20;
+          this.triggerCameraShake(15, 350);
+          soundEngine.playVictory();
+          this.particles.emitSuperJumpBurst(this.quantumCrystal.x, this.quantumCrystal.y, '#c084fc');
+          this.particles.emit(this.quantumCrystal.x, this.quantumCrystal.y, 30, {
+            color: '#a855f7',
+            size: 5,
+            speed: 5,
+            life: 1.0
+          });
+
+          if (this.boss.hp <= 0) {
+            this.handleBossDefeat();
+            return;
+          }
+        }
+      }
+
+      if (this.boss.parallelTimer <= 0) {
+        this.boss.isParallelUniverse = false;
+        this.gravity = this.stage.gravity;
+      }
+    }
+
+    // 4. Ataques periódicos com orbes de energia disparados para baixo
+    this.boss.attackTimer -= dt * 0.0166;
+    if (this.boss.attackTimer <= 0) {
+      this.boss.attackTimer = Math.random() * 1.5 + 1.8;
+      const targetSpeedY = 3.6;
+      const dirX = (this.ball.x - this.boss.x) * 0.008;
+      this.boss.projectiles.push({
+        x: this.boss.x,
+        y: this.cameraY + this.boss.y + 24,
+        vx: Math.max(-2, Math.min(2, dirX)),
+        vy: targetSpeedY,
+        radius: 8,
+        color: this.boss.glow
+      });
+      soundEngine.playHazardHit();
+    }
+
+    // 5. Atualizar projéteis do Chefão
+    for (let i = this.boss.projectiles.length - 1; i >= 0; i--) {
+      const proj = this.boss.projectiles[i];
+      proj.x += proj.vx * dt;
+      proj.y += proj.vy * dt;
+
+      // Colisão com a bola do jogador
+      const dist = Math.hypot(proj.x - this.ball.x, proj.y - this.ball.y);
+      if (dist < this.ball.radius + proj.radius) {
+        this.takeDamage('boss_attack');
+        this.boss.projectiles.splice(i, 1);
+        continue;
+      }
+
+      // Remover se passou do rodapé da tela
+      if (proj.y > this.cameraY + this.height + 40) {
+        this.boss.projectiles.splice(i, 1);
+      }
+    }
+
+    // 6. Atualizar Mísseis disparados pelo Jogador
+    const bossWorldY = this.cameraY + this.boss.y;
+    for (let i = this.playerMissiles.length - 1; i >= 0; i--) {
+      const m = this.playerMissiles[i];
+      m.x += m.vx * dt;
+      m.y += m.vy * dt;
+
+      // Rastro de partículas do míssil
+      if (Math.random() < 0.4) {
+        this.particles.emit(m.x, m.y, 1, {
+          color: m.color,
+          size: 2.5,
+          speed: 1,
+          life: 0.25
+        });
+      }
+
+      // Colisão do míssil com o Chefão
+      const hitDist = Math.hypot(m.x - this.boss.x, m.y - bossWorldY);
+      if (hitDist < this.boss.radius + m.radius) {
+        this.playerMissiles.splice(i, 1);
+        this.boss.hp = Math.max(0, this.boss.hp - 1);
+        this.boss.hitFlash = 12;
+        this.triggerCameraShake(7, 180);
+        soundEngine.playHazardHit();
+        this.particles.emitJumpBurst(this.boss.x, bossWorldY, this.boss.glow);
+
+        if (this.boss.hp <= 0) {
+          this.handleBossDefeat();
+          return;
+        }
+        continue;
+      }
+
+      // Remover míssil se subiu muito acima da câmera
+      if (m.y < this.cameraY - 100) {
+        this.playerMissiles.splice(i, 1);
+      }
+    }
+  }
+
+  handleBossDefeat() {
+    if (this.bossDefeatedHandled) return;
+    this.bossDefeatedHandled = true;
+    const bossWorldY = this.cameraY + this.boss.y;
+
+    // Explosão massiva de partículas e sfx
+    this.particles.emit(this.boss.x, bossWorldY, 45, {
+      color: this.boss.glow,
+      size: 6,
+      speed: 6,
+      life: 1.4
+    });
+    this.particles.emitSuperJumpBurst(this.boss.x, bossWorldY, '#facc15');
+    this.triggerCameraShake(18, 450);
+
+    // Recompensa de gemas bônus
+    if (this.stage.rewardGems) {
+      this.gemsCollected += this.stage.rewardGems;
+    }
+
+    setTimeout(() => {
+      this.finishGame('completed', { bossDefeated: true, bossName: this.boss.name });
+    }, 400);
+  }
+
+  drawBossBattle(ctx) {
+    if (!this.isBossFight || !this.boss) return;
+
+    // 1. Efeito Cósmico de Universo Paralelo
+    if (this.boss.isParallelUniverse) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(24, 7, 44, 0.42)';
+      ctx.fillRect(0, 0, this.width, this.height);
+
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.22)';
+      ctx.lineWidth = 1;
+      const t = Date.now() * 0.001;
+      for (let y = 0; y < this.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + Math.sin(t + y * 0.02) * 8);
+        ctx.lineTo(this.width, y + Math.cos(t + y * 0.02) * 8);
+        ctx.stroke();
+      }
+
+      // Faixa de Alerta Quântico no Topo
+      ctx.fillStyle = 'rgba(15, 5, 29, 0.85)';
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 1.5;
+      this.roundRect(ctx, 20, 52, this.width - 40, 26, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f0abfc';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const remainingSec = Math.max(0, this.boss.parallelTimer).toFixed(1);
+      ctx.fillText(`🌌 UNIVERSO PARALELO: COLETE O CRISTAL! (${remainingSec}s)`, this.width / 2, 65);
+      ctx.restore();
+    }
+
+    // 2. Desenhar Cristal de Estabilização Quântica
+    if (this.quantumCrystal && !this.quantumCrystal.collected) {
+      const crystalScreenY = this.quantumCrystal.y - this.cameraY;
+      if (crystalScreenY > -30 && crystalScreenY < this.height + 30) {
+        ctx.save();
+        const pulseScale = 1 + Math.sin(this.quantumCrystal.pulse) * 0.15;
+        ctx.translate(this.quantumCrystal.x, crystalScreenY);
+        ctx.scale(pulseScale, pulseScale);
+
+        ctx.shadowColor = '#c084fc';
+        ctx.shadowBlur = 16;
+
+        ctx.fillStyle = '#a855f7';
+        ctx.strokeStyle = '#f0abfc';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -this.quantumCrystal.radius * 1.3);
+        ctx.lineTo(this.quantumCrystal.radius, 0);
+        ctx.lineTo(0, this.quantumCrystal.radius * 1.3);
+        ctx.lineTo(-this.quantumCrystal.radius, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 3. Desenhar Mísseis do Jogador
+    for (const m of this.playerMissiles) {
+      const mScreenY = m.y - this.cameraY;
+      if (mScreenY < -20 || mScreenY > this.height + 20) continue;
+
+      ctx.save();
+      ctx.shadowColor = m.glow;
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = m.color;
+      ctx.beginPath();
+      ctx.arc(m.x, mScreenY, m.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(m.x, mScreenY, m.radius * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 4. Desenhar Projéteis do Chefão
+    for (const proj of this.boss.projectiles) {
+      const projScreenY = proj.y - this.cameraY;
+      if (projScreenY < -20 || projScreenY > this.height + 20) continue;
+
+      ctx.save();
+      ctx.shadowColor = proj.color;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = proj.color;
+      ctx.beginPath();
+      ctx.arc(proj.x, projScreenY, proj.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 5. Desenhar o Chefão (Fixado no topo em coordenadas de tela)
+    const bossScreenY = this.boss.y;
+    ctx.save();
+    ctx.translate(this.boss.x, bossScreenY);
+
+    if (this.boss.hitFlash > 0) {
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 24;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, this.boss.radius * 1.08, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.shadowColor = this.boss.glow;
+      ctx.shadowBlur = 20;
+
+      // Anel de escudo externo
+      ctx.strokeStyle = this.boss.glow;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, this.boss.radius + 6, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Núcleo do Boss com gradiente
+      const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, this.boss.radius);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.35, this.boss.glow);
+      grad.addColorStop(1, this.boss.color);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, this.boss.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Olhos do Chefão
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.arc(-10, -4, 4, 0, Math.PI * 2);
+      ctx.arc(10, -4, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(-10, -3, 2, 0, Math.PI * 2);
+      ctx.arc(10, -3, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Coroa sobre a cabeça
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('👑', 0, -this.boss.radius - 8);
+    }
+
+    ctx.restore();
+  }
+
+  drawBossHPBar(ctx) {
+    if (!this.isBossFight || !this.boss) return;
+
+    ctx.save();
+    const barW = 220;
+    const barH = 12;
+    const barX = (this.width - barW) / 2;
+    const barY = 22;
+
+    // Fundo da Barra
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    ctx.strokeStyle = this.boss.glow;
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = this.boss.glow;
+    ctx.shadowBlur = 10;
+    this.roundRect(ctx, barX, barY, barW, barH, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    // Preenchimento de HP
+    const hpRatio = Math.max(0, this.boss.hp / this.boss.maxHp);
+    if (hpRatio > 0) {
+      ctx.shadowBlur = 0;
+      const fillW = Math.max(8, (barW - 4) * hpRatio);
+      const hpGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+      hpGrad.addColorStop(0, '#ef4444');
+      hpGrad.addColorStop(0.5, '#f59e0b');
+      hpGrad.addColorStop(1, '#10b981');
+      ctx.fillStyle = hpGrad;
+      this.roundRect(ctx, barX + 2, barY + 2, fillW, barH - 4, 4);
+      ctx.fill();
+    }
+
+    // Título do Boss acima da barra
+    ctx.shadowBlur = 4;
+    ctx.shadowColor = '#000000';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`👑 ${this.boss.name} — ${this.boss.title}`, this.width / 2, barY - 6);
+
+    // Texto de HP
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.boss.hp} / ${this.boss.maxHp} HP`, this.width / 2, barY + barH + 11);
+
     ctx.restore();
   }
 
