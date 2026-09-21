@@ -173,7 +173,7 @@ export function StageCard({ stage, isUnlocked, isCompleted, onSelect }) {
       <div className="relative z-10 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
         {isBoss ? (
           <div className="flex items-center gap-1.5 text-amber-300 font-bold text-[11px]">
-            <span>⚔️ Vida: {stage.bossHP} HP</span>
+            <span>⚔️ Subida Infinita · {stage.bossHP} HP</span>
           </div>
         ) : (
           <div className="flex items-center gap-1 text-cyan-300 font-semibold">

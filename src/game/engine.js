@@ -960,7 +960,8 @@ export class GameEngine {
           // Disparo de míssil contra o Chefão ao saltar em plataforma com bateria ativa
           if (this.isBossFight && p.hasBossBattery && p.batteryActive) {
             p.batteryActive = false;
-            p.batteryCooldown = 3.5;
+            p.maxBatteryCooldown = 3.0;
+            p.batteryCooldown = 3.0;
             this.playerMissiles.push({
               x: this.ball.x,
               y: p.y - 14,
@@ -1026,13 +1027,22 @@ export class GameEngine {
       }
     }
 
-    // Recarga de Baterias do Chefão e Atualização da Luta de Boss
+    // Recarga de Baterias / Armas anti-Chefão e Atualização da Luta de Boss
     if (this.isBossFight) {
       for (const p of this.platforms) {
         if (p.hasBossBattery && !p.batteryActive) {
-          p.batteryCooldown -= dt * 0.0166;
+          p.batteryCooldown -= dt * (1 / 60);
           if (p.batteryCooldown <= 0) {
             p.batteryActive = true;
+            p.batteryCooldown = 0;
+            // Efeito visual e sonoro de arma recarregada
+            this.particles.emit(p.x + p.width / 2, p.y - 10, 6, {
+              color: '#38bdf8',
+              size: 2.8,
+              speed: 2,
+              life: 0.4
+            });
+            soundEngine.playJetpackPickup();
           }
         }
       }
@@ -1221,8 +1231,8 @@ export class GameEngine {
       this.cameraY += (targetY - this.cameraY) * 0.12 * dt;
     }
 
-    // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera
-    const genAheadDistance = this.isEndless ? 650 : 400;
+    // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera (Infinita no Modo Infinito e Boss Fight)
+    const genAheadDistance = (this.isEndless || this.isBossFight) ? 650 : 400;
     while (this.highestPlatformY > this.cameraY - genAheadDistance) {
       this.highestPlatformY -= Math.floor(Math.random() * 28 + 52);
       this.generatePlatformAt(this.highestPlatformY);
@@ -2568,33 +2578,59 @@ export class GameEngine {
         }
       }
 
-      // Desenhar Bateria de Energia do Chefão acoplada à plataforma
+      // Desenhar Bateria de Energia / Arma anti-Chefão acoplada à plataforma
       if (p.hasBossBattery) {
         const battX = p.x + p.width / 2;
         const battY = screenY;
         const isActive = p.batteryActive;
 
-        // Suporte metálico
-        ctx.fillStyle = isActive ? '#0284c7' : '#334155';
-        ctx.strokeStyle = isActive ? '#38bdf8' : '#64748b';
-        ctx.lineWidth = 1.5;
-        this.roundRect(ctx, battX - 12, battY - 8, 24, 8, 3);
+        // Suporte metálico da arma
+        ctx.fillStyle = isActive ? '#0284c7' : '#1e293b';
+        ctx.strokeStyle = isActive ? '#38bdf8' : '#475569';
+        ctx.lineWidth = 1.6;
+        this.roundRect(ctx, battX - 14, battY - 8, 28, 8, 3);
         ctx.fill();
         ctx.stroke();
 
-        // Núcleo energético pulsante
-        ctx.fillStyle = isActive ? '#38bdf8' : '#475569';
-        ctx.shadowColor = isActive ? '#00f0ff' : 'transparent';
-        ctx.shadowBlur = isActive ? 10 : 0;
-        ctx.beginPath();
-        ctx.arc(battX, battY - 9, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-
         if (isActive) {
+          // Arma Pronta: cano emissor e núcleo pulsante
+          ctx.fillStyle = '#38bdf8';
+          ctx.shadowColor = '#00f0ff';
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(battX, battY - 9, 5, 0, Math.PI * 2);
+          ctx.fill();
+
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.arc(battX, battY - 9, 2, 0, Math.PI * 2);
+          ctx.arc(battX, battY - 9, 2.2, 0, Math.PI * 2);
           ctx.fill();
+
+          // Indicador "PRONTA!"
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 8px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('PRONTA! ⚡', battX, battY - 14);
+        } else {
+          // Barra de progresso de recarga em tempo real
+          const maxCD = p.maxBatteryCooldown || 3.0;
+          const rechargeRatio = Math.max(0, Math.min(1, 1 - (p.batteryCooldown / maxCD)));
+
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#0f172a';
+          this.roundRect(ctx, battX - 12, battY - 7, 24, 6, 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#0284c7';
+          this.roundRect(ctx, battX - 12, battY - 7, 24 * rechargeRatio, 6, 2);
+          ctx.fill();
+
+          // Texto com contagem regressiva de recarga
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 8px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`RECARGA ${(Math.max(0.1, p.batteryCooldown)).toFixed(1)}s`, battX, battY - 14);
         }
       }
 
@@ -3136,10 +3172,10 @@ export class GameEngine {
       }
     }
 
-    // 6. Meta de Altura / Linha de Chegada
+    // 6. Meta de Altura / Linha de Chegada (Ocultada no Modo Infinito e Boss Fight, onde a subida é sem fim)
     const goalY = -this.stage.targetHeight + (this.height - 120);
     const goalScreenY = goalY - this.cameraY;
-    if (goalScreenY > -60 && goalScreenY < this.height + 60) {
+    if (!this.isEndless && !this.isBossFight && goalScreenY > -60 && goalScreenY < this.height + 60) {
       ctx.save();
       ctx.shadowColor = '#facc15';
       ctx.shadowBlur = this.isMobile ? 0 : 14;
