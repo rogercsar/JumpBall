@@ -603,6 +603,7 @@ export class GameEngine {
       this.ball.vy = 0;
       this.cameraX = 0;
       this.horizontalFurthestX = 80;
+      this.lastHorizontalPlatformY = this.height - 180;
       // Gerar plataformas iniciais à frente
       let curX = 260;
       while (curX < this.targetDistance + 600) {
@@ -779,40 +780,69 @@ export class GameEngine {
   // Gera plataformas para o percurso horizontal
   generateHorizontalPlatformAt(x) {
     const hazards = this.stage.hazards || [];
-    const pWidth = Math.floor(Math.random() * 40 + 55);
-    // Altura das plataformas varia para criar parkour interessante
-    const pY = Math.floor(
-      Math.random() * (this.height - 200 - (this.height - 340)) + (this.height - 340)
-    );
+    const pWidth = Math.floor(Math.random() * 35 + 65); // 65px a 100px para ótima jogabilidade
+
+    // Variação de altura gradual e suave para garantir que todos os saltos sejam alcançáveis
+    if (!this.lastHorizontalPlatformY) {
+      this.lastHorizontalPlatformY = this.height - 180;
+    }
+    const deltaY = Math.floor(Math.random() * 80 - 40); // oscilação confortável de -40px a +40px
+    const pY = Math.max(this.height - 330, Math.min(this.height - 140, this.lastHorizontalPlatformY + deltaY));
+    this.lastHorizontalPlatformY = pY;
 
     let type = 'standard';
     let vx = 0;
+    let moveType = null;
+    let moveVX = 0;
+    let moveVY = 0;
+    let moveMinX = x;
+    let moveMaxX = x;
+    let moveMinY = pY;
+    let moveMaxY = pY;
+
     const rand = Math.random();
-    if (rand < 0.18 && hazards.includes('moving')) {
+    if (rand < 0.32 && (hazards.includes('moving') || true)) {
       type = 'moving';
-      // Plataformas móveis se movem verticalmente no modo horizontal
-      vx = 0;
-      // usamos vy para mover verticalmente — guardamos no campo vx por compat.
-    } else if (rand < 0.32 && hazards.includes('fragile')) {
+      // 50% de chance de mover na HORIZONTAL (esquerda/direita) e 50% na VERTICAL (cima/baixo)
+      const isHorizontalMove = Math.random() < 0.5;
+      const speed = (Math.random() * 0.5 + 1.2) * (this.stage.speedFactor || 1);
+
+      if (isHorizontalMove) {
+        moveType = 'horizontal';
+        moveVX = (Math.random() > 0.5 ? 1 : -1) * speed;
+        const rangeX = Math.floor(Math.random() * 20 + 45); // oscilação de 45px a 65px
+        moveMinX = x - rangeX;
+        moveMaxX = x + rangeX;
+      } else {
+        moveType = 'vertical';
+        moveVY = (Math.random() > 0.5 ? 1 : -1) * speed;
+        const rangeY = Math.floor(Math.random() * 20 + 45); // oscilação de 45px a 65px
+        moveMinY = Math.max(this.height - 340, pY - rangeY);
+        moveMaxY = Math.min(this.height - 130, pY + rangeY);
+      }
+    } else if (rand < 0.44 && hazards.includes('fragile')) {
       type = 'fragile';
-    } else if (rand < 0.44 && hazards.includes('springs')) {
+    } else if (rand < 0.56 && hazards.includes('springs')) {
       type = 'spring';
-    } else if (rand < 0.56 && hazards.includes('conveyor')) {
+    } else if (rand < 0.68 && hazards.includes('conveyor')) {
       type = 'conveyor';
-      vx = Math.random() > 0.5 ? 2 : -2;
+      vx = Math.random() > 0.5 ? 2.2 : -2.2;
     }
 
     const platform = {
       x: x,
       y: pY,
       width: pWidth,
-      height: 15,
+      height: 16,
       type: type,
       vx: vx,
-      // Plataformas móveis horizontais se movem verticalmente para criar desafio de parkour
-      moveVY: type === 'moving' ? (Math.random() > 0.5 ? 1.2 : -1.2) * (this.stage.speedFactor || 1) : 0,
-      moveMinY: this.height - 350,
-      moveMaxY: this.height - 100,
+      moveType: moveType,
+      moveVX: moveVX,
+      moveMinX: moveMinX,
+      moveMaxX: moveMaxX,
+      moveVY: moveVY,
+      moveMinY: moveMinY,
+      moveMaxY: moveMaxY,
       broken: false,
       opacity: 1,
       hasSpikes: false,
@@ -824,7 +854,7 @@ export class GameEngine {
     // Espinhos temáticos
     const spikeThemes = ['steampunk', 'iron', 'rock', 'volcano'];
     if (type === 'standard' && (spikeThemes.includes(this.stage.theme) || hazards.includes('spikes'))) {
-      if (Math.random() < 0.12) platform.hasSpikes = true;
+      if (Math.random() < 0.10) platform.hasSpikes = true;
     }
 
     this.platforms.push(platform);
@@ -1196,6 +1226,8 @@ export class GameEngine {
 
             if (p.type === 'conveyor') {
               this.ball.vx += p.vx * 1.8;
+            } else if (p.moveVX) {
+              this.ball.vx += p.moveVX * 0.45;
             }
           }
           break;
@@ -1203,17 +1235,19 @@ export class GameEngine {
       }
     }
 
-    // 5. Atualizar Plataformas Móveis (Afetado pelo Slowmo)
-    const slowmoPlatMult = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
-    for (const p of this.platforms) {
-      if (p.type === 'moving' && !p.broken) {
-        p.x += p.vx * dt * slowmoPlatMult;
-        if (p.x <= 10) {
-          p.x = 10;
-          p.vx = Math.abs(p.vx);
-        } else if (p.x + p.width >= this.width - 10) {
-          p.x = this.width - 10 - p.width;
-          p.vx = -Math.abs(p.vx);
+    // 5. Atualizar Plataformas Móveis (Afetado pelo Slowmo - apenas no modo vertical)
+    if (!this.isHorizontal) {
+      const slowmoPlatMult = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
+      for (const p of this.platforms) {
+        if (p.type === 'moving' && !p.broken) {
+          p.x += p.vx * dt * slowmoPlatMult;
+          if (p.x <= 10) {
+            p.x = 10;
+            p.vx = Math.abs(p.vx);
+          } else if (p.x + p.width >= this.width - 10) {
+            p.x = this.width - 10 - p.width;
+            p.vx = -Math.abs(p.vx);
+          }
         }
       }
     }
@@ -1475,13 +1509,23 @@ export class GameEngine {
         this.hasPendingScoreUpdate = true;
       }
 
-      // Plataformas móveis verticais no modo horizontal
+      // Plataformas móveis no modo horizontal (verticais e horizontais)
       const slowmoPlatMult2 = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
       for (const p of this.platforms) {
-        if (p.moveVY && !p.broken) {
+        if (p.broken) continue;
+
+        // Movimento vertical (sobe e desce)
+        if (p.moveVY) {
           p.y += p.moveVY * dt * slowmoPlatMult2;
           if (p.y <= p.moveMinY) { p.y = p.moveMinY; p.moveVY = Math.abs(p.moveVY); }
           if (p.y >= p.moveMaxY) { p.y = p.moveMaxY; p.moveVY = -Math.abs(p.moveVY); }
+        }
+
+        // Movimento horizontal (esquerda e direita)
+        if (p.moveVX) {
+          p.x += p.moveVX * dt * slowmoPlatMult2;
+          if (p.x <= p.moveMinX) { p.x = p.moveMinX; p.moveVX = Math.abs(p.moveVX); }
+          if (p.x >= p.moveMaxX) { p.x = p.moveMaxX; p.moveVX = -Math.abs(p.moveVX); }
         }
       }
 
@@ -2880,20 +2924,86 @@ export class GameEngine {
         ctx.fillText(`${arrowDir} ${arrowDir} ${arrowDir}`, p.x + p.width * 0.2, screenY + 11);
       } else {
         // Plataforma Padrão ou Móvel
-        ctx.fillStyle = this.stage.platformColor;
-        ctx.strokeStyle = this.stage.platformBorder;
+        const isMoving = p.type === 'moving';
+        if (isMoving && this.isHorizontal) {
+          // Plataforma móvel no modo horizontal: azul ciano para H, âmbar para V
+          const isHMove = Boolean(p.moveVX);
+          // Pulso de brilho animado
+          const pulseBright = (Math.sin(Date.now() * 0.006 + p.x * 0.01) + 1) * 0.5;
+          if (isHMove) {
+            ctx.fillStyle = `hsl(199, 95%, ${20 + pulseBright * 12}%)`; // ciano escuro pulsante
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.7 + pulseBright * 0.3})`;
+          } else {
+            ctx.fillStyle = `hsl(37, 95%, ${18 + pulseBright * 10}%)`; // âmbar escuro pulsante
+            ctx.strokeStyle = `rgba(251, 191, 36, ${0.7 + pulseBright * 0.3})`;
+          }
+        } else {
+          ctx.fillStyle = this.stage.platformColor;
+          ctx.strokeStyle = this.stage.platformBorder;
+        }
         ctx.lineWidth = 2;
         this.roundRect(ctx, p.x, screenY, p.width, p.height, 6);
         ctx.fill();
         ctx.stroke();
 
-        if (p.type === 'moving') {
-          // Indicador de movimento nas pontas
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(p.x + 8, screenY + p.height / 2, 2.5, 0, Math.PI * 2);
-          ctx.arc(p.x + p.width - 8, screenY + p.height / 2, 2.5, 0, Math.PI * 2);
-          ctx.fill();
+        if (isMoving) {
+          if (this.isHorizontal) {
+            // Indicador de direção de alta legibilidade no modo horizontal
+            ctx.save();
+            const midX = p.x + p.width / 2;
+            const midY = screenY + p.height / 2;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const arrowPulse = (Math.sin(Date.now() * 0.008 + p.x * 0.02) + 1) * 0.5;
+
+            if (p.moveVX) {
+              // Movimento Horizontal: setas ciano animadas
+              const arrowAlpha = 0.6 + arrowPulse * 0.4;
+              ctx.fillStyle = `rgba(255, 255, 255, ${arrowAlpha})`;
+              ctx.shadowColor = '#38bdf8';
+              ctx.shadowBlur = this.isMobile ? 0 : (6 + arrowPulse * 8);
+              ctx.font = `bold ${10 + Math.round(arrowPulse * 2)}px sans-serif`;
+              // Direção real da seta com base na velocidade
+              const arrowText = p.moveVX > 0 ? '► ► ►' : '◄ ◄ ◄';
+              ctx.fillText(arrowText, midX, midY);
+              // Label de tipo
+              ctx.shadowBlur = 0;
+              ctx.font = 'bold 7px monospace';
+              ctx.fillStyle = '#7dd3fc';
+              ctx.fillText('H', midX, screenY - 5);
+            } else {
+              // Movimento Vertical: setas âmbar animadas
+              const arrowAlpha = 0.6 + arrowPulse * 0.4;
+              ctx.fillStyle = `rgba(255, 255, 255, ${arrowAlpha})`;
+              ctx.shadowColor = '#fbbf24';
+              ctx.shadowBlur = this.isMobile ? 0 : (6 + arrowPulse * 8);
+              ctx.font = `bold ${10 + Math.round(arrowPulse * 2)}px sans-serif`;
+              // Direção real da seta com base na velocidade
+              const arrowText = p.moveVY > 0 ? '▼ ▼ ▼' : '▲ ▲ ▲';
+              ctx.fillText(arrowText, midX, midY);
+              // Label de tipo
+              ctx.shadowBlur = 0;
+              ctx.font = 'bold 7px monospace';
+              ctx.fillStyle = '#fde68a';
+              ctx.fillText('V', midX, screenY - 5);
+            }
+
+            // Esferas de luz nas pontas da plataforma (coloridas por tipo)
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = p.moveVX ? '#38bdf8' : '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(p.x + 5, midY, 3, 0, Math.PI * 2);
+            ctx.arc(p.x + p.width - 5, midY, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          } else {
+            // Indicador de movimento nas pontas (modo vertical)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(p.x + 8, screenY + p.height / 2, 2.5, 0, Math.PI * 2);
+            ctx.arc(p.x + p.width - 8, screenY + p.height / 2, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
 
@@ -3127,8 +3237,154 @@ export class GameEngine {
     // 4.5. Desenhar Inimigos e Perigos Ambientais da Cena
     this.drawEnvironmentalHazards(ctx);
 
-    // 4.7. Linha de chegada horizontal (desenhada em coordenadas de mundo antes de restaurar o translate)
+    // 4.7. Elementos do Modo Horizontal (Checkpoints, Perigos e Linha de Chegada)
     if (this.isHorizontal) {
+      // 4.7.1. Marcadores de Metragem / Checkpoints a cada 500m
+      for (let cp = 500; cp < this.targetDistance; cp += 500) {
+        const cpX = 80 + cp;
+        const cpScreenX = cpX - this.cameraX;
+        if (cpScreenX < -40 || cpScreenX > this.width + 40) continue;
+
+        ctx.save();
+        // Linha guia vertical de neon do checkpoint
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(cpX, this.height - 350);
+        ctx.lineTo(cpX, this.height - 60);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Bandeirinha holográfica flutuante
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        this.roundRect(ctx, cpX - 32, this.height - 355, 64, 22, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`🚩 ${cp >= 1000 ? (cp / 1000).toFixed(0) + 'km' : cp + 'm'}`, cpX, this.height - 344);
+        ctx.restore();
+      }
+
+      // 4.7.2. Zona de Perigo Inferior Visual (Mar na Nau ou Caldeiras na Fábrica)
+      // Nota: estamos dentro do ctx.translate(-cameraX), então usamos coordenadas de MUNDO (+ cameraX)
+      const hazardY = this.height - 42;
+      const worldLeft = this.cameraX;
+      const worldRight = this.cameraX + this.width + 20;
+      ctx.save();
+      const isShip = (this.stage.theme || '').includes('ship') || (this.stage.theme || '').includes('ocean');
+      if (isShip) {
+        // Piso do navio / convés
+        ctx.fillStyle = 'rgba(15, 35, 55, 0.95)';
+        ctx.fillRect(worldLeft, hazardY + 8, worldRight - worldLeft, 34);
+
+        // Ondas marinhas com espuma brilhante
+        const waveGrad = ctx.createLinearGradient(0, hazardY, 0, hazardY + 42);
+        waveGrad.addColorStop(0, 'rgba(14, 165, 233, 0.45)');
+        waveGrad.addColorStop(0.4, 'rgba(3, 105, 161, 0.75)');
+        waveGrad.addColorStop(1, 'rgba(2, 48, 90, 0.95)');
+        ctx.fillStyle = waveGrad;
+        ctx.beginPath();
+        const waveTime = Date.now() * 0.003;
+        ctx.moveTo(worldLeft, hazardY + 42);
+        for (let wx = worldLeft; wx <= worldRight; wx += 8) {
+          const wy = hazardY + Math.sin(wx * 0.05 + waveTime) * 5 + Math.cos(wx * 0.03 + waveTime * 1.4) * 3;
+          if (wx === worldLeft) ctx.lineTo(wx, wy);
+          else ctx.lineTo(wx, wy);
+        }
+        ctx.lineTo(worldRight, hazardY + 42);
+        ctx.closePath();
+        ctx.fill();
+
+        // Linha de espuma brilhante no topo das ondas
+        ctx.strokeStyle = 'rgba(125, 211, 252, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let wx = worldLeft; wx <= worldRight; wx += 8) {
+          const wy = hazardY + Math.sin(wx * 0.05 + waveTime) * 5 + Math.cos(wx * 0.03 + waveTime * 1.4) * 3;
+          if (wx === worldLeft) ctx.moveTo(wx, wy);
+          else ctx.lineTo(wx, wy);
+        }
+        ctx.stroke();
+
+        // Label de aviso
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.9)';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🌊 MAR — ZONA DE PERIGO', worldLeft + 12, hazardY + 24);
+      } else {
+        // Piso metálico steampunk
+        ctx.fillStyle = 'rgba(40, 25, 10, 0.95)';
+        ctx.fillRect(worldLeft, hazardY + 8, worldRight - worldLeft, 34);
+
+        // Vapores incandescentes
+        const steamGrad = ctx.createLinearGradient(0, hazardY, 0, hazardY + 42);
+        steamGrad.addColorStop(0, 'rgba(245, 158, 11, 0.35)');
+        steamGrad.addColorStop(0.5, 'rgba(180, 83, 9, 0.65)');
+        steamGrad.addColorStop(1, 'rgba(100, 40, 5, 0.9)');
+        ctx.fillStyle = steamGrad;
+        ctx.beginPath();
+        const steamTime = Date.now() * 0.004;
+        ctx.moveTo(worldLeft, hazardY + 42);
+        for (let sx = worldLeft; sx <= worldRight; sx += 10) {
+          const sy = hazardY + Math.sin(sx * 0.08 + steamTime) * 4;
+          if (sx === worldLeft) ctx.lineTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.lineTo(worldRight, hazardY + 42);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(253, 224, 71, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let sx = worldLeft; sx <= worldRight; sx += 10) {
+          const sy = hazardY + Math.sin(sx * 0.08 + steamTime) * 4;
+          if (sx === worldLeft) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(253, 224, 71, 0.9)';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🔥 CALDEIRAS — ZONA DE PERIGO', worldLeft + 12, hazardY + 24);
+      }
+      ctx.restore();
+
+      // 4.7.3. Dica visual no início do percurso
+      // Coordenadas de MUNDO (dentro de translate(-cameraX)): centro da tela = cameraX + width/2
+      if (this.ball.x < 360) {
+        ctx.save();
+        const bob = Math.sin(Date.now() * 0.006) * 4;
+        const tipCenterX = this.cameraX + this.width / 2; // centro da tela em coords mundo
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        this.roundRect(ctx, tipCenterX - 120, this.height - 240 + bob, 240, 44, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('🏃 CORRA PARA A DIREITA', tipCenterX, this.height - 232 + bob);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px sans-serif';
+        ctx.fillText('⬅ esq / dir ➔ para mover  |  botão ⬆ para saltar', tipCenterX, this.height - 216 + bob);
+        ctx.restore();
+      }
+
+      // 4.7.4. Linha de chegada horizontal (Pórtico iluminado)
       const finishWorldX = 80 + this.targetDistance;
       const finishScreenX = finishWorldX - this.cameraX;
       if (finishScreenX > -40 && finishScreenX < this.width + 40) {
@@ -3150,43 +3406,128 @@ export class GameEngine {
           }
         }
         // Banner de meta
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
         ctx.strokeStyle = '#facc15';
-        ctx.lineWidth = 2;
-        this.roundRect(ctx, finishWorldX - 55, this.height - 350, 150, 28, 8);
+        ctx.lineWidth = 2.5;
+        this.roundRect(ctx, finishWorldX - 60, this.height - 355, 160, 32, 10);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#fde047';
-        ctx.font = 'bold 12px sans-serif';
+        ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🏁 LINHA DE CHEGADA', finishWorldX + 20, this.height - 331);
+        ctx.fillText('🏁 LINHA DE CHEGADA', finishWorldX + 20, this.height - 334);
         ctx.restore();
       }
 
-      // Restaura o translate horizontal antes de desenhar elementos de tela
+      // Restaura o translate horizontal antes de desenhar elementos fixos na tela
       ctx.restore();
 
-      // Barra de progresso horizontal (HUD da fase)
-      const distPct = Math.min(1, Math.max(0, this.maxHeightReached / this.targetDistance));
-      const barWidth = this.width * 0.72;
-      const barX = (this.width - barWidth) / 2;
-      const barY = this.height - 16;
+      // 4.7.5. HUD Superior de Corrida Horizontal no Canvas (Alta legibilidade)
       ctx.save();
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-      this.roundRect(ctx, barX - 2, barY - 10, barWidth + 4, 16, 4);
+      const hudW = Math.min(this.width - 20, 320);
+      const hudX = (this.width - hudW) / 2;
+      const hudY = 10;
+      const hudH = 52;
+
+      // Fundo em vidro escuro com brilho temático
+      const hudBg = ctx.createLinearGradient(hudX, hudY, hudX, hudY + hudH);
+      hudBg.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+      hudBg.addColorStop(1, 'rgba(7, 35, 55, 0.92)');
+      ctx.fillStyle = hudBg;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+      ctx.lineWidth = 1.5;
+      this.roundRect(ctx, hudX, hudY, hudW, hudH, 14);
       ctx.fill();
-      const progGrad = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+      ctx.stroke();
+
+      // Linha decorativa superior brilhante
+      const lineGrad = ctx.createLinearGradient(hudX, 0, hudX + hudW, 0);
+      lineGrad.addColorStop(0, 'rgba(56,189,248,0)');
+      lineGrad.addColorStop(0.3, 'rgba(56,189,248,0.8)');
+      lineGrad.addColorStop(0.7, 'rgba(168,85,247,0.8)');
+      lineGrad.addColorStop(1, 'rgba(250,204,21,0)');
+      ctx.fillStyle = lineGrad;
+      ctx.fillRect(hudX + 14, hudY + 1.5, hudW - 28, 1.5);
+
+      const distPct = Math.min(1, Math.max(0, this.maxHeightReached / this.targetDistance));
+      const distM = this.maxHeightReached;
+      const distKm = distM >= 1000 ? (distM / 1000).toFixed(2) + 'km' : distM + 'm';
+      const goalKm = this.targetDistance >= 1000 ? (this.targetDistance / 1000).toFixed(0) + 'km' : this.targetDistance + 'm';
+      const pctText = `${Math.round(distPct * 100)}%`;
+
+      // Ícone e distância percorrida (esquerda)
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`🏃 ${distKm}`, hudX + 12, hudY + 16);
+
+      // Percentual central em destaque
+      ctx.fillStyle = distPct >= 1 ? '#4ade80' : distPct >= 0.75 ? '#facc15' : '#38bdf8';
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = this.isMobile ? 0 : 8;
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(pctText, hudX + hudW / 2, hudY + 16);
+      ctx.shadowBlur = 0;
+
+      // Meta e vidas (direita)
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Meta: ${goalKm}`, hudX + hudW - 12, hudY + 16);
+
+      // Ícones de vidas (abaixo do percentual)
+      const livesStartX = hudX + hudW / 2 - (this.maxLives * 16) / 2;
+      for (let lv = 0; lv < this.maxLives; lv++) {
+        const lx = livesStartX + lv * 18;
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = lv < this.lives ? 1.0 : 0.25;
+        ctx.fillText('❤️', lx, hudY + 36);
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Barra de progresso interna (base)
+      const barInnerW = hudW - 24;
+      const barY = hudY + hudH - 11;
+      const barH = 6;
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+      this.roundRect(ctx, hudX + 12, barY, barInnerW, barH, 3);
+      ctx.fill();
+
+      // Barra de progresso preenchida com gradiente
+      const progGrad = ctx.createLinearGradient(hudX + 12, 0, hudX + 12 + barInnerW, 0);
       progGrad.addColorStop(0, '#38bdf8');
-      progGrad.addColorStop(0.6, '#a855f7');
+      progGrad.addColorStop(0.5, '#a855f7');
       progGrad.addColorStop(1, '#facc15');
       ctx.fillStyle = progGrad;
-      this.roundRect(ctx, barX, barY - 8, barWidth * distPct, 12, 3);
+      const barFill = Math.max(6, barInnerW * distPct);
+      this.roundRect(ctx, hudX + 12, barY, barFill, barH, 3);
       ctx.fill();
-      // Ícone de corrida e texto
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 9px monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText(`🏃 ${this.maxHeightReached}m / ${this.targetDistance}m`, barX, barY - 12);
+
+      // Marcadores de checkpoint na barra (a cada 25%)
+      for (let cp = 0.25; cp < 1; cp += 0.25) {
+        const cpBarX = hudX + 12 + barInnerW * cp;
+        ctx.fillStyle = distPct >= cp ? '#ffffff' : 'rgba(148,163,184,0.5)';
+        ctx.beginPath();
+        ctx.arc(cpBarX, barY + barH / 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Ponto brilhante na posição atual
+      if (distPct > 0.01 && distPct < 0.99) {
+        const dotX = hudX + 12 + barInnerW * distPct;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = this.isMobile ? 0 : 6;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(dotX, barY + barH / 2, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
       ctx.restore();
     }
 
