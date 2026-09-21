@@ -613,17 +613,19 @@ export const STAGES = [
     theme: 'ship',
     icon: 'Anchor',
     targetHeight: 23000,
-    gravity: 0.30,
+    layout: 'horizontal',
+    targetDistance: 4000,
+    gravity: 0.36,
     jumpForce: -11.8,
     speedFactor: 1.7,
-    wind: -0.25,
+    wind: -0.15,
     bgGradient: ['#0f172a', '#1e293b', '#0369a1'],
     platformColor: '#0ea5e9',
     platformBorder: '#7dd3fc',
     ballGlow: '#38bdf8',
-    description: 'No convés e mastros de um galeão lendário navegando por ondas oceânicas bravias e ventos marinhos fortes.',
+    description: '🏃‍♂️ PERCURSO HORIZONTAL! Corra pelo convés e mastros de um galeão lendário navegando por ondas oceânicas bravias. Não caia no mar!',
     hazards: ['moving', 'fragile'],
-    mechanic: 'Balanço marítimo com rajadas de vento oceânico.'
+    mechanic: 'Percurso lateral com saltos entre plataformas marítimas. Cuidado com as vagas e o balanço do navio!'
   },
   {
     id: 24,
@@ -939,7 +941,9 @@ export const STAGES = [
     theme: 'steampunk',
     icon: 'Cog',
     targetHeight: 39000,
-    gravity: 0.36,
+    layout: 'horizontal',
+    targetDistance: 5000,
+    gravity: 0.38,
     jumpForce: -13.0,
     speedFactor: 2.2,
     wind: 0,
@@ -947,9 +951,9 @@ export const STAGES = [
     platformColor: '#d97706',
     platformBorder: '#fed7aa',
     ballGlow: '#b45309',
-    description: 'Caldeiras titânicas, manômetros a vapor, pistões de cobre e engrenagens gigantescas em rotação contínua.',
+    description: '🏃‍♂️ PERCURSO HORIZONTAL! Atravesse a fábrica steampunk repleta de caldeiras, pistões de cobre e engrenagens colossais girando!',
     hazards: ['moving', 'conveyor', 'fragile'],
-    mechanic: 'Válvulas de vapor sob pressão e esteiras de engrenagens industriais.'
+    mechanic: 'Percurso lateral industrial com esteiras, vapores explosivos e plataformas giratórias de bronze!'
   },
   {
     id: 40,

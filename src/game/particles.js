@@ -287,18 +287,30 @@ export class ParticleSystem {
     });
   }
 
-  // Bolhas e respingos de magma da lava ascendente
-  emitLavaSpurt(x, y) {
-    this.emit(x, y, 2, {
-      color: Math.random() > 0.4 ? '#f97316' : '#fbbf24',
-      size: Math.random() * 3.5 + 2,
-      speed: Math.random() * 3 + 1.5,
-      spread: Math.PI * 0.7,
-      baseAngle: -Math.PI / 2, // Espirra para cima
-      life: 0.5,
-      gravity: 0.15
+  // Efeito ao coletar um coração de vida extra
+  emitHeartPickup(x, y) {
+    // Faíscas rosa e magenta
+    this.emit(x, y, 16, {
+      color: '#f43f5e',
+      size: 4.5,
+      speed: 4,
+      spread: Math.PI * 2,
+      baseAngle: -Math.PI / 2,
+      life: 0.85,
+      gravity: -0.05 // Flutua suavemente para cima
+    });
+    // Brilho cintilante branco/dourado
+    this.emit(x, y, 10, {
+      color: '#fde047',
+      size: 3,
+      speed: 3,
+      spread: Math.PI * 2,
+      baseAngle: -Math.PI / 2,
+      life: 0.7,
+      gravity: -0.02
     });
   }
+
 
   update(dt = 1) {
     for (let i = this.particles.length - 1; i >= 0; i--) {

@@ -66,6 +66,12 @@ export class GameEngine {
     this.powerups = [];
     this.activePowerUps = { magnet: 0, shield: false, slowmo: 0, springBoost: 0 };
 
+    // Sistema de Corações de Vida Coletáveis (Fase 38+ e Modo Infinito Exponencial)
+    this.hearts = [];
+    this.spawnedHeartsCount = 0;
+    this.endlessNextHeartHeight = 10000;
+    this.endlessHeartsSpawned = 0;
+
     // Modo Infinito com Magma / Lava Ascendente
     this.isEndless = this.mode === 'endless';
     this.lavaY = this.height + 120;
@@ -177,8 +183,9 @@ export class GameEngine {
     this.thrustSoundTimer = 0;
     this.highestPlatformY = this.height;
 
-    // Sistema de Chefão / Boss Fight
-    this.isBossFight = Boolean(this.stage.isBossStage);
+    // Sistema de Chefão / Boss Fight (ativado na Jornada do Herói, desativado na Jornada Livre)
+    this.soloJourney = gameOptions.soloJourney || 'hero';
+    this.isBossFight = Boolean(this.stage.isBossStage && this.soloJourney !== 'free');
     if (this.isBossFight) {
       this.boss = {
         name: this.stage.bossName || 'Guardião Titânico',
@@ -211,6 +218,12 @@ export class GameEngine {
     this.jumpForce = baseJump * 0.76; // Reduz o salto normal em ~24% (-11.5 vira ~ -8.74)
     this.wind = stage.wind || 0;
     this.friction = stage.friction || 0.94;
+
+    // Modo Horizontal: percursos laterais (Fases 23 e 39) - precisa ser inicializado antes de initInitialPlatforms
+    this.isHorizontal = Boolean(this.stage.layout === 'horizontal');
+    this.cameraX = 0;
+    this.targetDistance = this.stage.targetDistance || 4000;
+    this.horizontalFurthestX = 80; // começa na posição inicial da bola
 
     this.initInitialPlatforms();
     this.render();
@@ -554,16 +567,53 @@ export class GameEngine {
     this.gems = [];
     this.magicBackpacks = [];
     this.powerups = [];
+    this.hearts = [];
     this.activePowerUps = { magnet: 0, shield: false, slowmo: 0, springBoost: 0 };
     this.environmentalHazards = [];
     this.activeLightning = null;
     this.hazardSpawnTimer = 0;
     this.lightningTimer = 0;
     this.spawnedBackpacksCount = 0;
+    this.spawnedHeartsCount = 0;
+    this.endlessNextHeartHeight = 10000;
+    this.endlessHeartsSpawned = 0;
     if (this.isEndless) {
       this.lavaY = this.height + 120;
     }
 
+    // === MODO HORIZONTAL ===
+    if (this.isHorizontal) {
+      // Plataforma inicial (deck largo do navio / chão da fábrica)
+      this.platforms.push({
+        x: 20,
+        y: this.height - 130,
+        width: 220,
+        height: 18,
+        type: 'standard',
+        vx: 0,
+        broken: false,
+        opacity: 1,
+        hasSpikes: false,
+        hasBossBattery: false
+      });
+      // Posição inicial da bola no modo horizontal
+      this.ball.x = 80;
+      this.ball.y = this.height - 130 - this.ball.radius - 4;
+      this.ball.vx = 0;
+      this.ball.vy = 0;
+      this.cameraX = 0;
+      this.horizontalFurthestX = 80;
+      // Gerar plataformas iniciais à frente
+      let curX = 260;
+      while (curX < this.targetDistance + 600) {
+        this.generateHorizontalPlatformAt(curX);
+        curX += Math.floor(Math.random() * 60 + 90);
+      }
+      this.highestPlatformY = this.height; // não usado no horizontal mas evita erros
+      return;
+    }
+
+    // === MODO VERTICAL PADRÃO ===
     // Plataforma base inicial (mais larga no modo corrida para acomodar jogador e bot)
     const baseWidth = this.mode === 'race_ai' ? 160 : 120;
     this.platforms.push({
@@ -684,6 +734,140 @@ export class GameEngine {
         pulse: Math.random() * Math.PI * 2
       });
     }
+
+    // Geração de Corações de Vida Coletáveis:
+    // 1. A partir da Fase 38 (3 corações espalhados uniformemente nos marcos de 25%, 50% e 75% da fase)
+    // 2. Modo Infinito: função exponencial iniciando em 10.000m (10k, 25k, 47.5k, 81.25k...)
+    const currentPlatHeight = Math.max(0, Math.floor(-y + this.height - 120));
+    const isStage38Plus = Boolean(
+      !this.isEndless &&
+      this.stage &&
+      ((this.stage.number !== undefined && this.stage.number >= 38) || (this.stage.id !== undefined && Number(this.stage.id) >= 38))
+    );
+
+    if (isStage38Plus && this.spawnedHeartsCount < 3) {
+      const targetStageHeight = this.stage.targetHeight || 38000;
+      const intervalHeight = targetStageHeight / 4;
+      const targetMilestone = intervalHeight * (this.spawnedHeartsCount + 1);
+
+      if (currentPlatHeight >= targetMilestone - 90) {
+        this.hearts.push({
+          x: pX + pWidth / 2,
+          y: y - 30,
+          radius: 14,
+          collected: false,
+          pulse: Math.random() * Math.PI * 2
+        });
+        this.spawnedHeartsCount++;
+      }
+    } else if (this.isEndless) {
+      if (currentPlatHeight >= this.endlessNextHeartHeight) {
+        this.hearts.push({
+          x: pX + pWidth / 2,
+          y: y - 30,
+          radius: 14,
+          collected: false,
+          pulse: Math.random() * Math.PI * 2
+        });
+        this.endlessHeartsSpawned++;
+        const nextInterval = Math.round(10000 * Math.pow(1.5, this.endlessHeartsSpawned));
+        this.endlessNextHeartHeight += nextInterval;
+      }
+    }
+  }
+
+  // Gera plataformas para o percurso horizontal
+  generateHorizontalPlatformAt(x) {
+    const hazards = this.stage.hazards || [];
+    const pWidth = Math.floor(Math.random() * 40 + 55);
+    // Altura das plataformas varia para criar parkour interessante
+    const pY = Math.floor(
+      Math.random() * (this.height - 200 - (this.height - 340)) + (this.height - 340)
+    );
+
+    let type = 'standard';
+    let vx = 0;
+    const rand = Math.random();
+    if (rand < 0.18 && hazards.includes('moving')) {
+      type = 'moving';
+      // Plataformas móveis se movem verticalmente no modo horizontal
+      vx = 0;
+      // usamos vy para mover verticalmente — guardamos no campo vx por compat.
+    } else if (rand < 0.32 && hazards.includes('fragile')) {
+      type = 'fragile';
+    } else if (rand < 0.44 && hazards.includes('springs')) {
+      type = 'spring';
+    } else if (rand < 0.56 && hazards.includes('conveyor')) {
+      type = 'conveyor';
+      vx = Math.random() > 0.5 ? 2 : -2;
+    }
+
+    const platform = {
+      x: x,
+      y: pY,
+      width: pWidth,
+      height: 15,
+      type: type,
+      vx: vx,
+      // Plataformas móveis horizontais se movem verticalmente para criar desafio de parkour
+      moveVY: type === 'moving' ? (Math.random() > 0.5 ? 1.2 : -1.2) * (this.stage.speedFactor || 1) : 0,
+      moveMinY: this.height - 350,
+      moveMaxY: this.height - 100,
+      broken: false,
+      opacity: 1,
+      hasSpikes: false,
+      hasBossBattery: false,
+      batteryActive: false,
+      batteryCooldown: 0
+    };
+
+    // Espinhos temáticos
+    const spikeThemes = ['steampunk', 'iron', 'rock', 'volcano'];
+    if (type === 'standard' && (spikeThemes.includes(this.stage.theme) || hazards.includes('spikes'))) {
+      if (Math.random() < 0.12) platform.hasSpikes = true;
+    }
+
+    this.platforms.push(platform);
+
+    // Gema acima da plataforma (chance de 28%)
+    if (Math.random() < 0.28) {
+      this.gems.push({
+        x: x + pWidth / 2,
+        y: pY - 28,
+        radius: 8,
+        collected: false,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+
+    // Power-up coletável (chance de 10%)
+    if (Math.random() < 0.10) {
+      const pTypes = ['magnet', 'shield', 'slowmo', 'spring_boost'];
+      this.powerups.push({
+        x: x + pWidth / 2,
+        y: pY - 28,
+        radius: 12,
+        type: pTypes[Math.floor(Math.random() * pTypes.length)],
+        collected: false,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+
+    // Coração (fase 39+ ou milestone: 1/3, 2/3 da distância)
+    const stageNum = this.stage.number || 1;
+    if (stageNum >= 38 && this.spawnedHeartsCount < 3) {
+      const milestone = (this.targetDistance / 4) * (this.spawnedHeartsCount + 1);
+      if (x >= milestone - 120) {
+        this.hearts.push({
+          x: x + pWidth / 2,
+          y: pY - 32,
+          radius: 14,
+          collected: false,
+          pulse: Math.random() * Math.PI * 2
+        });
+        this.spawnedHeartsCount++;
+      }
+    }
   }
 
   // Dispara tremor de câmera cinemático em impactos fortes
@@ -752,6 +936,7 @@ export class GameEngine {
     this.paused = false;
     this.finished = false;
     this.ball.vy = this.jumpForce; // Dispara o primeiro pulo do jogador ao dar Play
+
     if (this.botBall) {
       this.botBall.vy = this.jumpForce; // Dispara largada da bola do Bot simultaneamente
     }
@@ -833,8 +1018,11 @@ export class GameEngine {
     this.ball.x += this.ball.vx * dt;
     this.ball.angle += (this.ball.vx * 0.05) * dt;
 
-    // Tratamento de Paredes Laterais: Bloqueio com Ricochete vs Portal Aberto com Travessia
-    this.handleLateralWallCollisions(this.ball, dt, true);
+    // Tratamento de Paredes Laterais (apenas no modo vertical)
+    if (!this.isHorizontal) {
+      this.handleLateralWallCollisions(this.ball, dt, true);
+    }
+
 
     // 2. Física Vertical (Gravidade ou Efeito Balão Suave da Mochila Mágica)
     if (this.ball.hasMagicBackpack && this.ball.backpackFuel > 0) {
@@ -924,14 +1112,17 @@ export class GameEngine {
       }
     }
 
-    // 3. Atualizar Altura e Pontuação (Alinhado exatamente à escala da Meta da Fase)
-    const currentHeight = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
-    if (currentHeight > this.maxHeightReached) {
-      const diff = currentHeight - this.maxHeightReached;
-      this.maxHeightReached = currentHeight;
-      this.score += diff;
-      this.hasPendingScoreUpdate = true;
+    // 3. Atualizar Altura e Pontuação (apenas no modo vertical; horizontal usa distância em step 7)
+    if (!this.isHorizontal) {
+      const currentHeight = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
+      if (currentHeight > this.maxHeightReached) {
+        const diff = currentHeight - this.maxHeightReached;
+        this.maxHeightReached = currentHeight;
+        this.score += diff;
+        this.hasPendingScoreUpdate = true;
+      }
     }
+
 
     // 4. Colisão da Bola com Plataformas (Apenas quando estiver caindo: vy > 0)
     if (this.ball.vy > 0) {
@@ -1150,6 +1341,32 @@ export class GameEngine {
       }
     }
 
+    // 6.28. Coleta de Corações de Vida (Fase 38+ e Modo Infinito Exponencial)
+    for (const heart of this.hearts) {
+      if (!heart.collected) {
+        heart.pulse += 0.05 * dt;
+        const dist = Math.hypot(this.ball.x - heart.x, this.ball.y - heart.y);
+        if (dist < this.ball.radius + heart.radius + 8) {
+          heart.collected = true;
+          soundEngine.playHeartPickup();
+          this.particles.emitHeartPickup(heart.x, heart.y);
+          this.triggerCameraShake(4, 150);
+          this.triggerHaptic(50);
+
+          if (this.lives < this.maxLives) {
+            this.lives++;
+            if (this.onLivesUpdate) {
+              this.onLivesUpdate(this.lives);
+            }
+          } else {
+            // Se já estiver com 3 vidas cheias, ganha 1.000 pontos de bônus!
+            this.score += 1000;
+            this.hasPendingScoreUpdate = true;
+          }
+        }
+      }
+    }
+
     // 6.3. Atualizar Riscos e Inimigos Ambientais da Fase
     this.updateEnvironmentalHazards(dt);
 
@@ -1233,125 +1450,230 @@ export class GameEngine {
       });
     }
 
-    // 7. Câmera Vertical (Segue a bola do jogador para cima suavemente)
-    const targetY = this.ball.y - this.height * 0.45;
-    if (targetY < this.cameraY) {
-      this.cameraY += (targetY - this.cameraY) * 0.12 * dt;
-    }
+    // 7. Câmera (Vertical normal / Horizontal acompanha a bola da esquerda)
+    if (this.isHorizontal) {
+      // Câmera horizontal: acompanha suavemente com offset de 35% da largura da tela
+      const targetCX = this.ball.x - this.width * 0.35;
+      this.cameraX += (targetCX - this.cameraX) * 0.14 * dt;
+      // Não deixa recuar abaixo de 0 (o começo do percurso)
+      this.cameraX = Math.max(0, this.cameraX);
 
-    // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera (Infinita no Modo Infinito e Boss Fight)
-    const genAheadDistance = (this.isEndless || this.isBossFight) ? 650 : 400;
-    while (this.highestPlatformY > this.cameraY - genAheadDistance) {
-      this.highestPlatformY -= Math.floor(Math.random() * 28 + 52);
-      this.generatePlatformAt(this.highestPlatformY);
-    }
-
-    // 8.5. Atualização da Lava Ascendente no Modo Infinito
-    if (this.isEndless) {
-      const heightProgress = Math.max(0, this.maxHeightReached);
-      const speedScale = 1 + (heightProgress / 2200) * 0.75;
-      const slowmoLavaMult = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
-      this.lavaY -= this.lavaSpeed * speedScale * slowmoLavaMult * dt;
-
-      // Borbulhamento estocástico
-      if (Math.random() < 0.25) {
-        const spurX = Math.random() * this.width;
-        this.particles.emitLavaSpurt(spurX, this.lavaY);
+      // Barreira lateral esquerda: impede que o jogador recue até atrás da câmera
+      const leftBarrier = this.cameraX + this.ball.radius + 6;
+      if (this.ball.x < leftBarrier) {
+        this.ball.x = leftBarrier;
+        if (this.ball.vx < 0) this.ball.vx = 0;
       }
 
-      // Alerta de proximidade
-      this.lavaWarning = (this.lavaY - this.ball.y) < 220;
-
-      // Se a bola mergulhar na lava:
-      if (this.ball.y + this.ball.radius >= this.lavaY) {
-        this.takeDamage('lava');
-        this.ball.vy = this.jumpForce * 1.35; // Salto de pânico para tentar escapar
-        this.ball.stretchY = 1.45;
-        this.triggerCameraShake(10, 240);
-        this.triggerHaptic([60, 40, 60]);
-        this.particles.emitLavaSpurt(this.ball.x, this.lavaY);
+      // Distância percorrida (metros horizontais desde a origem)
+      const horizDist = Math.max(0, Math.floor(this.ball.x - 80));
+      if (horizDist > this.horizontalFurthestX - 80) {
+        const diff = horizDist - (this.horizontalFurthestX - 80);
+        this.horizontalFurthestX = horizDist + 80;
+        this.maxHeightReached = horizDist; // reusar maxHeightReached para armazenar distância
+        this.score += diff;
+        this.hasPendingScoreUpdate = true;
       }
-    }
 
-    // 9. Limpeza de Entidades Fora da Tela
-    this.platforms = this.platforms.filter((p) => p.y < this.cameraY + this.height + 150);
-    this.gems = this.gems.filter((g) => !g.collected && g.y < this.cameraY + this.height + 150);
-    this.magicBackpacks = this.magicBackpacks.filter((mb) => !mb.collected && mb.y < this.cameraY + this.height + 150);
-    this.powerups = this.powerups.filter((pu) => !pu.collected && pu.y < this.cameraY + this.height + 150);
-
-    // 10. Atualizar Partículas
-    this.particles.update(dt);
-
-    // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada - apenas no modo normal ou corrida)
-    if (!this.isEndless) {
-      if (this.isBossFight) {
-        // Na Boss Fight, a vitória ocorre ao zerar o HP do Chefão (tratado em updateBoss/handleBossDefeat)
-      } else {
-        const goalY = -this.stage.targetHeight + (this.height - 120);
-        if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
-          if (this.mode === 'race_pvp' && this.onPvPFinish) {
-            this.onPvPFinish('win');
-          }
-          this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
-          return;
+      // Plataformas móveis verticais no modo horizontal
+      const slowmoPlatMult2 = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
+      for (const p of this.platforms) {
+        if (p.moveVY && !p.broken) {
+          p.y += p.moveVY * dt * slowmoPlatMult2;
+          if (p.y <= p.moveMinY) { p.y = p.moveMinY; p.moveVY = Math.abs(p.moveVY); }
+          if (p.y >= p.moveMaxY) { p.y = p.moveMaxY; p.moveVY = -Math.abs(p.moveVY); }
         }
       }
-    }
 
-    // 12. Verificação de Queda / Sistema de 3 Vidas
-    if (this.ball.y > this.cameraY + this.height + 60) {
-      // Perda imediata da Mochila Mágica se o jogador cair
-      if (this.ball.hasMagicBackpack) {
-        this.ball.hasMagicBackpack = false;
-        this.ball.backpackFuel = 0;
-        this.ball.stretchX = 1.0;
-        this.ball.stretchY = 1.0;
-        this.particles.emitBackpackSmoke(this.ball.x, this.ball.y);
+      // Verificação de Vitória Horizontal (chegou no fim do percurso)
+      if (this.ball.x - 80 >= this.targetDistance) {
+        this.finishGame('completed', {});
+        return;
       }
-      if (this.lives > 1) {
-        // Registra o marcador holográfico no local exato onde a bola caiu
-        const deathNumber = (this.maxLives - this.lives) + 1;
-        this.deathMarkers.push({
-          x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
-          y: this.cameraY + this.height - 25,
-          deathNumber
-        });
 
-        // Decrementa 1 vida
-        this.lives--;
-        if (this.onLivesUpdate) {
-          this.onLivesUpdate(this.lives);
-        }
-
-        // SFX de perda de vida e partículas vermelhas
+      // Queda no buraco (bola saiu pela parte inferior)
+      if (this.ball.y > this.height + 40) {
         soundEngine.playLoseLife();
-        this.particles.emit(this.ball.x, this.cameraY + this.height - 30, 24, {
-          color: '#ef4444',
-          size: 4.5,
-          speed: 4,
-          life: 0.8
-        });
+        this.particles.emit(this.ball.x, this.height, 20, { color: '#3b82f6', size: 5, speed: 3.5, life: 0.7 });
+        this.triggerCameraShake(10, 250);
+        this.triggerHaptic([50, 30, 50]);
 
-        // Respawn seguro com escudo
-        this.respawnPlayer();
-      } else {
-        // 3ª morte: Game Over definitivo
-        const deathNumber = this.maxLives;
-        this.deathMarkers.push({
-          x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
-          y: this.cameraY + this.height - 25,
-          deathNumber
-        });
-        this.lives = 0;
-        if (this.onLivesUpdate) {
-          this.onLivesUpdate(0);
+        if (this.lives > 1) {
+          this.lives--;
+          if (this.onLivesUpdate) this.onLivesUpdate(this.lives);
+          // Respawn na plataforma atrás mais próxima visível
+          this.respawnPlayerHorizontal();
+        } else {
+          this.lives = 0;
+          if (this.onLivesUpdate) this.onLivesUpdate(0);
+          this.finishGame('game_over', {});
         }
-        if (this.mode === 'race_pvp' && this.onPvPFinish) {
-          this.onPvPFinish('lose');
-        }
-        this.finishGame('game_over', { raceWinner: this.mode === 'race_pvp' ? 'opponent' : 'bot', opponentName: this.opponentBall?.username });
       }
+
+      // Limpeza de entidades que ficaram muito atrás da câmera
+      const cleanupX = this.cameraX - 300;
+      this.platforms = this.platforms.filter((p) => p.x + p.width > cleanupX);
+      this.gems = this.gems.filter((g) => !g.collected && g.x > cleanupX);
+      this.powerups = this.powerups.filter((pu) => !pu.collected && pu.x > cleanupX);
+      this.hearts = this.hearts.filter((h) => !h.collected && h.x > cleanupX);
+
+    } else {
+      // Câmera vertical padrão
+      const targetY = this.ball.y - this.height * 0.45;
+      if (targetY < this.cameraY) {
+        this.cameraY += (targetY - this.cameraY) * 0.12 * dt;
+      }
+
+      // 8. Geração Procedural Contínua de Novas Plataformas acima da câmera (Infinita no Modo Infinito e Boss Fight)
+      const genAheadDistance = (this.isEndless || this.isBossFight) ? 650 : 400;
+      while (this.highestPlatformY > this.cameraY - genAheadDistance) {
+        this.highestPlatformY -= Math.floor(Math.random() * 28 + 52);
+        this.generatePlatformAt(this.highestPlatformY);
+      }
+
+      // 8.5. Atualização da Lava Ascendente no Modo Infinito
+      if (this.isEndless) {
+        const heightProgress = Math.max(0, this.maxHeightReached);
+        const speedScale = 1 + (heightProgress / 2200) * 0.75;
+        const slowmoLavaMult = this.activePowerUps.slowmo > 0 ? 0.45 : 1.0;
+        this.lavaY -= this.lavaSpeed * speedScale * slowmoLavaMult * dt;
+
+        // Borbulhamento estocástico
+        if (Math.random() < 0.25) {
+          const spurX = Math.random() * this.width;
+          this.particles.emitLavaSpurt(spurX, this.lavaY);
+        }
+
+        // Alerta de proximidade
+        this.lavaWarning = (this.lavaY - this.ball.y) < 220;
+
+        // Se a bola mergulhar na lava:
+        if (this.ball.y + this.ball.radius >= this.lavaY) {
+          this.takeDamage('lava');
+          this.ball.vy = this.jumpForce * 1.35; // Salto de pânico para tentar escapar
+          this.ball.stretchY = 1.45;
+          this.triggerCameraShake(10, 240);
+          this.triggerHaptic([60, 40, 60]);
+          this.particles.emitLavaSpurt(this.ball.x, this.lavaY);
+        }
+      }
+
+      // 9. Limpeza de Entidades Fora da Tela
+      this.platforms = this.platforms.filter((p) => p.y < this.cameraY + this.height + 150);
+      this.gems = this.gems.filter((g) => !g.collected && g.y < this.cameraY + this.height + 150);
+      this.magicBackpacks = this.magicBackpacks.filter((mb) => !mb.collected && mb.y < this.cameraY + this.height + 150);
+      this.powerups = this.powerups.filter((pu) => !pu.collected && pu.y < this.cameraY + this.height + 150);
+      this.hearts = this.hearts.filter((h) => !h.collected && h.y < this.cameraY + this.height + 150);
+
+      // 11. Verificação de Vitória (Chegou na meta de altura ou cruzou a linha de chegada)
+      if (!this.isEndless) {
+        if (this.isBossFight) {
+          // Na Boss Fight, a vitória ocorre ao zerar o HP do Chefão (tratado em updateBoss/handleBossDefeat)
+        } else {
+          const goalY = -this.stage.targetHeight + (this.height - 120);
+          if (this.maxHeightReached >= this.stage.targetHeight || this.ball.y <= goalY + this.ball.radius) {
+            if (this.mode === 'race_pvp' && this.onPvPFinish) {
+              this.onPvPFinish('win');
+            }
+            this.finishGame('completed', { raceWinner: 'player', opponentName: this.opponentBall?.username });
+            return;
+          }
+        }
+      }
+
+      // 12. Verificação de Queda / Sistema de 3 Vidas
+      if (this.ball.y > this.cameraY + this.height + 60) {
+        // Perda imediata da Mochila Mágica se o jogador cair
+        if (this.ball.hasMagicBackpack) {
+          this.ball.hasMagicBackpack = false;
+          this.ball.backpackFuel = 0;
+          this.ball.stretchX = 1.0;
+          this.ball.stretchY = 1.0;
+          this.particles.emitBackpackSmoke(this.ball.x, this.ball.y);
+        }
+        if (this.lives > 1) {
+          // Registra o marcador holográfico no local exato onde a bola caiu
+          const deathNumber = (this.maxLives - this.lives) + 1;
+          this.deathMarkers.push({
+            x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
+            y: this.cameraY + this.height - 25,
+            deathNumber
+          });
+
+          // Decrementa 1 vida
+          this.lives--;
+          if (this.onLivesUpdate) {
+            this.onLivesUpdate(this.lives);
+          }
+
+          // SFX de perda de vida e partículas vermelhas
+          soundEngine.playLoseLife();
+          this.particles.emit(this.ball.x, this.cameraY + this.height - 30, 24, {
+            color: '#ef4444',
+            size: 4.5,
+            speed: 4,
+            life: 0.8
+          });
+
+          // Respawn seguro com escudo
+          this.respawnPlayer();
+        } else {
+          // 3ª morte: Game Over definitivo
+          const deathNumber = this.maxLives;
+          this.deathMarkers.push({
+            x: Math.max(30, Math.min(this.width - 30, this.ball.x)),
+            y: this.cameraY + this.height - 25,
+            deathNumber
+          });
+          this.lives = 0;
+          if (this.onLivesUpdate) {
+            this.onLivesUpdate(0);
+          }
+          if (this.mode === 'race_pvp' && this.onPvPFinish) {
+            this.onPvPFinish('lose');
+          }
+          this.finishGame('game_over', { raceWinner: this.mode === 'race_pvp' ? 'opponent' : 'bot', opponentName: this.opponentBall?.username });
+        }
+      }
+    } // fim do bloco vertical
+
+    // 10. Atualizar Partículas (sempre, independente do modo)
+    this.particles.update(dt);
+  }
+
+  // Respawn horizontal: reposiciona a bola na última plataforma visível atrás dela
+  respawnPlayerHorizontal() {
+    // Procura a plataforma visível mais próxima à esquerda da câmera
+    const candidates = this.platforms.filter((p) => {
+      if (p.broken) return false;
+      const screenX = p.x - this.cameraX;
+      return screenX > 30 && screenX < this.width - 30;
+    });
+    candidates.sort((a, b) => b.x - a.x); // mais à direita primeiro (mais próxima do jogador)
+
+    let spawnX = this.cameraX + this.width * 0.3;
+    let spawnY = this.height - 200;
+
+    if (candidates.length > 0) {
+      const plat = candidates[0];
+      spawnX = plat.x + plat.width / 2;
+      spawnY = plat.y - this.ball.radius - 2;
     }
+
+    this.ball.x = spawnX;
+    this.ball.y = spawnY;
+    this.ball.vx = 0;
+    this.ball.vy = this.jumpForce * 0.7;
+    this.ball.stretchX = 0.7;
+    this.ball.stretchY = 1.3;
+    this.ball.hasMagicBackpack = false;
+    this.ball.backpackFuel = 0;
+    this.boostCharge = this.maxBoostCharge;
+    this.hasPendingBoostUpdate = true;
+    this.invulnerableTimer = 2.5;
+
+    soundEngine.playRespawn();
+    this.particles.emitSuperJumpBurst(this.ball.x, this.ball.y, '#38bdf8');
   }
 
   // Lógica da Inteligência Artificial do Bot na Corrida
@@ -2496,11 +2818,22 @@ export class GameEngine {
     // 1. Cenário de Fundo Temático com Parallax e Partículas Atmosféricas
     this.background.draw(ctx, this.cameraY);
 
+    // Para modo horizontal: deslocamos o canvas pelo cameraX
+    if (this.isHorizontal) {
+      ctx.save();
+      ctx.translate(-Math.round(this.cameraX), 0);
+    }
+
     // 2. Desenhar Plataformas
     for (const p of this.platforms) {
       if (p.broken) continue;
       const screenY = p.y - this.cameraY;
-      if (screenY < -30 || screenY > this.height + 30) continue;
+      const screenX = this.isHorizontal ? p.x : p.x;
+      if (!this.isHorizontal && (screenY < -30 || screenY > this.height + 30)) continue;
+      if (this.isHorizontal) {
+        const worldScreenX = p.x - this.cameraX;
+        if (worldScreenX + p.width < -10 || worldScreenX > this.width + 10) continue;
+      }
 
       ctx.save();
       if (p.type === 'spring') {
@@ -2794,16 +3127,83 @@ export class GameEngine {
     // 4.5. Desenhar Inimigos e Perigos Ambientais da Cena
     this.drawEnvironmentalHazards(ctx);
 
-    // 4.8. Desenhar Paredes Laterais e Portais Temáticos
-    this.drawLateralWalls(ctx);
+    // 4.7. Linha de chegada horizontal (desenhada em coordenadas de mundo antes de restaurar o translate)
+    if (this.isHorizontal) {
+      const finishWorldX = 80 + this.targetDistance;
+      const finishScreenX = finishWorldX - this.cameraX;
+      if (finishScreenX > -40 && finishScreenX < this.width + 40) {
+        ctx.save();
+        // Poste esquerdo
+        ctx.fillStyle = '#facc15';
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = this.isMobile ? 0 : 18;
+        ctx.fillRect(finishWorldX - 5, this.height - 320, 10, 290);
+        // Poste direito
+        ctx.fillRect(finishWorldX + 35, this.height - 320, 10, 290);
+        // Bandeira xadrez
+        ctx.shadowBlur = 0;
+        const squareSize = 14;
+        for (let row = 0; row < 5; row++) {
+          for (let col = 0; col < 3; col++) {
+            ctx.fillStyle = (row + col) % 2 === 0 ? '#ffffff' : '#1e293b';
+            ctx.fillRect(finishWorldX - 4 + col * squareSize, this.height - 316 + row * squareSize, squareSize, squareSize);
+          }
+        }
+        // Banner de meta
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2;
+        this.roundRect(ctx, finishWorldX - 55, this.height - 350, 150, 28, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏁 LINHA DE CHEGADA', finishWorldX + 20, this.height - 331);
+        ctx.restore();
+      }
+
+      // Restaura o translate horizontal antes de desenhar elementos de tela
+      ctx.restore();
+
+      // Barra de progresso horizontal (HUD da fase)
+      const distPct = Math.min(1, Math.max(0, this.maxHeightReached / this.targetDistance));
+      const barWidth = this.width * 0.72;
+      const barX = (this.width - barWidth) / 2;
+      const barY = this.height - 16;
+      ctx.save();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+      this.roundRect(ctx, barX - 2, barY - 10, barWidth + 4, 16, 4);
+      ctx.fill();
+      const progGrad = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+      progGrad.addColorStop(0, '#38bdf8');
+      progGrad.addColorStop(0.6, '#a855f7');
+      progGrad.addColorStop(1, '#facc15');
+      ctx.fillStyle = progGrad;
+      this.roundRect(ctx, barX, barY - 8, barWidth * distPct, 12, 3);
+      ctx.fill();
+      // Ícone de corrida e texto
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`🏃 ${this.maxHeightReached}m / ${this.targetDistance}m`, barX, barY - 12);
+      ctx.restore();
+    }
+
+    // 4.8. Desenhar Paredes Laterais e Portais Temáticos (somente no modo vertical)
+    if (!this.isHorizontal) {
+      this.drawLateralWalls(ctx);
+    }
 
     // 5. Desenhar a Bola do Jogador
     const ballScreenY = this.ball.y - this.cameraY;
+    const ballScreenX = this.isHorizontal ? this.ball.x - this.cameraX : this.ball.x;
 
     // Se a bola estiver com a Mochila Mágica equipada, desenhar a mochila acoplada com asas e chamas
     if (this.ball.hasMagicBackpack) {
       ctx.save();
-      ctx.translate(this.ball.x, ballScreenY);
+      ctx.translate(ballScreenX, ballScreenY);
+
 
       // Glow da mochila
       ctx.shadowColor = '#f59e0b';
@@ -2865,7 +3265,7 @@ export class GameEngine {
     }
 
     ctx.save();
-    ctx.translate(this.ball.x, ballScreenY);
+    ctx.translate(ballScreenX, ballScreenY);
     ctx.rotate(this.ball.angle);
     ctx.scale(this.ball.stretchX, this.ball.stretchY);
 
@@ -2961,7 +3361,7 @@ export class GameEngine {
 
       // 1. Barra Flutuando Logo Acima da Bola
       ctx.save();
-      ctx.translate(this.ball.x, ballScreenY - this.ball.radius - 22);
+      ctx.translate(ballScreenX, ballScreenY - this.ball.radius - 22);
 
       ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
       ctx.strokeStyle = fuelPct < 25 ? '#ef4444' : '#f59e0b';
@@ -3180,11 +3580,12 @@ export class GameEngine {
       }
     }
 
-    // 6. Meta de Altura / Linha de Chegada (Ocultada no Modo Infinito e Boss Fight, onde a subida é sem fim)
+    // 6. Meta de Altura / Linha de Chegada (Ocultada no Modo Infinito, Boss Fight e Horizontal)
     const goalY = -this.stage.targetHeight + (this.height - 120);
     const goalScreenY = goalY - this.cameraY;
-    if (!this.isEndless && !this.isBossFight && goalScreenY > -60 && goalScreenY < this.height + 60) {
+    if (!this.isEndless && !this.isBossFight && !this.isHorizontal && goalScreenY > -60 && goalScreenY < this.height + 60) {
       ctx.save();
+
       ctx.shadowColor = '#facc15';
       ctx.shadowBlur = this.isMobile ? 0 : 14;
 
@@ -3212,7 +3613,10 @@ export class GameEngine {
     }
 
     // 6.5. Desenhar Power-Ups Coletáveis
-    this.drawPowerUps(ctx);
+    this.drawPowerUps(ctx, this.cameraX);
+
+    // 6.6. Desenhar Corações Coletáveis (Fase 38+ e Modo Infinito)
+    this.drawHearts(ctx, this.cameraX);
 
     // 6.8. Desenhar Magma / Lava Subindo no Modo Infinito
     this.drawLava(ctx);
@@ -3230,15 +3634,17 @@ export class GameEngine {
   }
 
   // Desenha os Power-Ups coletáveis flutuando nas plataformas
-  drawPowerUps(ctx) {
+  drawPowerUps(ctx, cameraX = 0) {
     for (const pu of this.powerups) {
       if (pu.collected) continue;
       const screenY = pu.y - this.cameraY;
+      const screenX = pu.x - cameraX;
       if (screenY < -30 || screenY > this.height + 30) continue;
+      if (screenX < -40 || screenX > this.width + 40) continue;
 
       ctx.save();
       const floatOffset = Math.sin(pu.pulse * 3) * 4;
-      ctx.translate(pu.x, screenY + floatOffset);
+      ctx.translate(screenX, screenY + floatOffset);
 
       let pColor = '#38bdf8';
       let pIcon = '🧲';
@@ -3273,6 +3679,70 @@ export class GameEngine {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(pIcon, 0, 1);
+
+      ctx.restore();
+    }
+  }
+
+  // Desenha os Corações Coletáveis Flutuantes (Recuperação de Vida)
+  drawHearts(ctx, cameraX = 0) {
+    for (const heart of this.hearts) {
+      if (heart.collected) continue;
+      const screenY = heart.y - this.cameraY;
+      const screenX = heart.x - cameraX;
+      if (screenY < -40 || screenY > this.height + 40) continue;
+      if (screenX < -50 || screenX > this.width + 50) continue;
+
+      ctx.save();
+      const floatOffset = Math.sin(heart.pulse * 3.5) * 5;
+      const heartbeat = 1 + Math.sin(heart.pulse * 6) * 0.14;
+      ctx.translate(screenX, screenY + floatOffset);
+      ctx.scale(heartbeat, heartbeat);
+
+      // Glow pulsante rosa neon
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = this.isMobile ? 0 : 16;
+
+      // Aura / Orbe translúcida suave ao redor do coração
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.16)';
+      ctx.beginPath();
+      ctx.arc(0, 0, heart.radius + 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Desenhar formato do coração estilizado com gradiente de alta fidelidade
+      const s = 11;
+      const heartGrad = ctx.createLinearGradient(0, -s, 0, s);
+      heartGrad.addColorStop(0, '#fb7185');
+      heartGrad.addColorStop(0.5, '#f43f5e');
+      heartGrad.addColorStop(1, '#be123c');
+
+      ctx.fillStyle = heartGrad;
+      ctx.strokeStyle = '#ffe4e6';
+      ctx.lineWidth = 1.6;
+
+      ctx.beginPath();
+      // Inicia no entalhe central superior
+      ctx.moveTo(0, -s * 0.2);
+      // Lobo esquerdo
+      ctx.bezierCurveTo(-s * 0.55, -s * 1.1, -s * 1.3, -s * 0.2, 0, s * 1.05);
+      // Lobo direito
+      ctx.bezierCurveTo(s * 1.3, -s * 0.2, s * 0.55, -s * 1.1, 0, -s * 0.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Reflexo brilhante de luz no lobo superior esquerdo
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.beginPath();
+      ctx.arc(-s * 0.45, -s * 0.45, s * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rótulo discreto holográfico "+1 ❤️"
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fecdd3';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('+1 ❤️', 0, -s - 4);
 
       ctx.restore();
     }

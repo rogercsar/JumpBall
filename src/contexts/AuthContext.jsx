@@ -245,30 +245,28 @@ export function AuthProvider({ children }) {
       }
 
       const local = localStore.getProfile();
-      // Se profiles no banco já tem stages_completed registrado, respeita esse valor
-      let resolvedStage = 0;
-      if (data && data.stages_completed !== null && data.stages_completed !== undefined) {
-        resolvedStage = Number(data.stages_completed);
-      } else {
-        let maxStageFromHistory = 0;
-        try {
-          const { data: histData } = await supabase
-            .from('game_history')
-            .select('stage_id')
-            .eq('user_id', userId)
-            .eq('status', 'completed');
-          if (histData && histData.length > 0) {
-            maxStageFromHistory = Math.max(...histData.map(h => Number(h.stage_id) || 0));
-          }
-        } catch (hErr) {
-          /* ignore */
+      let maxStageFromHistory = 0;
+      try {
+        const { data: histData } = await supabase
+          .from('game_history')
+          .select('stage_id')
+          .eq('user_id', userId)
+          .eq('status', 'completed');
+        if (histData && histData.length > 0) {
+          maxStageFromHistory = Math.max(...histData.map(h => Number(h.stage_id) || 0));
         }
-        resolvedStage = Math.max(
-          maxStageFromHistory, 
-          local.stages_completed || 0,
-          Number(cloudMeta.stages_completed || 0)
-        );
+      } catch (hErr) {
+        /* ignore */
       }
+
+      // Preserva sempre o maior progresso alcançado (ex: se o jogador chegou na fase 38 no celular,
+      // esse valor nunca será rebaixado por dados antigos de outra máquina)
+      const resolvedStage = Math.max(
+        Number(data?.stages_completed || 0),
+        local.stages_completed || 0,
+        Number(cloudMeta.stages_completed || 0),
+        maxStageFromHistory
+      );
 
       const bestHighScore = Math.max(
         data?.high_score || 0, 
@@ -366,6 +364,9 @@ export function AuthProvider({ children }) {
       // para que celulares ou outros computadores sincronizem instantaneamente
       if (
         cloudMeta.gems === undefined ||
+        resolvedStage > (Number(cloudMeta.stages_completed) || 0) ||
+        resolvedStage > (Number(data?.stages_completed) || 0) ||
+        bestHighScore > (Number(cloudMeta.high_score) || 0) ||
         resolvedUnlockedSkins.length > (cloudMeta.unlocked_skins?.length || 0) ||
         resolvedAchievements.length > (cloudMeta.achievements?.length || 0) ||
         resolvedGems > (Number(cloudMeta.gems) || 0) ||
@@ -393,16 +394,27 @@ export function AuthProvider({ children }) {
         } catch (syncErr) { /* ignore */ }
       }
 
-      // Sincroniza via upsert com o Supabase para garantir que a linha exista com os dados corretos
+      // Sincroniza com a tabela 'profiles' no Supabase usando apenas as colunas válidas do schema
       try {
-        await supabase.from('profiles').upsert({
-          id: userId,
+        const profileUpdate = {
           stages_completed: resolvedStage,
           high_score: bestHighScore,
           total_jumps: bestTotalJumps,
-          games_played: bestGamesPlayed,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        };
+
+        const { error: upErr } = await supabase
+          .from('profiles')
+          .update(profileUpdate)
+          .eq('id', userId);
+
+        // Se a linha ainda não existir no banco, realiza upsert com os campos essenciais
+        if (upErr || upErr === null) {
+          await supabase.from('profiles').upsert({
+            id: userId,
+            ...profileUpdate
+          }, { onConflict: 'id', ignoreDuplicates: false });
+        }
       } catch (uErr) { /* ignore */ }
     } catch (err) {
       console.warn('Aviso ao carregar perfil do Supabase:', err);

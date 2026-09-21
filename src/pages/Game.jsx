@@ -24,7 +24,10 @@ import {
   Cake,
   Gift,
   Crown,
-  Globe
+  Globe,
+  CheckCircle2,
+  Feather,
+  Compass
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
 import { STAGES, BALL_SKINS, WORLDS } from '../game/stages';
@@ -87,6 +90,22 @@ export function Game({ onNavigate }) {
 
   // Modo de Jogo: 'solo' (Individual) | 'race_ai' (vs Máquina) | 'race_pvp' (Duelo 1v1)
   const [gameMode, setGameMode] = useState('solo');
+  // Estilo de Jornada Solo: 'hero' (Jornada do Herói com Chefões) | 'free' (Jornada Livre sem Chefões)
+  const [soloJourney, setSoloJourney] = useState(() => {
+    try {
+      return localStorage.getItem('jumpball_solo_journey') || 'hero';
+    } catch (e) {
+      return 'hero';
+    }
+  });
+
+  const handleSoloJourneyChange = (journey) => {
+    setSoloJourney(journey);
+    try {
+      localStorage.setItem('jumpball_solo_journey', journey);
+    } catch (e) { /* ignore */ }
+  };
+
   const [aiDifficulty, setAiDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
   const [raceStats, setRaceStats] = useState({
     playerHeight: 0,
@@ -438,7 +457,7 @@ export function Game({ onNavigate }) {
         },
         (result) => {
           setGameState('victory');
-          const isBoss = Boolean(stage?.isBossStage);
+          const isBoss = Boolean(stage?.isBossStage && soloJourney !== 'free');
           const enhancedResult = {
             ...result,
             stage,
@@ -449,7 +468,9 @@ export function Game({ onNavigate }) {
             eventRewardGems: stage?.rewardGems || 0,
             celebrationTitle: isBoss
               ? `👑 CHEFÃO DERROTADO: ${stage?.bossName}!`
-              : (stage?.celebrationTitle || stage?.name)
+              : (stage?.isBossStage && soloJourney === 'free'
+                ? `🏔️ CUME CONQUISTADO: ${stage?.title}!`
+                : (stage?.celebrationTitle || stage?.name))
           };
           setLastGameResult(enhancedResult);
           saveGameResult(enhancedResult, stage);
@@ -473,6 +494,7 @@ export function Game({ onNavigate }) {
         {
           mode: activeMode,
           aiDifficulty: activeDiff,
+          soloJourney: soloJourney,
           opponentData: activePvP?.opponent,
           selectedTrail: profile?.selected_trail || 'default',
           onLocalPlayerUpdate: activeMode === 'race_pvp' ? (state) => {
@@ -495,7 +517,7 @@ export function Game({ onNavigate }) {
         engine.start();
       }
     }, 60);
-  }, [activeSkin, user, settings.controlMode, updateProfile, gameMode, aiDifficulty, pvpMatchConfig]);
+  }, [activeSkin, user, settings.controlMode, updateProfile, gameMode, soloJourney, aiDifficulty, pvpMatchConfig]);
 
   // Sincronização de Telemetria do Duelo 1v1 PvP
   useEffect(() => {
@@ -694,8 +716,8 @@ export function Game({ onNavigate }) {
                   : 'text-orange-400 hover:text-orange-300'
                   }`}
               >
-                <Flame className="w-3.5 h-3.5" />
-                <span>Infinito 🔥</span>
+                {/*<Flame className="w-3.5 h-3.5" />*/}
+                <span>Infinito</span>
               </button>
             </div>
 
@@ -708,7 +730,7 @@ export function Game({ onNavigate }) {
                   {[
                     { id: 'easy', label: 'Fácil' },
                     { id: 'medium', label: 'Médio' },
-                    { id: 'hard', label: 'Difícil 🔥' }
+                    { id: 'hard', label: 'Difícil' }
                   ].map((diff) => (
                     <button
                       key={diff.id}
@@ -773,6 +795,117 @@ export function Game({ onNavigate }) {
             </div>
           ) : (
             <div className="space-y-6">
+              {/* PAINEL EXCLUSIVO DO MODO SOLO: JORNADA LIVRE vs JORNADA DO HERÓI */}
+              {gameMode === 'solo' && (
+                <div className="glass-panel p-4 sm:p-5 rounded-3xl border border-cyan-500/20 bg-gradient-to-b from-slate-900/90 via-slate-900/70 to-slate-950 shadow-2xl space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-cyan-400" />
+                        <h2 className="text-base sm:text-lg font-black text-white">Escolha o seu Estilo de Jornada Solo</h2>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Defina como deseja explorar as 50 fases cósmicas do JumpBall
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800">
+                        Jornada Ativa: <strong className={soloJourney === 'free' ? 'text-emerald-400' : 'text-amber-400'}>{soloJourney === 'free' ? 'Jornada Livre 🕊️' : 'Jornada do Herói ⚔️'}</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Os 2 Cards de Escolha de Jornada */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {/* CARD 1: JORNADA LIVRE */}
+                    <div
+                      onClick={() => handleSoloJourneyChange('free')}
+                      className={`group relative rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer overflow-hidden flex flex-col justify-between ${soloJourney === 'free'
+                          ? 'border-emerald-400 bg-gradient-to-br from-emerald-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-emerald-500/10 ring-2 ring-emerald-400/40 scale-[1.01]'
+                          : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-900/90'
+                        }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shrink-0 transition-transform group-hover:scale-105 ${soloJourney === 'free'
+                              ? 'bg-gradient-to-tr from-emerald-400 to-teal-500 text-slate-950 shadow-emerald-500/30'
+                              : 'bg-slate-800 text-emerald-400 border border-slate-700'
+                            }`}>
+                            <Feather className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base font-black text-white">Jornada Livre</h3>
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                Escalada Zen
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                              Subida clássica pelas 50 fases <strong>sem combates com chefões</strong>. Foco total em ritmo, física de salto e cruzar a linha de chegada no topo.
+                            </p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${soloJourney === 'free'
+                            ? 'border-emerald-400 bg-emerald-400 text-slate-950'
+                            : 'border-slate-600'
+                          }`}>
+                          {soloJourney === 'free' && <CheckCircle2 className="w-3.5 h-3.5 fill-current" />}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
+                        <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">✓ 50 Fases Desbloqueáveis</span>
+                        <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">✓ Linha de Chegada Clássica</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold">✓ Ritmo Contínuo</span>
+                      </div>
+                    </div>
+
+                    {/* CARD 2: JORNADA DO HERÓI */}
+                    <div
+                      onClick={() => handleSoloJourneyChange('hero')}
+                      className={`group relative rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer overflow-hidden flex flex-col justify-between ${soloJourney === 'hero'
+                          ? 'border-amber-400 bg-gradient-to-br from-amber-950/40 via-purple-950/30 to-slate-950 shadow-xl shadow-amber-500/15 ring-2 ring-amber-400/40 scale-[1.01]'
+                          : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-900/90'
+                        }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shrink-0 transition-transform group-hover:scale-105 ${soloJourney === 'hero'
+                              ? 'bg-gradient-to-tr from-amber-400 to-rose-500 text-slate-950 shadow-amber-500/30'
+                              : 'bg-slate-800 text-amber-400 border border-slate-700'
+                            }`}>
+                            <Crown className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base font-black text-white">Jornada do Herói</h3>
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
+                                Campanha com Chefões
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                              A campanha clássica lendária! Supere armadilhas e <strong>combata os 10 Titãs Guardiões</strong> a cada 5 fases ativando canhões anti-chefão.
+                            </p>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${soloJourney === 'hero'
+                            ? 'border-amber-400 bg-amber-400 text-slate-950'
+                            : 'border-slate-600'
+                          }`}>
+                          {soloJourney === 'hero' && <CheckCircle2 className="w-3.5 h-3.5 fill-current" />}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
+                        <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">👑 10 Batalhas de Titãs</span>
+                        <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">⚡ Baterias de Energia</span>
+                        <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold">🌌 Ataque do Multiverso</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Seção de Fases Comemorativas Ativas (Tempo Limitado: 7 Dias) */}
               {activeEventStages.length > 0 && (
                 <div className="space-y-3">
@@ -868,11 +1001,10 @@ export function Game({ onNavigate }) {
                   <button
                     type="button"
                     onClick={() => setSelectedWorldId('all')}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${
-                      selectedWorldId === 'all'
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${selectedWorldId === 'all'
                         ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20 scale-105'
                         : 'bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60 hover:bg-slate-700/60'
-                    }`}
+                      }`}
                   >
                     Ver Todas as 50 Fases
                   </button>
@@ -895,13 +1027,12 @@ export function Game({ onNavigate }) {
                         key={w.id}
                         type="button"
                         onClick={() => setSelectedWorldId(w.id)}
-                        className={`group relative flex items-center gap-2 px-3 py-2 rounded-2xl border shrink-0 transition-all text-left ${
-                          isSelected
+                        className={`group relative flex items-center gap-2 px-3 py-2 rounded-2xl border shrink-0 transition-all text-left ${isSelected
                             ? 'bg-slate-800/90 border-cyan-400/80 shadow-lg shadow-cyan-500/10 scale-105 ring-1 ring-cyan-400/40'
                             : !isWorldUnlocked
                               ? 'bg-slate-900/40 border-slate-800 opacity-60 hover:opacity-80'
                               : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/50'
-                        }`}
+                          }`}
                       >
                         <div
                           className="w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs shadow-inner shrink-0"
@@ -957,9 +1088,16 @@ export function Game({ onNavigate }) {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0 self-start sm:self-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
-                        <span>👑</span>
-                        <span>Chefão: {currentWorld.bossName} ({currentWorld.bossTitle})</span>
+                      <div className={`flex items-center gap-2 shrink-0 self-start sm:self-center px-3 py-1.5 rounded-xl border text-xs font-bold ${soloJourney === 'free'
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                          : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                        }`}>
+                        <span>{soloJourney === 'free' ? '🏔️' : '👑'}</span>
+                        <span>
+                          {soloJourney === 'free'
+                            ? `Cume do Mundo: Fase ${currentWorld.bossStageNumber} (Escalada Pura)`
+                            : `Chefão: ${currentWorld.bossName} (${currentWorld.bossTitle})`}
+                        </span>
                       </div>
                     </div>
                   );
@@ -968,27 +1106,28 @@ export function Game({ onNavigate }) {
 
               {/* Grid das Fases Filtradas por Mundo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {STAGES.filter((stage) => {
-                if (selectedWorldId === 'all') return true;
-                const world = WORLDS.find((w) => w.id === selectedWorldId);
-                if (!world) return true;
-                return stage.number >= world.stageRange[0] && stage.number <= world.stageRange[1];
-              }).map((stage) => {
-                const completedStages = profile?.stages_completed || 0;
-                // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
-                const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
-                const isCompleted = stage.number <= completedStages;
+                {STAGES.filter((stage) => {
+                  if (selectedWorldId === 'all') return true;
+                  const world = WORLDS.find((w) => w.id === selectedWorldId);
+                  if (!world) return true;
+                  return stage.number >= world.stageRange[0] && stage.number <= world.stageRange[1];
+                }).map((stage) => {
+                  const completedStages = profile?.stages_completed || 0;
+                  // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
+                  const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
+                  const isCompleted = stage.number <= completedStages;
 
-                return (
-                  <StageCard
-                    key={stage.id}
-                    stage={stage}
-                    isUnlocked={isUnlocked}
-                    isCompleted={isCompleted}
-                    onSelect={startGame}
-                  />
-                );
-              })}
+                  return (
+                    <StageCard
+                      key={stage.id}
+                      stage={stage}
+                      isUnlocked={isUnlocked}
+                      isCompleted={isCompleted}
+                      onSelect={startGame}
+                      journeyMode={soloJourney}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1103,17 +1242,15 @@ export function Game({ onNavigate }) {
 
           {/* Painel do Modo Corrida 1v1 (vs Máquina ou vs Oponente Real) */}
           {(gameMode === 'race_ai' || gameMode === 'race_pvp') && (
-            <div className={`w-full mb-1 glass-panel px-3 py-1 rounded-2xl border shrink-0 flex items-center justify-between text-xs shadow-md ${
-              gameMode === 'race_pvp'
+            <div className={`w-full mb-1 glass-panel px-3 py-1 rounded-2xl border shrink-0 flex items-center justify-between text-xs shadow-md ${gameMode === 'race_pvp'
                 ? 'border-rose-500/40 bg-rose-950/30'
                 : 'border-purple-500/30 bg-purple-950/30'
-            }`}>
+              }`}>
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded-md border text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
-                  gameMode === 'race_pvp'
+                <span className={`px-2 py-0.5 rounded-md border text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${gameMode === 'race_pvp'
                     ? 'bg-rose-500/25 border-rose-400/40 text-rose-300'
                     : 'bg-purple-500/25 border-purple-400/40 text-purple-300'
-                }`}>
+                  }`}>
                   <Swords className="w-3 h-3 text-pink-400" /> {gameMode === 'race_pvp' ? 'Duelo PvP' : 'Corrida'}
                 </span>
                 <span className="text-[11px] font-bold">
@@ -1236,9 +1373,17 @@ export function Game({ onNavigate }) {
                 </div>
 
                 <div>
-                  <span className={`text-[10px] uppercase font-bold tracking-widest block ${gameMode === 'race_ai' ? 'text-purple-400' : 'text-cyan-400'
+                  <span className={`text-[10px] uppercase font-bold tracking-widest block ${gameMode === 'race_ai'
+                      ? 'text-purple-400'
+                      : soloJourney === 'free'
+                        ? 'text-emerald-400'
+                        : 'text-amber-400'
                     }`}>
-                    {gameMode === 'race_ai' ? `Corrida 1v1 vs Máquina • ${aiDifficulty.toUpperCase()}` : 'Modo Individual'}
+                    {gameMode === 'race_ai'
+                      ? `Corrida 1v1 vs Máquina • ${aiDifficulty.toUpperCase()}`
+                      : soloJourney === 'free'
+                        ? 'Modo Solo • Jornada Livre (Escalada Pura)'
+                        : 'Modo Solo • Jornada do Herói (Com Chefões)'}
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
                     Fase {selectedStage?.number}: {selectedStage?.title}
@@ -1320,11 +1465,10 @@ export function Game({ onNavigate }) {
             {/* Overlay de Game Over */}
             {gameState === 'game_over' && (
               <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in z-20">
-                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border ${
-                  lastGameResult?.isEndless
+                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border ${lastGameResult?.isEndless
                     ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
                     : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-                }`}>
+                  }`}>
                   {lastGameResult?.isEndless ? <Flame className="w-8 h-8 fill-current" /> : <Skull className="w-8 h-8" />}
                 </div>
 
@@ -1415,8 +1559,8 @@ export function Game({ onNavigate }) {
                     {lastGameResult?.isEvent
                       ? `🎉 ${lastGameResult?.celebrationTitle || 'Evento Festivo Conquistado!'}`
                       : lastGameResult?.isPvP
-                      ? `🏆 Você superou @${lastGameResult?.opponentName || 'Adversário'}!`
-                      : (lastGameResult?.isRace ? 'Vitória Épica na Corrida!' : 'Meta Alcançada com Sucesso!')}
+                        ? `🏆 Você superou @${lastGameResult?.opponentName || 'Adversário'}!`
+                        : (lastGameResult?.isRace ? 'Vitória Épica na Corrida!' : 'Meta Alcançada com Sucesso!')}
                   </span>
                   <h2 className="text-3xl font-black text-white">
                     {lastGameResult?.isEvent
