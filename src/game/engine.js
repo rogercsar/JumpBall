@@ -2099,6 +2099,11 @@ export class GameEngine {
       // Limpeza se cair muito abaixo da tela
       if (h.y > this.cameraY + this.height + 100) {
         this.environmentalHazards.splice(i, 1);
+        continue;
+      }
+      // Limpeza no modo horizontal: remove se ficou muito atrás da câmera
+      if (this.isHorizontal && h.x < this.cameraX - 200) {
+        this.environmentalHazards.splice(i, 1);
       }
     }
 
@@ -2303,8 +2308,13 @@ export class GameEngine {
     }
 
     this.environmentalHazards.push({
-      x: Math.random() * (this.width - 60) + 30,
-      y: this.cameraY - 40,
+      // No modo horizontal: spawna em coordenadas de MUNDO para alinhar com ball.x
+      x: this.isHorizontal
+        ? this.cameraX + Math.random() * (this.width - 60) + 30
+        : Math.random() * (this.width - 60) + 30,
+      y: this.isHorizontal
+        ? Math.random() * -80 - 20           // spawna aleatoriamente acima da tela
+        : this.cameraY - 40,
       vx: (Math.random() - 0.5) * 1.2,
       vy: vy,
       radius: radius,
@@ -2318,11 +2328,14 @@ export class GameEngine {
 
   drawEnvironmentalHazards(ctx) {
     for (const h of this.environmentalHazards) {
+      // No modo horizontal: converter coords de mundo para tela
+      const screenX = this.isHorizontal ? h.x - this.cameraX : h.x;
       const screenY = h.y - this.cameraY;
       if (screenY < -40 || screenY > this.height + 40) continue;
+      if (screenX < -40 || screenX > this.width + 40) continue;
 
       ctx.save();
-      ctx.translate(h.x, screenY);
+      ctx.translate(screenX, screenY);
       ctx.rotate(h.angle);
 
       if (h.type === 'branch') {
@@ -3240,35 +3253,37 @@ export class GameEngine {
     // 4.7. Elementos do Modo Horizontal (Checkpoints, Perigos e Linha de Chegada)
     if (this.isHorizontal) {
       // 4.7.1. Marcadores de Metragem / Checkpoints a cada 500m
+      // Posicionados no TOPO da tela (abaixo do HUD) para não interferir na jogabilidade
       for (let cp = 500; cp < this.targetDistance; cp += 500) {
         const cpX = 80 + cp;
         const cpScreenX = cpX - this.cameraX;
-        if (cpScreenX < -40 || cpScreenX > this.width + 40) continue;
+        if (cpScreenX < -60 || cpScreenX > this.width + 60) continue;
 
         ctx.save();
-        // Linha guia vertical de neon do checkpoint
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
+        // Linha guia vertical sutil (quase transparente, não obstrui a visão)
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 6]);
         ctx.beginPath();
-        ctx.moveTo(cpX, this.height - 350);
-        ctx.lineTo(cpX, this.height - 60);
+        ctx.moveTo(cpX, 65);     // começa abaixo do HUD
+        ctx.lineTo(cpX, this.height - 48); // vai até antes da zona de perigo
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Bandeirinha holográfica flutuante
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 1.5;
-        this.roundRect(ctx, cpX - 32, this.height - 355, 64, 22, 6);
+        // Bandeirinha minimalista no TOPO (logo abaixo do HUD, y=65 a 85px)
+        const cpAlpha = 0.8;
+        ctx.fillStyle = `rgba(15, 23, 42, ${cpAlpha})`;
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+        ctx.lineWidth = 1;
+        this.roundRect(ctx, cpX - 24, 66, 48, 18, 5);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#38bdf8';
-        ctx.font = 'bold 10px sans-serif';
+        ctx.fillStyle = '#7dd3fc';
+        ctx.font = 'bold 8px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`🚩 ${cp >= 1000 ? (cp / 1000).toFixed(0) + 'km' : cp + 'm'}`, cpX, this.height - 344);
+        ctx.fillText(`🚩 ${cp >= 1000 ? (cp / 1000).toFixed(0) + 'km' : cp + 'm'}`, cpX, 75);
         ctx.restore();
       }
 
