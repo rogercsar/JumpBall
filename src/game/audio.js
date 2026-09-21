@@ -614,7 +614,7 @@ class SoundEngine {
     this.customBgmTitle = '';
     this.customAudioPlaying = false;
     this.lastStageTheme = 'forest';
-    this.lastStageId = 1;
+    this.unlocked = false;
   }
 
   init() {
@@ -635,11 +635,18 @@ class SoundEngine {
     if (!this.ctx) return;
 
     if (this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(() => {});
+      this.ctx.resume().then(() => {
+        this.playSilenceBufferOnce();
+      }).catch(() => {});
+    } else if (this.ctx.state === 'running') {
+      this.playSilenceBufferOnce();
     }
+  }
 
-    // Toca um buffer silencioso de 1 amostra para desbloquear a saída de áudio no iOS Safari / WebKit
+  playSilenceBufferOnce() {
+    if (this.unlocked || !this.ctx || this.ctx.state !== 'running') return;
     try {
+      this.unlocked = true;
       const buffer = this.ctx.createBuffer(1, 1, 22050);
       const source = this.ctx.createBufferSource();
       source.buffer = buffer;
@@ -651,7 +658,12 @@ class SoundEngine {
   }
 
   resume() {
-    this.unlock();
+    if (!this.ctx) {
+      this.init();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
   }
 
   setVolumes(sfxVol, bgmVol) {
@@ -1646,12 +1658,14 @@ class SoundEngine {
 
 export const soundEngine = new SoundEngine();
 
-// Auto-desbloqueio do Web Audio API no primeiro gesto do usuário (fundamental no iOS Safari / WebKit)
+// Auto-desbloqueio do Web Audio API no primeiro gesto genuíno do usuário (iOS Safari / WebKit / Chrome)
 if (typeof window !== 'undefined') {
-  const unlockEvents = ['touchstart', 'touchend', 'mousedown', 'pointerdown', 'keydown'];
-  const handleUserGesture = () => {
+  const unlockEvents = ['touchstart', 'touchend', 'mousedown', 'keydown'];
+  const handleUserGesture = (e) => {
+    // Ignora eventos sintéticos injetados por extensões de navegador (ex: content.js)
+    if (e && e.isTrusted === false) return;
     soundEngine.unlock();
-    if (soundEngine.ctx && soundEngine.ctx.state === 'running') {
+    if (soundEngine.unlocked || (soundEngine.ctx && soundEngine.ctx.state === 'running')) {
       unlockEvents.forEach((evt) => window.removeEventListener(evt, handleUserGesture, true));
     }
   };
