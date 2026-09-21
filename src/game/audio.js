@@ -1370,6 +1370,34 @@ class SoundEngine {
     });
   }
 
+  // Efeito ao Recarregar Bateria / Arma anti-Chefão ou Coleta de Jetpack
+  playJetpackPickup() {
+    if (this.isMuted || this.sfxVolume <= 0) return;
+    this.resume();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const chimeFrequencies = [659.25, 880.0, 1174.66]; // E5, A5, D6
+
+    chimeFrequencies.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const startTime = now + idx * 0.04;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(this.sfxVolume * 0.22, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.2);
+    });
+  }
+
   // Efeito de Propulsão / Jato Contínuo da Mochila Mágica
   playJetpackThrust() {
     if (this.isMuted || this.sfxVolume <= 0) return;

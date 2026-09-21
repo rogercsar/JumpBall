@@ -1042,7 +1042,15 @@ export class GameEngine {
               speed: 2,
               life: 0.4
             });
-            soundEngine.playJetpackPickup();
+            try {
+              if (soundEngine && typeof soundEngine.playJetpackPickup === 'function') {
+                soundEngine.playJetpackPickup();
+              } else if (soundEngine && typeof soundEngine.playMagicBackpack === 'function') {
+                soundEngine.playMagicBackpack();
+              }
+            } catch (err) {
+              console.warn('Erro ao reproduzir som de recarga:', err);
+            }
           }
         }
       }
@@ -3510,8 +3518,8 @@ export class GameEngine {
         continue;
       }
 
-      // Remover míssil se subiu muito acima da câmera
-      if (m.y < this.cameraY - 100) {
+      // Remover míssil se subiu muito acima da câmera ou se ficou para trás
+      if (m.y < this.cameraY - 120 || m.y > this.cameraY + this.height + 250) {
         this.playerMissiles.splice(i, 1);
       }
     }

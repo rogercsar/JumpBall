@@ -1145,13 +1145,13 @@ export function Game({ onNavigate }) {
           {/* Barra de Progresso até a Meta da Fase ou Indicador do Modo Infinito / Boss Fight */}
           <div className="w-full mb-1 px-1 shrink-0">
             {selectedStage?.isBossStage ? (
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 bg-amber-950/40 px-3 py-1 rounded-xl border border-amber-500/40 shadow-sm shadow-amber-500/10">
-                <span className="flex items-center gap-1.5 text-amber-300">
-                  <span>👑</span>
-                  <span>{selectedStage.bossName}: <strong>Subida Infinita</strong></span>
+              <div className="flex items-center justify-between text-[11px] text-slate-400 bg-slate-900/50 px-2.5 py-0.5 rounded-lg border border-slate-800/60 backdrop-blur-xs">
+                <span className="flex items-center gap-1.5 text-slate-300">
+                  <span className="text-[10px] opacity-75">👑</span>
+                  <span className="text-xs font-semibold">{selectedStage.bossName} <span className="text-slate-500 font-normal">· Subida Infinita</span></span>
                 </span>
-                <span className="text-cyan-300">
-                  Altura: <strong>{currentHeight}m</strong>
+                <span className="text-slate-400 font-medium">
+                  Altura: <strong className="text-cyan-400/90 font-bold">{currentHeight}m</strong>
                 </span>
               </div>
             ) : gameMode === 'endless' ? (
