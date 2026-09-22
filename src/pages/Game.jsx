@@ -99,6 +99,11 @@ export function Game({ onNavigate }) {
     }
   });
 
+  // Estado de Revanche (PvP)
+  // 'idle' | 'requesting' | 'waiting' | 'incoming'
+  const [rematchState, setRematchState] = useState('idle');
+  const rematchTimeoutRef = useRef(null);
+
   // Progresso independente para o modo ativo (Livre ou Herói)
   const activeCompletedStages = soloJourney === 'free'
     ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
@@ -322,6 +327,10 @@ export function Game({ onNavigate }) {
     const localProf = localStore.getProfile();
     const isFreeMode = soloJourney === 'free';
 
+    // Modos de corrida (race_pvp, race_ai, endless) NUNCA alteram o progresso das jornadas solo.
+    // Apenas partidas no modo 'solo' avançam os contadores de fases concluídas.
+    const isRaceMode = gameMode === 'race_pvp' || gameMode === 'race_ai' || gameMode === 'endless';
+
     const currentHeroCompleted = Math.max(
       profileRef.current?.stages_completed_hero ?? profileRef.current?.stages_completed ?? 0,
       profile?.stages_completed_hero ?? profile?.stages_completed ?? 0,
@@ -335,12 +344,12 @@ export function Game({ onNavigate }) {
     );
 
     const isEventStage = Boolean(stageObj?.isEvent);
-    // Avança estritamente o progresso do modo jogado
-    const newHeroCompleted = (!isFreeMode && isWin && !isEventStage && stageNumber < 999)
+    // Avança estritamente o progresso do modo solo jogado (nunca nos modos de corrida/duelo)
+    const newHeroCompleted = (!isRaceMode && !isFreeMode && isWin && !isEventStage && stageNumber < 999)
       ? Math.max(currentHeroCompleted, stageNumber)
       : currentHeroCompleted;
 
-    const newFreeCompleted = (isFreeMode && isWin && !isEventStage && stageNumber < 999)
+    const newFreeCompleted = (!isRaceMode && isFreeMode && isWin && !isEventStage && stageNumber < 999)
       ? Math.max(currentFreeCompleted, stageNumber)
       : currentFreeCompleted;
 
@@ -437,8 +446,8 @@ export function Game({ onNavigate }) {
         console.warn('Aviso: Falha ao inserir no Supabase diretamente:', err);
       }
 
-      // Se venceu a fase no modo herói, assegura a persistência na nuvem imediatamente
-      if (isWin && !isFreeMode) {
+      // Se venceu a fase no modo herói solo, assegura a persistência na nuvem imediatamente
+      if (isWin && !isFreeMode && !isRaceMode) {
         try {
           const { error: profError } = await supabase.from('profiles').upsert({
             id: user.id,
@@ -556,9 +565,9 @@ export function Game({ onNavigate }) {
     }, 60);
   }, [activeSkin, user, settings.controlMode, updateProfile, gameMode, soloJourney, aiDifficulty, pvpMatchConfig]);
 
-  // Sincronização de Telemetria do Duelo 1v1 PvP
+  // Sincronização de Telemetria do Duelo 1v1 PvP + Escuta de eventos de revanche
   useEffect(() => {
-    if (gameState === 'playing' && gameMode === 'race_pvp') {
+    if ((gameState === 'playing' || gameState === 'game_over' || gameState === 'victory') && gameMode === 'race_pvp') {
       const unsubState = multiplayerService.onPlayerState((state) => {
         engineRef.current?.updateRemoteOpponent(state);
       });
@@ -568,6 +577,28 @@ export function Game({ onNavigate }) {
           if (data.status === 'win') {
             engineRef.current?.updateRemoteOpponent({ finished: true });
           }
+        } else if (data.event === 'request_rematch') {
+          // O adversário pediu revanche — mostrar aviso para o outro jogador
+          setRematchState('incoming');
+          // Auto-declinar após 30 segundos sem resposta
+          if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+          rematchTimeoutRef.current = setTimeout(() => {
+            setRematchState('idle');
+          }, 30000);
+        } else if (data.event === 'accept_rematch') {
+          // O adversário aceitou nossa revanche — reiniciar a partida!
+          if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+          setRematchState('idle');
+          if (pvpMatchConfig) {
+            startGame(selectedStageRef.current, 'race_pvp', null, pvpMatchConfig);
+          }
+        } else if (data.event === 'decline_rematch' || data.event === 'player_left') {
+          // O adversário recusou ou saiu — voltar ao modal PvP
+          if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+          setRematchState('idle');
+          setGameMode('solo');
+          setPvpMatchConfig(null);
+          setIsPvPModalOpen(true);
         }
       });
 
@@ -576,7 +607,24 @@ export function Game({ onNavigate }) {
         unsubGame();
       };
     }
+  }, [gameState, gameMode, pvpMatchConfig]);
+
+  // Reset automático do gameMode para 'solo' ao retornar ao menu após um duelo PvP
+  useEffect(() => {
+    if (gameState === 'menu' && gameMode === 'race_pvp') {
+      setGameMode('solo');
+      setPvpMatchConfig(null);
+      setRematchState('idle');
+      if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+    }
   }, [gameState, gameMode]);
+
+  // Cleanup ao desmontar (cancela timers de revanche)
+  useEffect(() => {
+    return () => {
+      if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+    };
+  }, []);
 
   // Inicia Duelo 1v1 PvP a partir do PvPLobbyModal
   const handleStartPvPMatch = ({ stage, roomCode, isHost, opponent }) => {
@@ -584,7 +632,43 @@ export function Game({ onNavigate }) {
     setPvpMatchConfig(config);
     setGameMode('race_pvp');
     setIsPvPModalOpen(false);
+    setRematchState('idle');
+    if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
     startGame(stage, 'race_pvp', null, config);
+  };
+
+  // Solicita revanche ao adversário (mantém conexão ativa)
+  const handleRequestRematch = () => {
+    setRematchState('requesting');
+    multiplayerService.sendGameEvent('request_rematch', {});
+    // Timeout: se o adversário não responder em 30s, abrir modal normal
+    if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+    rematchTimeoutRef.current = setTimeout(() => {
+      setRematchState('idle');
+      setGameMode('solo');
+      setPvpMatchConfig(null);
+      setIsPvPModalOpen(true);
+    }, 30000);
+  };
+
+  // Aceitar revanche recebida
+  const handleAcceptRematch = () => {
+    if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+    setRematchState('idle');
+    multiplayerService.sendGameEvent('accept_rematch', {});
+    if (pvpMatchConfig) {
+      startGame(selectedStageRef.current, 'race_pvp', null, pvpMatchConfig);
+    }
+  };
+
+  // Recusar revanche
+  const handleDeclineRematch = () => {
+    if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+    setRematchState('idle');
+    multiplayerService.sendGameEvent('decline_rematch', {});
+    setGameMode('solo');
+    setPvpMatchConfig(null);
+    setIsPvPModalOpen(true);
   };
 
   // Inicia a física e o movimento apenas quando o jogador clica em DAR PLAY
@@ -657,12 +741,25 @@ export function Game({ onNavigate }) {
       if (confirmed) {
         if (engineRef.current) engineRef.current.stop();
         soundEngine.stopBGM(0.4);
+        // Limpa estado PvP ao sair (o useEffect de gameState === 'menu' faz o reset)
+        if (gameMode === 'race_pvp') {
+          multiplayerService.sendGameEvent('decline_rematch', {});
+          multiplayerService.leaveRoom();
+          setRematchState('idle');
+          if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+        }
         setGameState('menu');
       } else if (engineRef.current && wasPlaying) {
         engineRef.current.resume();
       }
     } else {
       soundEngine.stopBGM(0.4);
+      if (gameMode === 'race_pvp') {
+        multiplayerService.sendGameEvent('decline_rematch', {});
+        multiplayerService.leaveRoom();
+        setRematchState('idle');
+        if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+      }
       setGameState('menu');
     }
   };
@@ -1375,6 +1472,9 @@ export function Game({ onNavigate }) {
                   {gameMode === 'race_ai' && (
                     <span className="text-purple-300">Bot: <strong>{raceStats.botHeight}m</strong></span>
                   )}
+                  {gameMode === 'race_pvp' && (
+                    <span className="text-rose-300">@{raceStats.opponentName || pvpMatchConfig?.opponent?.username || 'Adversário'}: <strong>{raceStats.botHeight}m</strong></span>
+                  )}
                   <span>Meta: <strong className="text-amber-400">{selectedStage?.targetHeight}m</strong></span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
@@ -1530,8 +1630,39 @@ export function Game({ onNavigate }) {
               </div>
             )}
 
+            {/* Overlay de Revanche Recebida (adversário pediu revanche) */}
+            {(gameState === 'game_over' || gameState === 'victory') && gameMode === 'race_pvp' && rematchState === 'incoming' && (
+              <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-5 animate-fade-in z-30">
+                <div className="w-16 h-16 rounded-3xl bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center shadow-xl shadow-rose-500/20 animate-pulse">
+                  <Swords className="w-8 h-8" />
+                </div>
+                <div>
+                  <span className="text-xs uppercase font-bold tracking-widest text-rose-400 block mb-1">⚔️ Pedido de Revanche!</span>
+                  <h2 className="text-2xl font-black text-white">
+                    @{pvpMatchConfig?.opponent?.username || 'Adversário'} quer a revanche!
+                  </h2>
+                  <p className="text-sm text-slate-400 mt-1">Aceita disputar a mesma fase novamente?</p>
+                </div>
+                <div className="flex flex-col gap-2.5 w-64">
+                  <button
+                    onClick={handleAcceptRematch}
+                    className="py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    <span>ACEITAR REVANCHE!</span>
+                  </button>
+                  <button
+                    onClick={handleDeclineRematch}
+                    className="py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold active:scale-95 transition-all"
+                  >
+                    Recusar e Voltar ao Menu
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Overlay de Game Over */}
-            {gameState === 'game_over' && (
+            {gameState === 'game_over' && rematchState !== 'incoming' && (
               <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in z-20">
                 <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border ${lastGameResult?.isEndless
                     ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
@@ -1544,19 +1675,27 @@ export function Game({ onNavigate }) {
                   <span className="text-xs uppercase font-bold tracking-wider text-rose-400">
                     {lastGameResult?.isEndless
                       ? '🌋 Fim da Sobrevivência!'
-                      : (lastGameResult?.isRace
-                        ? (lastGameResult?.winner === 'bot' ? 'A Máquina Alcançou a Meta Primeiro!' : 'Queda no Percurso!')
-                        : 'A gravidade venceu!')}
+                      : (lastGameResult?.isPvP
+                        ? `@${pvpMatchConfig?.opponent?.username || 'Adversário'} venceu o duelo!`
+                        : (lastGameResult?.isRace
+                          ? (lastGameResult?.winner === 'bot' ? 'A Máquina Alcançou a Meta Primeiro!' : 'Queda no Percurso!')
+                          : 'A gravidade venceu!'))}
                   </span>
                   <h2 className="text-3xl font-black text-white">
                     {lastGameResult?.isEndless
                       ? 'O Magma Te Alcançou!'
-                      : (lastGameResult?.isRace ? 'Derrota na Corrida' : 'Game Over')}
+                      : (lastGameResult?.isPvP ? 'Derrota no Duelo 1v1' : (lastGameResult?.isRace ? 'Derrota na Corrida' : 'Game Over'))}
                   </h2>
                 </div>
 
                 <div className="p-4 rounded-2xl glass-card w-full max-w-xs space-y-2 border border-slate-800 text-left text-xs">
-                  {lastGameResult?.isRace && (
+                  {lastGameResult?.isPvP && (
+                    <div className="flex justify-between pb-1 border-b border-rose-500/30 text-rose-300 font-bold">
+                      <span>Adversário:</span>
+                      <span>⚔️ @{pvpMatchConfig?.opponent?.username || 'Adversário'}</span>
+                    </div>
+                  )}
+                  {lastGameResult?.isRace && !lastGameResult?.isPvP && (
                     <div className="flex justify-between pb-1 border-b border-purple-500/30 text-purple-300 font-bold">
                       <span>Vencedor:</span>
                       <span className="text-rose-400">🤖 Bot IA ({aiDifficulty})</span>
@@ -1572,9 +1711,9 @@ export function Game({ onNavigate }) {
                       <span className="font-bold text-amber-400">{Math.max(profile?.endless_high_score || 0, lastGameResult?.maxHeight || 0)}m</span>
                     </div>
                   )}
-                  {lastGameResult?.isRace && (
+                  {(lastGameResult?.isRace || lastGameResult?.isPvP) && (
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Altura da IA:</span>
+                      <span className="text-slate-400">{lastGameResult?.isPvP ? 'Altura do Adversário:' : 'Altura da IA:'}</span>
                       <span className="font-bold text-purple-400">{lastGameResult?.botHeight || 0}m</span>
                     </div>
                   )}
@@ -1593,20 +1732,46 @@ export function Game({ onNavigate }) {
                 </div>
 
                 <div className="flex flex-col gap-2.5 w-56">
+                  {gameMode === 'race_pvp' ? (
+                    <>
+                      {rematchState === 'requesting' ? (
+                        <div className="py-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
+                          <Swords className="w-4 h-4" />
+                          <span>Aguardando resposta...</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleRequestRematch}
+                          className="py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm shadow-xl shadow-rose-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        >
+                          <Swords className="w-4 h-4" />
+                          <span>PEDIR REVANCHE</span>
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => startGame(lastGameResult?.isEndless ? ENDLESS_STAGE : selectedStage, lastGameResult?.isEndless ? 'endless' : null)}
+                      className={`py-3.5 rounded-2xl ${
+                        lastGameResult?.isEndless
+                          ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 shadow-orange-500/25'
+                          : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25'
+                      } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all`}
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>{lastGameResult?.isEndless ? 'JOGAR NOVAMENTE' : 'TENTAR NOVAMENTE'}</span>
+                    </button>
+                  )}
                   <button
-                    onClick={() => startGame(lastGameResult?.isEndless ? ENDLESS_STAGE : selectedStage, lastGameResult?.isEndless ? 'endless' : null)}
-                    className={`py-3.5 rounded-2xl ${lastGameResult?.isEndless
-                      ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 shadow-orange-500/25'
-                      : (lastGameResult?.isRace
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 shadow-purple-500/25'
-                        : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25')
-                      } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2`}
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>{lastGameResult?.isEndless ? 'JOGAR NOVAMENTE' : (lastGameResult?.isRace ? 'REVANCHE IMEDIATA' : 'TENTAR NOVAMENTE')}</span>
-                  </button>
-                  <button
-                    onClick={() => setGameState('menu')}
+                    onClick={() => {
+                      if (gameMode === 'race_pvp') {
+                        multiplayerService.sendGameEvent('decline_rematch', {});
+                        multiplayerService.leaveRoom();
+                        setRematchState('idle');
+                        if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+                      }
+                      setGameState('menu');
+                    }}
                     className="py-2.5 rounded-xl glass-card text-slate-300 hover:text-white text-xs font-semibold"
                   >
                     Voltar ao Menu
@@ -1616,7 +1781,7 @@ export function Game({ onNavigate }) {
             )}
 
             {/* Overlay de Vitória */}
-            {gameState === 'victory' && (
+            {gameState === 'victory' && rematchState !== 'incoming' && (
               <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in z-20">
                 <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
                   <Trophy className="w-8 h-8 animate-bounce" />
@@ -1627,7 +1792,7 @@ export function Game({ onNavigate }) {
                     {lastGameResult?.isEvent
                       ? `🎉 ${lastGameResult?.celebrationTitle || 'Evento Festivo Conquistado!'}`
                       : lastGameResult?.isPvP
-                        ? `🏆 Você superou @${lastGameResult?.opponentName || 'Adversário'}!`
+                        ? `🏆 Você superou @${pvpMatchConfig?.opponent?.username || lastGameResult?.opponentName || 'Adversário'}!`
                         : (lastGameResult?.isRace ? 'Vitória Épica na Corrida!' : 'Meta Alcançada com Sucesso!')}
                   </span>
                   <h2 className="text-3xl font-black text-white">
@@ -1646,8 +1811,8 @@ export function Game({ onNavigate }) {
                   )}
                   {lastGameResult?.isPvP && (
                     <div className="flex justify-between pb-1 border-b border-emerald-500/30 text-emerald-400 font-bold">
-                      <span>Resultado Duelo:</span>
-                      <span>🏆 1º Lugar (Vitória)</span>
+                      <span>Adversário:</span>
+                      <span>⚔️ @{pvpMatchConfig?.opponent?.username || 'Adversário'}</span>
                     </div>
                   )}
                   {lastGameResult?.isRace && !lastGameResult?.isPvP && (
@@ -1690,13 +1855,22 @@ export function Game({ onNavigate }) {
                       <span>COLETAR E VOLTAR AO MENU</span>
                     </button>
                   ) : lastGameResult?.isPvP ? (
-                    <button
-                      onClick={() => setIsPvPModalOpen(true)}
-                      className="py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm shadow-xl shadow-rose-500/25 flex items-center justify-center gap-1.5"
-                    >
-                      <Swords className="w-4 h-4" />
-                      <span>NOVO DUELO / REVANCHE</span>
-                    </button>
+                    <>
+                      {rematchState === 'requesting' ? (
+                        <div className="py-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
+                          <Swords className="w-4 h-4" />
+                          <span>Aguardando resposta de @{pvpMatchConfig?.opponent?.username || 'Adversário'}...</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleRequestRematch}
+                          className="py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm shadow-xl shadow-rose-500/25 flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                        >
+                          <Swords className="w-4 h-4" />
+                          <span>PEDIR REVANCHE</span>
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <button
                       onClick={handleNextStage}
@@ -1706,14 +1880,24 @@ export function Game({ onNavigate }) {
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   )}
+                  {!lastGameResult?.isPvP && (
+                    <button
+                      onClick={() => startGame(selectedStage)}
+                      className="py-2 rounded-xl text-slate-400 hover:text-white text-xs"
+                    >
+                      {lastGameResult?.isRace ? 'Correr Novamente' : 'Repetir Fase'}
+                    </button>
+                  )}
                   <button
-                    onClick={() => startGame(selectedStage)}
-                    className="py-2 rounded-xl text-slate-400 hover:text-white text-xs"
-                  >
-                    {lastGameResult?.isRace ? 'Correr Novamente' : 'Repetir Fase'}
-                  </button>
-                  <button
-                    onClick={() => setGameState('menu')}
+                    onClick={() => {
+                      if (gameMode === 'race_pvp') {
+                        multiplayerService.sendGameEvent('decline_rematch', {});
+                        multiplayerService.leaveRoom();
+                        setRematchState('idle');
+                        if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
+                      }
+                      setGameState('menu');
+                    }}
                     className="py-1 rounded-xl text-slate-500 hover:text-slate-300 text-[11px]"
                   >
                     Menu de Fases
