@@ -576,12 +576,27 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
             <Layers className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-xl sm:text-2xl font-black text-cyan-400">
-            {profile?.stages_completed_hero ?? profile?.stages_completed ?? 0} <span className="text-[10px] text-slate-500 font-bold">/ {STAGES.length}</span>
+            {Math.max(
+              profile?.stages_completed_hero || 0,
+              profile?.stages_completed || 0,
+              localStore.getProfile()?.stages_completed_hero || 0,
+              localStore.getProfile()?.stages_completed || 0
+            )} <span className="text-[10px] text-slate-500 font-bold">/ {STAGES.length}</span>
           </div>
           <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-            <span className="text-amber-400 font-bold">Herói: {profile?.stages_completed_hero ?? profile?.stages_completed ?? 0}</span>
+            <span className="text-amber-400 font-bold">
+              Herói: {Math.max(
+                profile?.stages_completed_hero || 0,
+                localStore.getProfile()?.stages_completed_hero || 0
+              )}
+            </span>
             <span>•</span>
-            <span className="text-emerald-400 font-bold">Livre: {profile?.stages_completed_free || 0}</span>
+            <span className="text-emerald-400 font-bold">
+              Livre: {Math.max(
+                profile?.stages_completed_free || 0,
+                localStore.getProfile()?.stages_completed_free || 0
+              )}
+            </span>
           </div>
         </div>
 

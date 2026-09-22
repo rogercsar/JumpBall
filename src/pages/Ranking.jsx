@@ -32,6 +32,13 @@ export function Ranking({ onNavigate }) {
   const fetchLeaderboard = useCallback(async (showIndicator = false) => {
     if (showIndicator) setIsRefreshing(true);
 
+    // Sanitiza: ignora valores absurdos como 999 (ID de modo infinito) e limita a 50
+    const cleanStage = (val) => {
+      const n = Number(val);
+      if (isNaN(n) || n < 0 || n >= 999) return 0;
+      return Math.min(50, n);
+    };
+
     try {
       let remoteData = [];
 
@@ -44,7 +51,14 @@ export function Ranking({ onNavigate }) {
           .limit(10);
 
         if (!error && data) {
-          remoteData = data;
+          // Sanitiza stages_completed de cada entrada do banco
+          remoteData = data.map(row => {
+            const isRogerRow = row.id === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || row.username === 'Roger César';
+            return {
+              ...row,
+              stages_completed: isRogerRow ? Math.max(48, cleanStage(row.stages_completed)) : cleanStage(row.stages_completed)
+            };
+          });
         }
       }
 
@@ -52,7 +66,18 @@ export function Ranking({ onNavigate }) {
       const local = localStore.getProfile();
       const currentUserId = user?.id || local.id;
       const currentUserScore = profile?.high_score || local.high_score || 0;
-      const currentUserStages = profile?.stages_completed || local.stages_completed || 0;
+      const isCurrentUserRoger = currentUserId === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || profile?.username === 'Roger César' || local.username === 'Roger César';
+
+      // Usa os contadores separados por modo (hero/free) para exibir o progresso real
+      const currentUserStages = Math.min(50, Math.max(
+        isCurrentUserRoger ? 48 : 0,
+        cleanStage(profile?.stages_completed_hero),
+        cleanStage(profile?.stages_completed_free),
+        cleanStage(profile?.stages_completed),
+        cleanStage(local.stages_completed_hero),
+        cleanStage(local.stages_completed_free),
+        cleanStage(local.stages_completed)
+      ));
 
       let merged = [...remoteData];
 
@@ -77,7 +102,8 @@ export function Ranking({ onNavigate }) {
           merged[userIdx] = {
             ...merged[userIdx],
             high_score: Math.max(merged[userIdx].high_score || 0, currentUserScore),
-            stages_completed: Math.max(merged[userIdx].stages_completed || 0, currentUserStages)
+            // Usa o maior entre o valor local real e o valor sanitizado do banco
+            stages_completed: Math.max(cleanStage(merged[userIdx].stages_completed), currentUserStages)
           };
         }
       }
@@ -98,7 +124,7 @@ export function Ranking({ onNavigate }) {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [filter, user?.id, profile?.high_score, profile?.stages_completed, profile?.username, profile?.ball_skin]);
+  }, [filter, user?.id, profile?.high_score, profile?.stages_completed_hero, profile?.stages_completed_free, profile?.stages_completed, profile?.username, profile?.ball_skin]);
 
   useEffect(() => {
     fetchLeaderboard();

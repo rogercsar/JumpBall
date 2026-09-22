@@ -107,8 +107,8 @@ export function Game({ onNavigate }) {
   // Progresso estritamente independente para cada modo (Livre ou Herói)
   // Garante que o progresso de um modo nunca vaze para o outro e limita a 50
   const activeCompletedStages = soloJourney === 'free'
-    ? Math.min(50, Math.max(0, profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0))
-    : Math.min(50, Math.max(0, profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0));
+    ? Math.min(50, Math.max(0, profile?.stages_completed_free || 0, localStore.getProfile()?.stages_completed_free || 0))
+    : Math.min(50, Math.max(0, profile?.stages_completed_hero || 0, localStore.getProfile()?.stages_completed_hero || 0));
 
   // Fases customizadas para o modo selecionado
   const activeStages = React.useMemo(() => {
@@ -121,8 +121,8 @@ export function Game({ onNavigate }) {
       localStorage.setItem('jumpball_solo_journey', journey);
     } catch (e) { /* ignore */ }
     const journeyCompleted = journey === 'free'
-      ? Math.min(50, Math.max(0, profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0))
-      : Math.min(50, Math.max(0, profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0));
+      ? Math.min(50, Math.max(0, profile?.stages_completed_free || 0, localStore.getProfile()?.stages_completed_free || 0))
+      : Math.min(50, Math.max(0, profile?.stages_completed_hero || 0, localStore.getProfile()?.stages_completed_hero || 0));
     setSelectedWorldId(Math.min(10, Math.max(1, Math.floor(journeyCompleted / 5) + 1)));
   };
 

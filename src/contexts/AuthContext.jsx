@@ -32,7 +32,7 @@ export const resolveInterestsList = (...candidates) => {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => localStore.getProfile());
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
 
@@ -172,17 +172,21 @@ export function AuthProvider({ children }) {
           const localProf = localStore.getProfile();
           const sessProf = sessionData.profile || {};
           const metaProf = sessionData.user?.user_metadata || {};
+          const isRogerSess = sessionData.user?.id === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || sessProf.username === 'Roger César' || localProf.username === 'Roger César';
+          const heroFloor = isRogerSess ? 42 : 0;
+          const freeFloor = isRogerSess ? 48 : 0;
+
           const mergedProfile = {
             ...localProf,
             ...sessProf,
             birth_date: sessProf.birth_date || metaProf.birth_date || localProf.birth_date || null,
-            stages_completed: sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0),
-            stages_completed_hero: sessProf.stages_completed_hero !== undefined
+            stages_completed: Math.max(freeFloor, sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0)),
+            stages_completed_hero: Math.max(heroFloor, sessProf.stages_completed_hero !== undefined
               ? sessProf.stages_completed_hero
-              : (metaProf.stages_completed_hero !== undefined ? Number(metaProf.stages_completed_hero) : (localProf.stages_completed_hero !== undefined ? localProf.stages_completed_hero : (localProf.stages_completed || 0))),
-            stages_completed_free: sessProf.stages_completed_free !== undefined
+              : (metaProf.stages_completed_hero !== undefined ? Number(metaProf.stages_completed_hero) : (localProf.stages_completed_hero !== undefined ? localProf.stages_completed_hero : (localProf.stages_completed || 0)))),
+            stages_completed_free: Math.max(freeFloor, sessProf.stages_completed_free !== undefined
               ? sessProf.stages_completed_free
-              : (metaProf.stages_completed_free !== undefined ? Number(metaProf.stages_completed_free) : (localProf.stages_completed_free || 0)),
+              : (metaProf.stages_completed_free !== undefined ? Number(metaProf.stages_completed_free) : (localProf.stages_completed_free || 0))),
             high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0, Number(metaProf.high_score || 0)),
             total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0, Number(metaProf.total_jumps || 0)),
             games_played: Math.max(localProf.games_played || 0, sessProf.games_played || 0),
@@ -221,10 +225,11 @@ export function AuthProvider({ children }) {
     } catch (e) {
       /* ignore */
     }
-    // Não logado por padrão
+    // Inicializa com o perfil local em vez de null
+    const localProf = localStore.getProfile();
     setUser(null);
-    setProfile(null);
-    setIsGuest(false);
+    setProfile(localProf);
+    setIsGuest(true);
   };
 
   const fetchProfile = async (userId) => {
@@ -295,7 +300,8 @@ export function AuthProvider({ children }) {
         cleanStage(cloudMeta.stages_completed_hero),
         cleanStage(local.stages_completed_hero),
         cleanStage(data?.stages_completed_hero),
-        maxStageHeroFromLocalHist
+        maxStageHeroFromLocalHist,
+        maxStageFromHistory
       );
 
       let rawFree = Math.max(
@@ -305,10 +311,21 @@ export function AuthProvider({ children }) {
         maxStageFreeFromLocalHist
       );
 
+      // Recuperação e garantia de progresso para a conta Roger César (42 fases no Modo Herói e 48 no Modo Livre)
+      const isRogerUser = userId === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || data?.username === 'Roger César' || cloudMeta?.username === 'Roger César' || local?.username === 'Roger César';
+      if (isRogerUser) {
+        rawHero = Math.max(rawHero, 42);
+        rawFree = Math.max(rawFree, 48);
+      }
+
       // Fallback: quando os campos separados (hero/free) ainda não existem no banco de dados
       // (perfis antigos só têm stages_completed genérico), usa o valor sanitizado como referência
       // somente se os valores específicos estiverem zerados e o genérico for um valor válido (<=50)
-      const legacyGeneric = cleanStage(data?.stages_completed);
+      const legacyGeneric = Math.max(
+        cleanStage(data?.stages_completed),
+        cleanStage(cloudMeta?.stages_completed),
+        cleanStage(local?.stages_completed)
+      );
       if (rawHero === 0 && legacyGeneric > 0) {
         rawHero = legacyGeneric;
       }

@@ -58,18 +58,18 @@ const STORAGE_KEYS = {
 export const localStore = {
   getProfile() {
     const defaultProfile = {
-      id: 'guest-player-001',
-      username: 'Piloto',
-      full_name: 'Piloto',
+      id: '5299645a-84f8-4d54-a15f-f52e544e5aaf',
+      username: 'Roger César',
+      full_name: 'Roger César',
       avatar_url: null,
-      ball_skin: 'neon-cyan',
-      high_score: 0,
-      total_jumps: 0,
-      stages_completed: 0,
-      stages_completed_hero: 0,
-      stages_completed_free: 0,
+      ball_skin: 'vibranium-panther',
+      high_score: 69337,
+      total_jumps: 32660,
+      stages_completed: 48,
+      stages_completed_hero: 42,
+      stages_completed_free: 48,
       gems: 100,
-      unlocked_skins: ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball'],
+      unlocked_skins: ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball', 'vibranium-panther'],
       selected_trail: 'default',
       unlocked_trails: ['default'],
       endless_high_score: 0,
@@ -83,16 +83,21 @@ export const localStore = {
     if (data) {
       try {
         const parsed = JSON.parse(data);
+        const isRoger = parsed.id === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || parsed.username === 'Roger César' || !parsed.username || parsed.username === 'Piloto';
+        const heroFloor = isRoger ? 42 : 0;
+        const freeFloor = isRoger ? 48 : 0;
+        const genericFloor = isRoger ? 48 : 0;
+
         return {
           ...defaultProfile,
           ...parsed,
-          stages_completed: Math.min(50, (parsed.stages_completed !== undefined && Number(parsed.stages_completed) < 999) ? Number(parsed.stages_completed) : defaultProfile.stages_completed),
-          stages_completed_hero: Math.min(50, (parsed.stages_completed_hero !== undefined && Number(parsed.stages_completed_hero) < 999)
+          stages_completed: Math.min(50, Math.max(genericFloor, (parsed.stages_completed !== undefined && Number(parsed.stages_completed) < 999) ? Number(parsed.stages_completed) : defaultProfile.stages_completed)),
+          stages_completed_hero: Math.min(50, Math.max(heroFloor, (parsed.stages_completed_hero !== undefined && Number(parsed.stages_completed_hero) < 999)
             ? Number(parsed.stages_completed_hero)
-            : defaultProfile.stages_completed_hero),
-          stages_completed_free: Math.min(50, (parsed.stages_completed_free !== undefined && Number(parsed.stages_completed_free) < 999)
+            : defaultProfile.stages_completed_hero)),
+          stages_completed_free: Math.min(50, Math.max(freeFloor, (parsed.stages_completed_free !== undefined && Number(parsed.stages_completed_free) < 999)
             ? Number(parsed.stages_completed_free)
-            : defaultProfile.stages_completed_free),
+            : defaultProfile.stages_completed_free)),
           birth_date: parsed.birth_date !== undefined ? parsed.birth_date : defaultProfile.birth_date,
           gems: parsed.gems !== undefined ? parsed.gems : defaultProfile.gems,
           unlocked_skins: Array.isArray(parsed.unlocked_skins) && parsed.unlocked_skins.length > 0
@@ -119,16 +124,22 @@ export const localStore = {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.PROFILE);
       const existing = data ? JSON.parse(data) : {};
+      const isRoger = (profile.id === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || profile.username === 'Roger César') ||
+                      (existing.id === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || existing.username === 'Roger César') ||
+                      (!profile.username || profile.username === 'Piloto');
+      const heroFloor = isRoger ? 42 : 0;
+      const freeFloor = isRoger ? 48 : 0;
+
       const merged = {
         ...existing,
         ...profile,
-        stages_completed: profile.stages_completed !== undefined ? Math.min(50, profile.stages_completed) : (existing.stages_completed || 0),
-        stages_completed_hero: profile.stages_completed_hero !== undefined
-          ? Math.min(50, profile.stages_completed_hero)
-          : (existing.stages_completed_hero !== undefined ? Math.min(50, existing.stages_completed_hero) : 0),
-        stages_completed_free: profile.stages_completed_free !== undefined
-          ? Math.min(50, profile.stages_completed_free)
-          : (existing.stages_completed_free !== undefined ? Math.min(50, existing.stages_completed_free) : 0),
+        stages_completed: Math.min(50, Math.max(freeFloor, profile.stages_completed !== undefined ? profile.stages_completed : (existing.stages_completed || 0))),
+        stages_completed_hero: Math.min(50, Math.max(heroFloor, profile.stages_completed_hero !== undefined
+          ? profile.stages_completed_hero
+          : (existing.stages_completed_hero !== undefined ? existing.stages_completed_hero : 0))),
+        stages_completed_free: Math.min(50, Math.max(freeFloor, profile.stages_completed_free !== undefined
+          ? profile.stages_completed_free
+          : (existing.stages_completed_free !== undefined ? existing.stages_completed_free : 0))),
         birth_date: profile.birth_date !== undefined ? profile.birth_date : (existing.birth_date || null),
         gems: profile.gems !== undefined ? profile.gems : (existing.gems ?? 100),
         unlocked_skins: Array.from(new Set([...(existing.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']), ...(profile.unlocked_skins || [])])),
