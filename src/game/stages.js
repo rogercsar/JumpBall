@@ -1339,3 +1339,189 @@ export const ENDLESS_STAGE = {
   mechanic: 'Magma ascendente contínuo e geração infinita de plataformas.'
 };
 
+/**
+ * Configurações e customizações exclusivas para as 50 Fases do Modo Livre (Jornada Livre)
+ * No Modo Livre, as 5ªs fases de cada mundo não possuem chefões/combate com canhões,
+ * tornando-se cumes lendários de escalada vertical pura.
+ */
+export const FREE_STAGE_CUSTOMIZATIONS = {
+  5: {
+    title: '🏔️ Cume do Bosque Ancestral',
+    icon: 'TreePine',
+    description: 'CUME DO MUNDO 1! Conquiste o ápice da floresta ancestral entre copas colossais e plataformas flutuantes de carvalho sagrado.',
+    mechanic: 'Escalada do Cume: plataformas com super-molas e correntes termais ascendentes.',
+    bgGradient: ['#042014', '#0d4a32', '#15734e'],
+    platformColor: '#10b981',
+    platformBorder: '#6ee7b7',
+    ballGlow: '#34d399',
+    hazards: ['springs', 'moving'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 150
+  },
+  10: {
+    title: '🏔️ Pináculo Dourado de Rá',
+    icon: 'Sun',
+    description: 'CUME DO MUNDO 2! Atinga o topo da pirâmide celestial sob tempestades de areia dourada e correntes de ar quente.',
+    mechanic: 'Pináculo Solar: rajadas de vento ascendente e plataformas de arenito dourado suspensas.',
+    bgGradient: ['#261502', '#4d2d05', '#78460a'],
+    platformColor: '#f59e0b',
+    platformBorder: '#fde68a',
+    ballGlow: '#fbbf24',
+    hazards: ['moving', 'fragile', 'springs'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 180
+  },
+  15: {
+    title: '🏔️ Fossa Abissal das Marés',
+    icon: 'Waves',
+    description: 'CUME DO MUNDO 3! Emerge das profundezas abissais pegando carona em geisers hidrotermais e super bolhas acrobáticas.',
+    mechanic: 'Super Flutuabilidade: salto ampliado por geisers e correntes marítimas fluidas.',
+    bgGradient: ['#02182b', '#063d69', '#0d63a5'],
+    platformColor: '#06b6d4',
+    platformBorder: '#a5f3fc',
+    ballGlow: '#22d3ee',
+    hazards: ['springs', 'moving'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 200
+  },
+  20: {
+    title: '🏔️ Agulha Trovejante do Cânion',
+    icon: 'Zap',
+    description: 'CUME DO MUNDO 4! Supere o cânion de tempestades saltando entre condutores magnéticos energizados em alta velocidade.',
+    mechanic: 'Condução Eletrostática: plataformas energizadas de alta impulsão e reflexos ágeis.',
+    bgGradient: ['#100b2b', '#251660', '#41229e'],
+    platformColor: '#8b5cf6',
+    platformBorder: '#c4b5fd',
+    ballGlow: '#a78bfa',
+    hazards: ['moving', 'conveyor', 'springs'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 220
+  },
+  25: {
+    title: '🏔️ Pico do Glaciar Eterno',
+    icon: 'Snowflake',
+    description: 'CUME DO MUNDO 5! Escale a agulha de gelo polar no topo do mundo desafiando a inércia do gelo e ventos boreais.',
+    mechanic: 'Patinação Polar: deslizes ultra-suaves com molas de cristal de gelo.',
+    bgGradient: ['#041a2f', '#09365e', '#105c9e'],
+    platformColor: '#38bdf8',
+    platformBorder: '#e0f2fe',
+    ballGlow: '#7dd3fc',
+    hazards: ['ice_slick', 'wind', 'springs'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 250
+  },
+  30: {
+    title: '🏔️ Cratera Primordial de Magma',
+    icon: 'Flame',
+    description: 'CUME DO MUNDO 6! Escale as bordas da caldeira vulcânica sobre rochas de basalto com empuxo de ar quente térmico.',
+    mechanic: 'Termas Vulcânicas: plataformas de basalto com empuxo de ar quente sem queda na lava.',
+    bgGradient: ['#240905', '#52140a', '#852012'],
+    platformColor: '#ef4444',
+    platformBorder: '#fca5a5',
+    ballGlow: '#f87171',
+    hazards: ['moving', 'fragile', 'springs'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 280
+  },
+  35: {
+    title: '🏔️ Torre Neural Cyberpunk',
+    icon: 'Cpu',
+    description: 'CUME DO MUNDO 7! O cume da torre de dados da metrópole neon, dominando esteiras de alta velocidade e feixes energéticos.',
+    mechanic: 'Aceleração de Dados: esteiras aceleradoras e nós de salto holográficos.',
+    bgGradient: ['#051c24', '#0d3d4f', '#13627d'],
+    platformColor: '#06b6d4',
+    platformBorder: '#67e8f9',
+    ballGlow: '#22d3ee',
+    hazards: ['conveyor', 'moving', 'springs'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 300
+  },
+  40: {
+    title: '🏔️ Vórtice do Horizonte Cósmico',
+    icon: 'Sparkles',
+    description: 'CUME DO MUNDO 8! O cume da fenda dimensional com saltos gravitacionais leves e plataformas quânticas radiantes.',
+    mechanic: 'Microgravidade Fluida: saltos prolongados com precisão acrobática.',
+    bgGradient: ['#1a082b', '#3b0f5e', '#6718a3'],
+    platformColor: '#d946ef',
+    platformBorder: '#f5d0fe',
+    ballGlow: '#e879f9',
+    hazards: ['springs', 'moving', 'conveyor'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 320
+  },
+  45: {
+    title: '🏔️ Pináculo Industrial de Bronze',
+    icon: 'Layers',
+    description: 'CUME DO MUNDO 9! A coroa da usina a vapor steampunk, navegando engrenagens monumentais e pistões de bronze amortecidos.',
+    mechanic: 'Mecânica a Vapor: plataformas móveis ritmadas com amortecedores a vapor.',
+    bgGradient: ['#26150b', '#4f2c16', '#7d4521'],
+    platformColor: '#f97316',
+    platformBorder: '#fed7aa',
+    ballGlow: '#fb923c',
+    hazards: ['moving', 'conveyor', 'springs'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 350
+  },
+  50: {
+    title: '🏔️ O Grande Zênite Celestial',
+    icon: 'Sparkles',
+    description: 'CUME SUPREMO AOS 50.000m! O ápice do universo onde todas as constelações celebram sua escalada vertical definitiva.',
+    mechanic: 'Dança Cósmica: o percurso supremo de plataformas estelares em harmonia pura sem combate.',
+    bgGradient: ['#130a2a', '#2c125e', '#4c1d95'],
+    platformColor: '#fbbf24',
+    platformBorder: '#fef08a',
+    ballGlow: '#fde047',
+    hazards: ['moving', 'springs', 'conveyor'],
+    isSummitStage: true,
+    isBossStage: false,
+    rewardGems: 500
+  }
+};
+
+/**
+ * Retorna as 50 Fases com personalizações exclusivas para a Jornada Livre:
+ * - As 5ªs fases viram cumes sem chefões
+ * - Fases normais recebem toques de exploração zen e ritmo acrobático
+ */
+export const FREE_STAGES = STAGES.map((stage) => {
+  const custom = FREE_STAGE_CUSTOMIZATIONS[stage.number];
+  if (custom) {
+    return {
+      ...stage,
+      ...custom,
+      journeyMode: 'free'
+    };
+  }
+
+  // Fases regulares da Jornada Livre: remove qualquer flag de boss e ajusta descrição se necessário
+  return {
+    ...stage,
+    isBossStage: false,
+    journeyMode: 'free',
+    description: stage.description.replace(/BATALHA DE CHEFÃO!?/gi, 'EXPLORAÇÃO VERTICAL!'),
+    mechanic: stage.mechanic.replace(/Batalha de Chefão:?/gi, 'Desafio de Escalada:')
+  };
+});
+
+/**
+ * Função utilitária para obter a lista de fases baseada no modo de jornada solo
+ * @param {'hero' | 'free'} mode
+ * @returns {Array} Lista de 50 fases configuradas para o modo
+ */
+export function getStagesForMode(mode = 'hero') {
+  if (mode === 'free') {
+    return FREE_STAGES;
+  }
+  return STAGES;
+}
+
+

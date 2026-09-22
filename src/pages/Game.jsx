@@ -30,7 +30,7 @@ import {
   Compass
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
-import { STAGES, BALL_SKINS, WORLDS } from '../game/stages';
+import { STAGES, BALL_SKINS, WORLDS, getStagesForMode } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
 import { soundEngine } from '../game/audio';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -99,11 +99,25 @@ export function Game({ onNavigate }) {
     }
   });
 
+  // Progresso independente para o modo ativo (Livre ou Herói)
+  const activeCompletedStages = soloJourney === 'free'
+    ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
+    : (profile?.stages_completed_hero ?? profile?.stages_completed ?? localStore.getProfile()?.stages_completed_hero ?? localStore.getProfile()?.stages_completed ?? 0);
+
+  // Fases customizadas para o modo selecionado
+  const activeStages = React.useMemo(() => {
+    return getStagesForMode(soloJourney);
+  }, [soloJourney]);
+
   const handleSoloJourneyChange = (journey) => {
     setSoloJourney(journey);
     try {
       localStorage.setItem('jumpball_solo_journey', journey);
     } catch (e) { /* ignore */ }
+    const journeyCompleted = journey === 'free'
+      ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
+      : (profile?.stages_completed_hero ?? profile?.stages_completed ?? localStore.getProfile()?.stages_completed_hero ?? localStore.getProfile()?.stages_completed ?? 0);
+    setSelectedWorldId(Math.min(10, Math.max(1, Math.floor(journeyCompleted / 5) + 1)));
   };
 
   const [aiDifficulty, setAiDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
@@ -123,7 +137,13 @@ export function Game({ onNavigate }) {
 
   // Seleção de Mundo Temático (1 a 10 ou 'all')
   const [selectedWorldId, setSelectedWorldId] = useState(() => {
-    const completed = profile?.stages_completed || 0;
+    const journey = (() => {
+      try { return localStorage.getItem('jumpball_solo_journey') || 'hero'; } catch (e) { return 'hero'; }
+    })();
+    const localProf = localStore.getProfile();
+    const completed = journey === 'free'
+      ? (localProf.stages_completed_free || 0)
+      : (localProf.stages_completed_hero ?? localProf.stages_completed ?? 0);
     return Math.min(10, Math.max(1, Math.floor(completed / 5) + 1));
   });
 
@@ -298,19 +318,32 @@ export function Game({ onNavigate }) {
     const controlModeVal = settings.controlMode || 'hybrid';
     const isWin = result.status === 'completed';
 
-    // Recupera o maior progresso registrado
+    // Recupera o maior progresso registrado para cada modo de forma totalmente independente
     const localProf = localStore.getProfile();
-    const currentCompleted = Math.max(
-      profileRef.current?.stages_completed || 0,
-      profile?.stages_completed || 0,
-      localProf.stages_completed || 0
+    const isFreeMode = soloJourney === 'free';
+
+    const currentHeroCompleted = Math.max(
+      profileRef.current?.stages_completed_hero ?? profileRef.current?.stages_completed ?? 0,
+      profile?.stages_completed_hero ?? profile?.stages_completed ?? 0,
+      localProf.stages_completed_hero ?? localProf.stages_completed ?? 0
+    );
+
+    const currentFreeCompleted = Math.max(
+      profileRef.current?.stages_completed_free ?? 0,
+      profile?.stages_completed_free ?? 0,
+      localProf.stages_completed_free ?? 0
     );
 
     const isEventStage = Boolean(stageObj?.isEvent);
-    // Se concluiu a fase normal, avança o progresso sequencial. Fases de eventos comemorativos são bônus independentes.
-    const newStagesCompleted = (isWin && !isEventStage && stageNumber < 999)
-      ? Math.max(currentCompleted, stageNumber)
-      : currentCompleted;
+    // Avança estritamente o progresso do modo jogado
+    const newHeroCompleted = (!isFreeMode && isWin && !isEventStage && stageNumber < 999)
+      ? Math.max(currentHeroCompleted, stageNumber)
+      : currentHeroCompleted;
+
+    const newFreeCompleted = (isFreeMode && isWin && !isEventStage && stageNumber < 999)
+      ? Math.max(currentFreeCompleted, stageNumber)
+      : currentFreeCompleted;
+
     const newHighScore = Math.max(profileRef.current?.high_score || 0, localProf.high_score || 0, scoreVal);
     const newTotalJumps = (profileRef.current?.total_jumps || localProf.total_jumps || 0) + jumpsVal;
     const newGamesPlayed = (profileRef.current?.games_played || localProf.games_played || 0) + 1;
@@ -320,6 +353,8 @@ export function Game({ onNavigate }) {
       user_id: user?.id || null,
       stageId: stageNumber,
       stage_id: stageNumber,
+      journey_mode: soloJourney,
+      soloJourney: soloJourney,
       score: scoreVal,
       maxHeight: heightVal,
       max_height: heightVal,
@@ -333,7 +368,9 @@ export function Game({ onNavigate }) {
     };
 
     const updates = {
-      stages_completed: newStagesCompleted,
+      stages_completed: newHeroCompleted,
+      stages_completed_hero: newHeroCompleted,
+      stages_completed_free: newFreeCompleted,
       high_score: newHighScore,
       total_jumps: newTotalJumps,
       games_played: newGamesPlayed
@@ -400,12 +437,12 @@ export function Game({ onNavigate }) {
         console.warn('Aviso: Falha ao inserir no Supabase diretamente:', err);
       }
 
-      // Se venceu a fase, assegura a persistência na nuvem imediatamente
-      if (isWin) {
+      // Se venceu a fase no modo herói, assegura a persistência na nuvem imediatamente
+      if (isWin && !isFreeMode) {
         try {
           const { error: profError } = await supabase.from('profiles').upsert({
             id: user.id,
-            stages_completed: newStagesCompleted,
+            stages_completed: newHeroCompleted,
             updated_at: new Date().toISOString()
           }, { onConflict: 'id' });
           if (profError) console.warn('Aviso: Erro ao atualizar stages_completed no Supabase:', profError);
@@ -752,7 +789,9 @@ export function Game({ onNavigate }) {
               </div>
             ) : (
               <div className="text-xs text-slate-400 hidden md:block">
-                Subida individual por {STAGES.length} biomas cósmicos com pontuação e recordes.
+                {soloJourney === 'free'
+                  ? 'Jornada Livre: 50 fases de pura escalada sem chefões com física e ritmo zen.'
+                  : 'Jornada do Herói: 50 fases épicas enfrentando os 10 Titãs Guardiões.'}
               </div>
             )}
           </div>
@@ -854,7 +893,7 @@ export function Game({ onNavigate }) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
-                        <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">✓ 50 Fases Desbloqueáveis</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-black">Progresso: {profile?.stages_completed_free || localStore.getProfile()?.stages_completed_free || 0}/50 Fases</span>
                         <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">✓ Linha de Chegada Clássica</span>
                         <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold">✓ Ritmo Contínuo</span>
                       </div>
@@ -897,7 +936,7 @@ export function Game({ onNavigate }) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
-                        <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">👑 10 Batalhas de Titãs</span>
+                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">Progresso: {profile?.stages_completed_hero ?? profile?.stages_completed ?? localStore.getProfile()?.stages_completed_hero ?? 0}/50 Fases</span>
                         <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">⚡ Baterias de Energia</span>
                         <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold">🌌 Ataque do Multiverso</span>
                       </div>
@@ -981,28 +1020,49 @@ export function Game({ onNavigate }) {
               {/* Seletor dos 10 Mundos Temáticos e Batalhas de Chefão */}
               <div className="mb-6 space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-                      <Globe className="w-5 h-5" />
+                  {soloJourney === 'free' ? (
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                        <Compass className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
+                          MUNDOS & EXPEDIÇÕES
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+                            10 Mundos · 50 Fases Livres
+                          </span>
+                        </h2>
+                        <p className="text-xs text-slate-400">
+                          Cada mundo possui 5 fases. Na 5ª fase conquiste o Cume do Mundo em pura escalada vertical!
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
-                        MUNDOS & CHEFÕES
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                          10 Mundos · 50 Fases
-                        </span>
-                      </h2>
-                      <p className="text-xs text-slate-400">
-                        Cada mundo possui 5 fases. Na 5ª fase enfrente o Chefão Guardião!
-                      </p>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
+                          MUNDOS & CHEFÕES
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                            10 Mundos · 50 Fases
+                          </span>
+                        </h2>
+                        <p className="text-xs text-slate-400">
+                          Cada mundo possui 5 fases. Na 5ª fase enfrente o Chefão Guardião!
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <button
                     type="button"
                     onClick={() => setSelectedWorldId('all')}
                     className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${selectedWorldId === 'all'
-                        ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20 scale-105'
+                        ? soloJourney === 'free'
+                          ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20 scale-105'
+                          : 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20 scale-105'
                         : 'bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60 hover:bg-slate-700/60'
                       }`}
                   >
@@ -1013,7 +1073,7 @@ export function Game({ onNavigate }) {
                 {/* Abas Horizontais dos Mundos com Scroll Suave */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                   {WORLDS.map((w) => {
-                    const completedStages = profile?.stages_completed || 0;
+                    const completedStages = activeCompletedStages;
                     const isWorldUnlocked = w.stageRange[0] <= Math.max(1, completedStages + 1);
                     const worldStagesCompleted = Math.max(
                       0,
@@ -1028,7 +1088,9 @@ export function Game({ onNavigate }) {
                         type="button"
                         onClick={() => setSelectedWorldId(w.id)}
                         className={`group relative flex items-center gap-2 px-3 py-2 rounded-2xl border shrink-0 transition-all text-left ${isSelected
-                            ? 'bg-slate-800/90 border-cyan-400/80 shadow-lg shadow-cyan-500/10 scale-105 ring-1 ring-cyan-400/40'
+                            ? soloJourney === 'free'
+                              ? 'bg-slate-800/90 border-emerald-400/80 shadow-lg shadow-emerald-500/10 scale-105 ring-1 ring-emerald-400/40'
+                              : 'bg-slate-800/90 border-cyan-400/80 shadow-lg shadow-cyan-500/10 scale-105 ring-1 ring-cyan-400/40'
                             : !isWorldUnlocked
                               ? 'bg-slate-900/40 border-slate-800 opacity-60 hover:opacity-80'
                               : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/50'
@@ -1037,7 +1099,7 @@ export function Game({ onNavigate }) {
                         <div
                           className="w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs shadow-inner shrink-0"
                           style={{
-                            backgroundColor: isSelected ? w.accentColor : '#1e293b',
+                            backgroundColor: isSelected ? (soloJourney === 'free' ? '#10b981' : w.accentColor) : '#1e293b',
                             color: isSelected ? '#020617' : '#94a3b8'
                           }}
                         >
@@ -1048,14 +1110,20 @@ export function Game({ onNavigate }) {
                             <span className={`text-xs font-bold whitespace-nowrap ${isSelected ? 'text-white' : 'text-slate-300'}`}>
                               {w.shortName}
                             </span>
-                            <span className="text-[10px]" title={`Chefão: ${w.bossName}`}>
-                              👑
-                            </span>
+                            {soloJourney === 'free' ? (
+                              <span className="text-[10px]" title={`Cume: Fase ${w.bossStageNumber}`}>
+                                🏔️
+                              </span>
+                            ) : (
+                              <span className="text-[10px]" title={`Chefão: ${w.bossName}`}>
+                                👑
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-1 mt-0.5">
                             <div className="w-12 h-1 bg-slate-950 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-cyan-400 transition-all duration-300"
+                                className={`h-full ${soloJourney === 'free' ? 'bg-emerald-400' : 'bg-cyan-400'} transition-all duration-300`}
                                 style={{ width: `${(worldStagesCompleted / 5) * 100}%` }}
                               />
                             </div>
@@ -1079,7 +1147,7 @@ export function Game({ onNavigate }) {
                           <h3 className="text-sm font-black text-white">
                             {currentWorld.name}
                           </h3>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${soloJourney === 'free' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'}`}>
                             Fases {currentWorld.stageRange[0]} a {currentWorld.stageRange[1]}
                           </span>
                         </div>
@@ -1106,20 +1174,20 @@ export function Game({ onNavigate }) {
 
               {/* Grid das Fases Filtradas por Mundo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {STAGES.filter((stage) => {
+                {activeStages.filter((stage) => {
                   if (selectedWorldId === 'all') return true;
                   const world = WORLDS.find((w) => w.id === selectedWorldId);
                   if (!world) return true;
                   return stage.number >= world.stageRange[0] && stage.number <= world.stageRange[1];
                 }).map((stage) => {
-                  const completedStages = profile?.stages_completed || 0;
+                  const completedStages = activeCompletedStages;
                   // Fase 1 sempre desbloqueada, subsequentes desbloqueadas se a anterior foi concluída
                   const isUnlocked = stage.number <= Math.max(1, completedStages + 1);
                   const isCompleted = stage.number <= completedStages;
 
                   return (
                     <StageCard
-                      key={stage.id}
+                      key={`${soloJourney}-${stage.id}`}
                       stage={stage}
                       isUnlocked={isUnlocked}
                       isCompleted={isCompleted}

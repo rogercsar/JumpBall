@@ -177,6 +177,12 @@ export function AuthProvider({ children }) {
             ...sessProf,
             birth_date: sessProf.birth_date || metaProf.birth_date || localProf.birth_date || null,
             stages_completed: sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0),
+            stages_completed_hero: sessProf.stages_completed_hero !== undefined
+              ? sessProf.stages_completed_hero
+              : (metaProf.stages_completed_hero !== undefined ? Number(metaProf.stages_completed_hero) : (localProf.stages_completed_hero !== undefined ? localProf.stages_completed_hero : (localProf.stages_completed || 0))),
+            stages_completed_free: sessProf.stages_completed_free !== undefined
+              ? sessProf.stages_completed_free
+              : (metaProf.stages_completed_free !== undefined ? Number(metaProf.stages_completed_free) : (localProf.stages_completed_free || 0)),
             high_score: Math.max(localProf.high_score || 0, sessProf.high_score || 0, Number(metaProf.high_score || 0)),
             total_jumps: Math.max(localProf.total_jumps || 0, sessProf.total_jumps || 0, Number(metaProf.total_jumps || 0)),
             games_played: Math.max(localProf.games_played || 0, sessProf.games_played || 0),
@@ -259,14 +265,23 @@ export function AuthProvider({ children }) {
         /* ignore */
       }
 
-      // Preserva sempre o maior progresso alcançado (ex: se o jogador chegou na fase 38 no celular,
-      // esse valor nunca será rebaixado por dados antigos de outra máquina)
-      const resolvedStage = Math.max(
+      // Preserva sempre o maior progresso alcançado (separado por Modo Herói e Modo Livre)
+      const resolvedStageHero = Math.max(
+        Number(data?.stages_completed_hero || 0),
         Number(data?.stages_completed || 0),
-        local.stages_completed || 0,
+        local.stages_completed_hero !== undefined ? local.stages_completed_hero : (local.stages_completed || 0),
+        Number(cloudMeta.stages_completed_hero || 0),
         Number(cloudMeta.stages_completed || 0),
         maxStageFromHistory
       );
+
+      const resolvedStageFree = Math.max(
+        Number(data?.stages_completed_free || 0),
+        Number(local.stages_completed_free || 0),
+        Number(cloudMeta.stages_completed_free || 0)
+      );
+
+      const resolvedStage = resolvedStageHero;
 
       const bestHighScore = Math.max(
         data?.high_score || 0, 
@@ -332,7 +347,9 @@ export function AuthProvider({ children }) {
         ...(data || {}),
         id: userId,
         birth_date: resolvedBirthDate,
-        stages_completed: resolvedStage,
+        stages_completed: resolvedStageHero,
+        stages_completed_hero: resolvedStageHero,
+        stages_completed_free: resolvedStageFree,
         high_score: bestHighScore,
         total_jumps: bestTotalJumps,
         games_played: bestGamesPlayed,
@@ -385,7 +402,9 @@ export function AuthProvider({ children }) {
               achievements: resolvedAchievements,
               daily_quests_progress: resolvedDailyQuests,
               endless_high_score: resolvedEndlessScore,
-              stages_completed: resolvedStage,
+              stages_completed: resolvedStageHero,
+              stages_completed_hero: resolvedStageHero,
+              stages_completed_free: resolvedStageFree,
               high_score: bestHighScore,
               total_jumps: bestTotalJumps,
               user_interests: resolvedInterests
@@ -637,6 +656,8 @@ export function AuthProvider({ children }) {
       ball_skin: updates.ball_skin || updates.ballSkin || base.ball_skin || 'neon-cyan',
       daily_quests_progress: updates.daily_quests_progress || base.daily_quests_progress || { date: '', progress: {}, claimed: {} },
       stages_completed: updates.stages_completed !== undefined ? updates.stages_completed : (base.stages_completed || 0),
+      stages_completed_hero: updates.stages_completed_hero !== undefined ? updates.stages_completed_hero : (base.stages_completed_hero !== undefined ? base.stages_completed_hero : (base.stages_completed || 0)),
+      stages_completed_free: updates.stages_completed_free !== undefined ? updates.stages_completed_free : (base.stages_completed_free || 0),
       high_score: Math.max(base.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
       total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (base.total_jumps || 0),
       games_played: (updates.games_played !== undefined) ? updates.games_played : (base.games_played || 0),
@@ -692,6 +713,8 @@ export function AuthProvider({ children }) {
               daily_quests_progress: updated.daily_quests_progress,
               endless_high_score: updated.endless_high_score,
               stages_completed: updated.stages_completed,
+              stages_completed_hero: updated.stages_completed_hero,
+              stages_completed_free: updated.stages_completed_free,
               high_score: updated.high_score,
               total_jumps: updated.total_jumps,
               user_interests: updated.user_interests
@@ -708,12 +731,13 @@ export function AuthProvider({ children }) {
   };
 
   // Resetar progresso das fases (zera stages_completed para 0, mantendo todo o histórico de partidas intacto)
-  const resetStageProgress = async () => {
+  const resetStageProgress = async (mode = 'all') => {
     const local = localStore.getProfile();
     const current = profile ? { ...local, ...profile } : local;
     const updated = {
       ...current,
-      stages_completed: 0
+      ...(mode === 'all' || mode === 'hero' ? { stages_completed: 0, stages_completed_hero: 0 } : {}),
+      ...(mode === 'all' || mode === 'free' ? { stages_completed_free: 0 } : {})
     };
     setProfile(updated);
     localStore.saveProfile(updated);
@@ -734,12 +758,22 @@ export function AuthProvider({ children }) {
           .from('profiles')
           .upsert({ 
             id: user.id, 
-            stages_completed: 0, 
+            stages_completed: updated.stages_completed, 
             updated_at: new Date().toISOString() 
           }, { onConflict: 'id' });
         if (upErr) {
           console.error('Erro ao sincronizar reset de fases com o Supabase:', upErr);
         }
+
+        try {
+          await supabase.auth.updateUser({
+            data: {
+              stages_completed: updated.stages_completed,
+              stages_completed_hero: updated.stages_completed_hero,
+              stages_completed_free: updated.stages_completed_free
+            }
+          });
+        } catch (mErr) { /* ignore */ }
       } catch (err) {
         console.error('Erro ao sincronizar reset de fases com o Supabase:', err);
       }
