@@ -96,7 +96,9 @@ export class GameEngine {
       angle: 0,
       hasMagicBackpack: false,
       backpackFuel: 0,
-      backpackMaxFuel: 100
+      backpackMaxFuel: 100,
+      backpackPickupAltitude: 0,
+      lastFuelCanAltitude: 0
     };
 
     // Estado da Bola do Bot IA (Competidor na Corrida vs Máquina)
@@ -724,9 +726,35 @@ export class GameEngine {
       }
     }
 
-    // Geração de Galões de Combustível da Mochila Mágica (Jetpack Plasma Fuel)
-    // Reduzido em 3x para balancear o jogo e não sobrecarregar as plataformas
-    const fuelChance = this.spawnedBackpacksCount > 0 ? 0.04 : 0.025;
+    // Geração Dinâmica e Calibrada de Galões de Combustível da Mochila Mágica (Jetpack Plasma Fuel)
+    // 1. Taxa base aumentada em ~1.8x (de 0.04/0.025 para 0.07/0.045)
+    // 2. Cálculo dinâmico inteligente: quando o jogador está com a mochila ativa,
+    //    calcula com base na altura onde pegou a mochila / último combustível e quanto combustível ainda resta,
+    //    garantindo que apareça combustível na janela de alcance antes de perder a mochila!
+    let fuelChance = this.spawnedBackpacksCount > 0 ? 0.07 : 0.045;
+
+    if (this.ball && this.ball.hasMagicBackpack && this.ball.backpackFuel > 0) {
+      const currentPlatAlt = Math.max(0, Math.floor(-y + this.height - 120));
+      const playerAlt = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
+      const refAlt = this.ball.lastFuelCanAltitude || this.ball.backpackPickupAltitude || playerAlt;
+      
+      // A velocidade de subida é ~1.85px/frame a 60fps (~111px/s).
+      // Com combustível restante (0 a 100), o jogador consegue voar por: (fuel / 18.2) segundos.
+      // Distância máxima alcançável restante com o combustível atual:
+      const remainingSeconds = (this.ball.backpackFuel / 18.2);
+      const maxReachableClimb = Math.max(120, remainingSeconds * 111);
+      const targetFuelAltitude = refAlt + maxReachableClimb * 0.72; // posiciona a ~70% da autonomia para dar tempo de pegar
+
+      // Se a plataforma que está sendo gerada estiver próxima ou acima da janela crítica de reabastecimento
+      if (currentPlatAlt >= targetFuelAltitude - 150 && currentPlatAlt <= targetFuelAltitude + 280) {
+        // Chance significativamente ampliada na janela crítica de resgate
+        fuelChance = Math.max(fuelChance, 0.28);
+      } else if (this.ball.backpackFuel < 40 && currentPlatAlt > playerAlt) {
+        // Se o combustível estiver acabando (<40%), aumenta a chance em qualquer plataforma à frente
+        fuelChance = Math.max(fuelChance, 0.18);
+      }
+    }
+
     if (Math.random() < fuelChance) {
       this.backpackFuelCans.push({
         x: pX + pWidth / 2,
@@ -1347,6 +1375,9 @@ export class GameEngine {
           this.ball.hasMagicBackpack = true;
           this.ball.backpackFuel = 100;
           this.ball.backpackMaxFuel = 100;
+          const currentAlt = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
+          this.ball.backpackPickupAltitude = currentAlt;
+          this.ball.lastFuelCanAltitude = currentAlt;
           this.boostCharge = this.maxBoostCharge;
           this.hasPendingBoostUpdate = true;
           this.score += 250;
@@ -1377,6 +1408,8 @@ export class GameEngine {
           if (this.ball.hasMagicBackpack) {
             // Recarrega o combustível da mochila em +60% (teto de 100) para continuar subindo
             this.ball.backpackFuel = Math.min(this.ball.backpackMaxFuel, this.ball.backpackFuel + 60);
+            const currentAlt = Math.max(0, Math.floor(-this.ball.y + this.height - 120));
+            this.ball.lastFuelCanAltitude = currentAlt;
             try {
               if (soundEngine && typeof soundEngine.playJetpackPickup === 'function') {
                 soundEngine.playJetpackPickup();
