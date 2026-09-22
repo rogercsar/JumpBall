@@ -54,6 +54,13 @@ const PRESET_RADIOS = [
     icon: '⚡'
   },
   {
+    id: 'rock',
+    name: 'Metal & Hard Rock (SomaFM)',
+    desc: 'SomaFM Metal Detector • Heavy metal, hard rock e riffs épicos 24/7',
+    url: 'https://ice1.somafm.com/metal-128-mp3',
+    icon: '🎸'
+  },
+  {
     id: 'gospel_praise',
     name: 'Rádio Super Gospel & Louvor',
     desc: 'Super FM • Louvor, adoração e mensagens cristãs 24/7',
