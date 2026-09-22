@@ -266,19 +266,33 @@ export function AuthProvider({ children }) {
       }
 
       // Preserva sempre o maior progresso alcançado (separado por Modo Herói e Modo Livre)
-      const resolvedStageHero = Math.max(
+      // Também verifica o histórico local para garantir que nenhum progresso anterior seja perdido
+      const localHist = localStore.getHistory();
+      let maxStageFromLocalHist = 0;
+      if (Array.isArray(localHist) && localHist.length > 0) {
+        maxStageFromLocalHist = Math.max(
+          0,
+          ...localHist.map(h => Number(h.stage_id || h.stageId || 0))
+        );
+      }
+
+      const highestKnown = Math.max(
         Number(data?.stages_completed_hero || 0),
         Number(data?.stages_completed || 0),
         local.stages_completed_hero !== undefined ? local.stages_completed_hero : (local.stages_completed || 0),
         Number(cloudMeta.stages_completed_hero || 0),
         Number(cloudMeta.stages_completed || 0),
-        maxStageFromHistory
+        maxStageFromHistory,
+        maxStageFromLocalHist
       );
+
+      const resolvedStageHero = highestKnown;
 
       const resolvedStageFree = Math.max(
         Number(data?.stages_completed_free || 0),
         Number(local.stages_completed_free || 0),
-        Number(cloudMeta.stages_completed_free || 0)
+        Number(cloudMeta.stages_completed_free || 0),
+        highestKnown
       );
 
       const resolvedStage = resolvedStageHero;
@@ -780,6 +794,59 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Restaura progresso das fases para um estágio desejado (ex: 42 fases conquistadas anteriormente)
+  const restoreStageProgress = async (targetStage = 42, mode = 'all') => {
+    const stageNum = Math.max(1, Number(targetStage) || 42);
+    const local = localStore.getProfile();
+    const current = profile ? { ...local, ...profile } : local;
+    const updated = {
+      ...current,
+      ...(mode === 'all' || mode === 'hero' ? {
+        stages_completed: Math.max(current.stages_completed || 0, stageNum),
+        stages_completed_hero: Math.max(current.stages_completed_hero || 0, stageNum)
+      } : {}),
+      ...(mode === 'all' || mode === 'free' ? {
+        stages_completed_free: Math.max(current.stages_completed_free || 0, stageNum)
+      } : {})
+    };
+    setProfile(updated);
+    localStore.saveProfile(updated);
+
+    const saved = localStorage.getItem(LOCAL_SESSION_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        parsed.profile = updated;
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(parsed));
+      } catch (e) { /* ignore */ }
+    }
+
+    if (supabase && isSupabaseConfigured && user && !isGuest && !user.id?.startsWith('offline-') && !user.id?.startsWith('guest-')) {
+      try {
+        await supabase
+          .from('profiles')
+          .upsert({ 
+            id: user.id, 
+            stages_completed: updated.stages_completed, 
+            updated_at: new Date().toISOString() 
+          }, { onConflict: 'id' });
+
+        try {
+          await supabase.auth.updateUser({
+            data: {
+              stages_completed: updated.stages_completed,
+              stages_completed_hero: updated.stages_completed_hero,
+              stages_completed_free: updated.stages_completed_free
+            }
+          });
+        } catch (authErr) { /* ignore */ }
+      } catch (err) {
+        console.warn('Erro ao sincronizar restauração de fases:', err);
+      }
+    }
+    return updated;
+  };
+
   // Adiciona gemas ao saldo do jogador
   const addGems = async (amount) => {
     if (!amount || amount <= 0) return;
@@ -1006,6 +1073,7 @@ export function AuthProvider({ children }) {
         logout,
         updateProfile,
         resetStageProgress,
+        restoreStageProgress,
         addGems,
         buySkin,
         buyTrail,
@@ -1040,6 +1108,7 @@ export function useAuth() {
       logout: async () => {},
       updateProfile: async () => {},
       resetStageProgress: async () => {},
+      restoreStageProgress: async () => {},
       addGems: async () => 0,
       buySkin: async () => ({ success: false }),
       buyTrail: async () => ({ success: false }),

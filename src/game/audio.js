@@ -583,6 +583,33 @@ const BGM_THEMES = {
         leadNotes: [N.A4, N.C5, N.E5, N.C5, N.G5, N.E5, N.C5, N.A4, N.F5, N.D5, N.A4, N.F4, N.E5, N.C5, N.B4, N.A4]
       }
     ]
+  },
+
+  classical_allegro: {
+    variations: [
+      {
+        // Vivaldi Presto / In the Hall of the Mountain King (Rápido, 144 BPM)
+        bpm: 144,
+        filterFreq: 2600,
+        bassOsc: 'triangle',
+        leadOsc: 'sawtooth',
+        bassEnvelope: { attack: 0.015, decay: 0.12, sustain: 0.35, release: 0.05 },
+        leadEnvelope: { attack: 0.01, decay: 0.09, sustain: 0.28, release: 0.05 },
+        bassNotes: [N.A2, N.A2, N.E3, N.A2, N.D3, N.A2, N.C3, N.B2, N.A2, N.A2, N.E3, N.A2, N.F3, N.E3, N.D3, N.B2],
+        leadNotes: [N.A4, N.C5, N.E5, N.A5, N.G5, N.E5, N.F5, N.D5, N.E5, N.C5, N.D5, N.B4, N.C5, N.A4, N.B4, N.E4]
+      },
+      {
+        // Mozart / Beethoven Allegro Molto (Rápido, 148 BPM)
+        bpm: 148,
+        filterFreq: 2800,
+        bassOsc: 'sawtooth',
+        leadOsc: 'triangle',
+        bassEnvelope: { attack: 0.01, decay: 0.11, sustain: 0.32, release: 0.04 },
+        leadEnvelope: { attack: 0.01, decay: 0.08, sustain: 0.25, release: 0.04 },
+        bassNotes: [N.D3, N.D3, N.A2, N.D3, N.G2, N.G2, N.B2, N.G2, N.A2, N.A2, N.Cs3, N.A2, N.D3, N.A2, N.D3, N._],
+        leadNotes: [N.D5, N.Fs5, N.A5, N.D6, N.B5, N.G5, N.E5, N.Cs5, N.D5, N.Fs5, N.A5, N.D6, N.Cs6, N.B5, N.A5, N.G5]
+      }
+    ]
   }
 };
 
@@ -881,6 +908,10 @@ class SoundEngine {
       case 'steampunk':
       case 'iron':
         return 'steampunk_clockwork';
+      case 'classical':
+      case 'orchestra':
+      case 'presto':
+        return 'classical_allegro';
       default:
         return 'nature_pastoral';
     }

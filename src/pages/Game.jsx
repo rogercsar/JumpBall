@@ -69,7 +69,7 @@ export const ENDLESS_STAGE = {
 };
 
 export function Game({ onNavigate }) {
-  const { profile, user, updateProfile, addGems, updateEndlessHighScore, recordQuestProgress } = useAuth();
+  const { profile, user, updateProfile, addGems, updateEndlessHighScore, recordQuestProgress, restoreStageProgress } = useAuth();
   const { settings } = useSettings();
   const { showConfirm, showAlert, isDialogOpen } = useDialog();
 
@@ -105,9 +105,14 @@ export function Game({ onNavigate }) {
   const rematchTimeoutRef = useRef(null);
 
   // Progresso independente para o modo ativo (Livre ou Herói)
-  const activeCompletedStages = soloJourney === 'free'
-    ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
-    : (profile?.stages_completed_hero ?? profile?.stages_completed ?? localStore.getProfile()?.stages_completed_hero ?? localStore.getProfile()?.stages_completed ?? 0);
+  // Reconciliação robusta: garante que o progresso total registrado no perfil (ex: 48 fases) desbloqueie as fases
+  const activeCompletedStages = Math.max(
+    soloJourney === 'free'
+      ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
+      : (profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0),
+    profile?.stages_completed || 0,
+    localStore.getProfile()?.stages_completed || 0
+  );
 
   // Fases customizadas para o modo selecionado
   const activeStages = React.useMemo(() => {
@@ -469,8 +474,18 @@ export function Game({ onNavigate }) {
     const activeDiff = diffOverride || aiDifficulty;
     const activePvP = pvpConfigOverride || pvpMatchConfig;
 
-    setSelectedStage(stage);
-    selectedStageRef.current = stage;
+    // Normaliza a fase para o modo ativo (garante que no Modo Livre a fase venha da lista sem chefões)
+    let resolvedStage = stage;
+    if (activeMode === 'solo' && soloJourney === 'free') {
+      const freeList = getStagesForMode('free');
+      resolvedStage = freeList.find((s) => s.number === stage?.number || s.id === stage?.id) || stage;
+    } else if (activeMode === 'solo' && soloJourney === 'hero') {
+      const heroList = getStagesForMode('hero');
+      resolvedStage = heroList.find((s) => s.number === stage?.number || s.id === stage?.id) || stage;
+    }
+
+    setSelectedStage(resolvedStage);
+    selectedStageRef.current = resolvedStage;
     setGameState(activeMode === 'race_pvp' ? 'playing' : 'ready');
     setCurrentScore(0);
     setCurrentHeight(0);
@@ -493,7 +508,7 @@ export function Game({ onNavigate }) {
 
       const engine = new GameEngine(
         canvas,
-        stage,
+        resolvedStage,
         activeSkin,
         (result) => {
           setGameState('game_over');
@@ -503,23 +518,25 @@ export function Game({ onNavigate }) {
         },
         (result) => {
           setGameState('victory');
-          const isBoss = Boolean(stage?.isBossStage && soloJourney !== 'free');
+          const isBoss = Boolean(resolvedStage?.isBossStage && soloJourney !== 'free');
+          const isSummit = Boolean(resolvedStage?.isSummitStage || (resolvedStage?.number % 5 === 0 && soloJourney === 'free'));
           const enhancedResult = {
             ...result,
-            stage,
-            isEvent: Boolean(stage?.isEvent),
+            stage: resolvedStage,
+            isEvent: Boolean(resolvedStage?.isEvent),
             isBossStage: isBoss,
-            bossName: stage?.bossName,
-            bossRewardGems: isBoss ? (stage?.rewardGems || 200) : 0,
-            eventRewardGems: stage?.rewardGems || 0,
+            isSummitStage: isSummit,
+            bossName: isBoss ? resolvedStage?.bossName : null,
+            bossRewardGems: isBoss ? (resolvedStage?.rewardGems || 200) : 0,
+            eventRewardGems: resolvedStage?.rewardGems || 0,
             celebrationTitle: isBoss
-              ? `👑 CHEFÃO DERROTADO: ${stage?.bossName}!`
-              : (stage?.isBossStage && soloJourney === 'free'
-                ? `🏔️ CUME CONQUISTADO: ${stage?.title}!`
-                : (stage?.celebrationTitle || stage?.name))
+              ? `👑 CHEFÃO DERROTADO: ${resolvedStage?.bossName}!`
+              : (isSummit
+                ? `🏔️ CUME CONQUISTADO: ${resolvedStage?.title}!`
+                : (resolvedStage?.celebrationTitle || resolvedStage?.name))
           };
           setLastGameResult(enhancedResult);
-          saveGameResult(enhancedResult, stage);
+          saveGameResult(enhancedResult, resolvedStage);
 
           // Chuva de confetes
           try {
@@ -716,7 +733,8 @@ export function Game({ onNavigate }) {
   // Próxima fase
   const handleNextStage = () => {
     const nextNumber = (selectedStage?.number || 1) + 1;
-    const nextStage = STAGES.find((s) => s.number === nextNumber);
+    const stagesList = getStagesForMode(soloJourney);
+    const nextStage = stagesList.find((s) => s.number === nextNumber);
     if (nextStage) {
       startGame(nextStage);
     } else {
@@ -761,6 +779,26 @@ export function Game({ onNavigate }) {
         if (rematchTimeoutRef.current) clearTimeout(rematchTimeoutRef.current);
       }
       setGameState('menu');
+    }
+  };
+
+  // Restauração rápida das 42 fases conquistadas anteriormente
+  const handleRestoreStages42 = async () => {
+    const confirmed = await showConfirm({
+      title: 'Restaurar Fases Anteriores',
+      message: 'Deseja restabelecer o seu progresso liberando até a Fase 42 para ambos os modos solo (Herói e Livre)?',
+      variant: 'info',
+      confirmText: 'Restaurar até a Fase 42',
+      cancelText: 'Cancelar'
+    });
+
+    if (confirmed && restoreStageProgress) {
+      await restoreStageProgress(42, 'all');
+      await showAlert({
+        title: 'Fases Restauradas com Sucesso!',
+        message: 'Todas as fases de 1 a 42 agora estão totalmente liberadas para você!',
+        variant: 'success'
+      });
     }
   };
 
@@ -1039,6 +1077,27 @@ export function Game({ onNavigate }) {
                       </div>
                     </div>
                   </div>
+
+                  {/* Banner de Restauração de Fases Anteriores */}
+                  {activeCompletedStages < 42 && (
+                    <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs shadow-lg shadow-amber-500/5">
+                      <div className="flex items-center gap-2.5 text-amber-300">
+                        <Sparkles className="w-5 h-5 text-amber-400 shrink-0 animate-pulse" />
+                        <div>
+                          <strong className="block text-amber-200">Recuperar Fases Anteriores</strong>
+                          <span className="text-[11px] text-slate-300">Você havia liberado até a Fase 42? Clique para restaurar seu progresso agora.</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRestoreStages42}
+                        className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Restaurar até a Fase 42</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1446,7 +1505,7 @@ export function Game({ onNavigate }) {
 
           {/* Barra de Progresso até a Meta da Fase ou Indicador do Modo Infinito / Boss Fight */}
           <div className="w-full mb-1 px-1 shrink-0">
-            {selectedStage?.isBossStage ? (
+            {selectedStage?.isBossStage && soloJourney !== 'free' ? (
               <div className="flex items-center justify-between text-[11px] text-slate-400 bg-slate-900/50 px-2.5 py-0.5 rounded-lg border border-slate-800/60 backdrop-blur-xs">
                 <span className="flex items-center gap-1.5 text-slate-300">
                   <span className="text-[10px] opacity-75">👑</span>
@@ -1798,7 +1857,13 @@ export function Game({ onNavigate }) {
                   <h2 className="text-3xl font-black text-white">
                     {lastGameResult?.isEvent
                       ? 'Recompensa Festiva Liberada!'
-                      : lastGameResult?.isPvP ? 'Vitória no Duelo 1v1!' : (lastGameResult?.isRace ? 'Você Venceu a Máquina!' : 'Fase Concluída!')}
+                      : lastGameResult?.isPvP
+                        ? 'Vitória no Duelo 1v1!'
+                        : lastGameResult?.isBossStage
+                          ? 'Chefão Derrotado!'
+                          : lastGameResult?.isSummitStage
+                            ? 'Cume Conquistado!'
+                            : (lastGameResult?.isRace ? 'Você Venceu a Máquina!' : 'Fase Concluída!')}
                   </h2>
                 </div>
 

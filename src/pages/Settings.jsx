@@ -40,6 +40,13 @@ const PRESET_RADIOS = [
     icon: '🌆'
   },
   {
+    id: 'classical_fast',
+    name: 'Clássicos Rápidos & Allegro',
+    desc: 'Radio Swiss Classic • Orquestra, Presto, Allegro e Concerto 24/7',
+    url: 'https://stream.srg-ssr.ch/m/rsc_de/mp3_128',
+    icon: '🎻'
+  },
+  {
     id: 'dance',
     name: 'DEF CON Radio (Cyber Gamer)',
     desc: 'SomaFM • Música de hacker, eletrônica e ritmo cósmico',

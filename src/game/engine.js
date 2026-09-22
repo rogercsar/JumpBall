@@ -175,6 +175,7 @@ export class GameEngine {
     this.platforms = [];
     this.gems = [];
     this.magicBackpacks = [];
+    this.backpackFuelCans = [];
     this.environmentalHazards = [];
     this.activeLightning = null;
     this.hazardSpawnTimer = 0;
@@ -566,6 +567,7 @@ export class GameEngine {
     this.platforms = [];
     this.gems = [];
     this.magicBackpacks = [];
+    this.backpackFuelCans = [];
     this.powerups = [];
     this.hearts = [];
     this.activePowerUps = { magnet: 0, shield: false, slowmo: 0, springBoost: 0 };
@@ -720,6 +722,18 @@ export class GameEngine {
         });
         this.spawnedBackpacksCount++;
       }
+    }
+
+    // Geração de Galões de Combustível da Mochila Mágica (Jetpack Plasma Fuel)
+    // Permite ao jogador reabastecer a mochila em voo e continuar subindo
+    if (Math.random() < 0.08 || (this.spawnedBackpacksCount > 0 && Math.random() < 0.12)) {
+      this.backpackFuelCans.push({
+        x: pX + pWidth / 2,
+        y: y - 30,
+        radius: 12,
+        collected: false,
+        pulse: Math.random() * Math.PI * 2
+      });
     }
 
     // Chance de gerar um Power-Up especial (Ímã, Escudo, Slowmo, Super Molas)
@@ -1060,9 +1074,9 @@ export class GameEngine {
       const fuelConsumptionPerSecond = 100 / 5.5; // consome 100% em 5.5s (~18.2% por segundo)
       this.ball.backpackFuel = Math.max(0, this.ball.backpackFuel - fuelConsumptionPerSecond * (dt / 60));
 
-      // Voo 2x mais lento: subida calma e serena a -1.2px/frame estilo balão do Mario
+      // Voo balanceado e dinâmico: subida suave e ágil a -1.85px/frame
       const floatBobbing = Math.sin(Date.now() * 0.005) * 0.2;
-      const targetFlyVy = -1.2 + floatBobbing; // Exatamente 2x mais lento que antes
+      const targetFlyVy = -1.85 + floatBobbing;
       this.ball.vy += (targetFlyVy - this.ball.vy) * 0.14 * dt;
       this.ball.y += this.ball.vy * dt;
 
@@ -1342,6 +1356,48 @@ export class GameEngine {
       }
     }
 
+    // 6.22. Coleta de Galão de Combustível da Mochila Mágica (Jetpack Plasma Fuel)
+    for (const fc of this.backpackFuelCans) {
+      if (!fc.collected) {
+        fc.pulse += 0.05 * dt;
+        const dist = Math.hypot(this.ball.x - fc.x, this.ball.y - fc.y);
+
+        // Atração magnética sutil em pleno voo quando a mochila estiver ativa
+        if (this.ball.hasMagicBackpack && dist < 150) {
+          const pullAngle = Math.atan2(this.ball.y - fc.y, this.ball.x - fc.x);
+          fc.x += Math.cos(pullAngle) * 4.5 * dt;
+          fc.y += Math.sin(pullAngle) * 4.5 * dt;
+        }
+
+        if (dist < this.ball.radius + fc.radius + 12) {
+          fc.collected = true;
+          this.score += 200;
+
+          if (this.ball.hasMagicBackpack) {
+            // Recarrega o combustível da mochila em +60% (teto de 100) para continuar subindo
+            this.ball.backpackFuel = Math.min(this.ball.backpackMaxFuel, this.ball.backpackFuel + 60);
+            try {
+              if (soundEngine && typeof soundEngine.playJetpackPickup === 'function') {
+                soundEngine.playJetpackPickup();
+              } else {
+                soundEngine.playCollect();
+              }
+            } catch (e) { /* ignore */ }
+            this.triggerCameraShake(3, 110);
+            this.triggerHaptic(40);
+            this.particles.emitSuperJumpBurst(fc.x, fc.y, '#f59e0b');
+            this.particles.emit(fc.x, fc.y, 18, { color: '#38bdf8', size: 3.5, speed: 4, life: 0.5 });
+          } else {
+            // Bônus alternativo sem a mochila: recarrega barra de impulso (+40%)
+            this.boostCharge = Math.min(this.maxBoostCharge, this.boostCharge + 40);
+            this.hasPendingBoostUpdate = true;
+            soundEngine.playCollect();
+            this.particles.emit(fc.x, fc.y, 12, { color: '#fbbf24', size: 3, speed: 3, life: 0.4 });
+          }
+        }
+      }
+    }
+
     // 6.25. Coleta e Atualização dos Power-Ups (Ímã, Escudo, Slowmo, Super Molas)
     if (this.activePowerUps.magnet > 0) {
       this.activePowerUps.magnet = Math.max(0, this.activePowerUps.magnet - dt * 0.0166);
@@ -1606,6 +1662,7 @@ export class GameEngine {
       this.platforms = this.platforms.filter((p) => p.y < this.cameraY + this.height + 150);
       this.gems = this.gems.filter((g) => !g.collected && g.y < this.cameraY + this.height + 150);
       this.magicBackpacks = this.magicBackpacks.filter((mb) => !mb.collected && mb.y < this.cameraY + this.height + 150);
+      this.backpackFuelCans = this.backpackFuelCans.filter((fc) => !fc.collected && fc.y < this.cameraY + this.height + 150);
       this.powerups = this.powerups.filter((pu) => !pu.collected && pu.y < this.cameraY + this.height + 150);
       this.hearts = this.hearts.filter((h) => !h.collected && h.y < this.cameraY + this.height + 150);
 
@@ -2222,8 +2279,15 @@ export class GameEngine {
         vy = Math.random() * 2.2 + 3.8;
         break;
 
-      case 'ocean':
       case 'waterfall':
+        // Obstáculo temático da fase de cachoeiras: Peixes saltitantes descendo a cascata!
+        type = 'falling_fish';
+        color = '#fb923c';
+        radius = 14;
+        vy = Math.random() * 1.6 + 2.9;
+        break;
+
+      case 'ocean':
       case 'rain':
       case 'ship':
       case 'underwater':
@@ -2518,6 +2582,84 @@ export class GameEngine {
         ctx.strokeStyle = '#64748b';
         ctx.lineWidth = 0.8;
         ctx.stroke();
+      } else if (h.type === 'falling_fish') {
+        // 7.8 Peixe Saltitante / Salmão da Cascata (Cachoeiras Ancestrais)
+        const swimTime = Date.now() * 0.015 + (h.x * 0.1);
+        const tailWag = Math.sin(swimTime) * 4.5;
+
+        // Corpo aerodinâmico do peixe com gradiente salmão / carpa dourada
+        const fishGrad = ctx.createLinearGradient(0, -16, 0, 14);
+        fishGrad.addColorStop(0, '#f97316');
+        fishGrad.addColorStop(0.5, '#fb923c');
+        fishGrad.addColorStop(1, '#38bdf8');
+
+        ctx.fillStyle = fishGrad;
+        ctx.strokeStyle = '#fdba74';
+        ctx.lineWidth = 1.3;
+
+        ctx.beginPath();
+        // Cabeça apontando para baixo
+        ctx.moveTo(0, 14);
+        ctx.quadraticCurveTo(8, 2, 7, -8);
+        // Cauda
+        ctx.lineTo(tailWag + 1, -15);
+        ctx.lineTo(tailWag, -17);
+        ctx.lineTo(tailWag - 1, -15);
+        ctx.lineTo(-7, -8);
+        ctx.quadraticCurveTo(-8, 2, 0, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Barbatana Caudal (rabo em leque ondulante)
+        ctx.fillStyle = 'rgba(251, 146, 60, 0.9)';
+        ctx.strokeStyle = '#fed7aa';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(tailWag, -16);
+        ctx.lineTo(tailWag - 7, -23);
+        ctx.quadraticCurveTo(tailWag, -19, tailWag + 7, -23);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Barbatanas Peitorais laterais
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.75)';
+        ctx.beginPath();
+        ctx.moveTo(-6, -1); ctx.lineTo(-12, -4); ctx.lineTo(-6, -7);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(6, -1); ctx.lineTo(12, -4); ctx.lineTo(6, -7);
+        ctx.closePath();
+        ctx.fill();
+
+        // Olhos com reflexo de água doce
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-3, 8, 2.5, 0, Math.PI * 2);
+        ctx.arc(3, 8, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-3, 9, 1.3, 0, Math.PI * 2);
+        ctx.arc(3, 9, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-3.5, 8.5, 0.6, 0, Math.PI * 2);
+        ctx.arc(2.5, 8.5, 0.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bolhas de splash da cachoeira
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.8)';
+        ctx.beginPath();
+        ctx.arc(tailWag * 0.5, -25, 1.5, 0, Math.PI * 2);
+        ctx.arc(-4, -12, 1.2, 0, Math.PI * 2);
+        ctx.fill();
       } else if (h.type === 'water_drop') {
         // 8. Gota d'Água Aerodinâmica (Oceanos, Chuva e Cachoeiras)
         const dropGrad = ctx.createLinearGradient(0, -14, 0, 10);
@@ -3194,6 +3336,69 @@ export class GameEngine {
       ctx.font = 'bold 10px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('🎒', 0, -16);
+
+      ctx.restore();
+    }
+
+    // 3.25. Desenhar Galões de Combustível da Mochila Mágica (Jetpack Plasma Fuel Canister)
+    for (const fc of this.backpackFuelCans) {
+      if (fc.collected) continue;
+      const screenY = fc.y - this.cameraY;
+      if (screenY < -30 || screenY > this.height + 30) continue;
+
+      ctx.save();
+      const floatOffset = Math.sin(fc.pulse * 3.5 + Date.now() * 0.005) * 4;
+      ctx.translate(fc.x, screenY + floatOffset);
+
+      // Glow pulsante de combustível de plasma (âmbar e ciano)
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = this.isMobile ? 0 : 12;
+
+      // Corpo cilíndrico do galão de combustível metálico escuro
+      const canGrad = ctx.createLinearGradient(-9, -12, 9, 12);
+      canGrad.addColorStop(0, '#1e293b');
+      canGrad.addColorStop(0.5, '#0f172a');
+      canGrad.addColorStop(1, '#334155');
+      ctx.fillStyle = canGrad;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.4;
+      this.roundRect(ctx, -8, -10, 16, 20, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bocal e Alça superior do galão
+      ctx.fillStyle = '#64748b';
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.rect(-5, -14, 10, 4);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(3, -15, 3, 5);
+
+      // Visor de vidro com Combustível de Plasma Fluorescente no centro
+      const fuelLevelGrad = ctx.createLinearGradient(-5, 5, 5, -5);
+      fuelLevelGrad.addColorStop(0, '#f59e0b');
+      fuelLevelGrad.addColorStop(0.5, '#fbbf24');
+      fuelLevelGrad.addColorStop(1, '#06b6d4');
+      ctx.fillStyle = fuelLevelGrad;
+      this.roundRect(ctx, -5, -6, 10, 12, 2);
+      ctx.fill();
+
+      // Linha medidora de nível fluorescente
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-4, 0); ctx.lineTo(-1, 0);
+      ctx.moveTo(-4, -3); ctx.lineTo(-2, -3);
+      ctx.stroke();
+
+      // Ícone holográfico de Combustível / Chama flutuando sobre o galão
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⛽', 0, -17);
 
       ctx.restore();
     }

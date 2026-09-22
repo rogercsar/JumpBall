@@ -89,10 +89,10 @@ const ICON_MAP = {
 
 export function StageCard({ stage, isUnlocked, isCompleted, onSelect, journeyMode = 'hero' }) {
   const IconComponent = ICON_MAP[stage.icon] || Sparkles;
-  const isBoss = Boolean(stage.isBossStage);
+  const isBoss = Boolean(stage.isBossStage && journeyMode !== 'free');
   const isSummit = Boolean(stage.isSummitStage || (stage.number % 5 === 0 && journeyMode === 'free'));
   const isHorizontal = stage.layout === 'horizontal';
-  const showBossStyle = isBoss && journeyMode !== 'free';
+  const showBossStyle = isBoss;
 
   return (
     <div
@@ -212,9 +212,14 @@ export function StageCard({ stage, isUnlocked, isCompleted, onSelect, journeyMod
             <span>🏁</span>
             <span>Meta: {(stage.targetDistance).toLocaleString()}m</span>
           </div>
-        ) : isBoss ? (
+        ) : showBossStyle ? (
           <div className="flex items-center gap-1.5 text-amber-300 font-bold text-[11px]">
             <span>⚔️ Subida Infinita · {stage.bossHP} HP</span>
+          </div>
+        ) : isSummit ? (
+          <div className="flex items-center gap-1 text-emerald-300 font-semibold">
+            <ArrowUp className="w-3.5 h-3.5" />
+            <span>Meta do Cume: {stage.targetHeight}m</span>
           </div>
         ) : (
           <div className="flex items-center gap-1 text-cyan-300 font-semibold">
@@ -223,9 +228,13 @@ export function StageCard({ stage, isUnlocked, isCompleted, onSelect, journeyMod
           </div>
         )}
 
-        {isBoss ? (
+        {showBossStyle ? (
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
             💎 +{stage.rewardGems} Gemas
+          </span>
+        ) : isSummit ? (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+            💎 +{stage.rewardGems || 200} Gemas
           </span>
         ) : (
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">

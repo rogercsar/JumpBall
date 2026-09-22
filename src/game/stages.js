@@ -1495,20 +1495,40 @@ export const FREE_STAGE_CUSTOMIZATIONS = {
 export const FREE_STAGES = STAGES.map((stage) => {
   const custom = FREE_STAGE_CUSTOMIZATIONS[stage.number];
   if (custom) {
+    const cleanStage = { ...stage };
+    delete cleanStage.bossName;
+    delete cleanStage.bossHP;
+    delete cleanStage.bossTitle;
+    delete cleanStage.bossTheme;
+    delete cleanStage.hasParallelUniverseAttack;
     return {
-      ...stage,
+      ...cleanStage,
       ...custom,
+      isBossStage: false,
+      isSummitStage: true,
       journeyMode: 'free'
     };
   }
 
   // Fases regulares da Jornada Livre: remove qualquer flag de boss e ajusta descrição se necessário
+  const cleanStage = { ...stage };
+  delete cleanStage.bossName;
+  delete cleanStage.bossHP;
+  delete cleanStage.bossTitle;
+  delete cleanStage.bossTheme;
+  delete cleanStage.hasParallelUniverseAttack;
   return {
-    ...stage,
+    ...cleanStage,
     isBossStage: false,
+    isSummitStage: false,
     journeyMode: 'free',
-    description: stage.description.replace(/BATALHA DE CHEFÃO!?/gi, 'EXPLORAÇÃO VERTICAL!'),
-    mechanic: stage.mechanic.replace(/Batalha de Chefão:?/gi, 'Desafio de Escalada:')
+    description: (stage.description || '')
+      .replace(/BATALHA DE CHEFÃO!?/gi, 'EXPLORAÇÃO VERTICAL!')
+      .replace(/batalha contra o chefão/gi, 'escalada do cume')
+      .replace(/chefão/gi, 'desafio supremo'),
+    mechanic: (stage.mechanic || '')
+      .replace(/Batalha de Chefão:?/gi, 'Desafio de Escalada:')
+      .replace(/chefão/gi, 'cume')
   };
 });
 
