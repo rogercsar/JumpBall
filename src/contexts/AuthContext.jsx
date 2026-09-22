@@ -259,43 +259,66 @@ export function AuthProvider({ children }) {
           .eq('user_id', userId)
           .eq('status', 'completed');
         if (histData && histData.length > 0) {
-          maxStageFromHistory = Math.max(...histData.map(h => Number(h.stage_id) || 0));
+          maxStageFromHistory = Math.max(0, ...histData.map(h => Number(h.stage_id) || 0).filter(s => s <= 50));
         }
       } catch (hErr) {
         /* ignore */
       }
 
-      // Preserva sempre o maior progresso alcançado (separado por Modo Herói e Modo Livre)
-      // Também verifica o histórico local para garantir que nenhum progresso anterior seja perdido
+      // Preserva sempre o maior progresso alcançado (separado estritamente por Modo Herói e Modo Livre)
       const localHist = localStore.getHistory();
-      let maxStageFromLocalHist = 0;
+      let maxStageHeroFromLocalHist = 0;
+      let maxStageFreeFromLocalHist = 0;
       if (Array.isArray(localHist) && localHist.length > 0) {
-        maxStageFromLocalHist = Math.max(
+        maxStageHeroFromLocalHist = Math.max(
           0,
-          ...localHist.map(h => Number(h.stage_id || h.stageId || 0))
+          ...localHist
+            .filter(h => (h.status === 'completed' || h.status === 'victory' || h.isWin) && (h.journey_mode === 'hero' || h.soloJourney === 'hero') && Number(h.stage_id || h.stageId || 0) <= 50)
+            .map(h => Number(h.stage_id || h.stageId || 0))
+        );
+        maxStageFreeFromLocalHist = Math.max(
+          0,
+          ...localHist
+            .filter(h => (h.status === 'completed' || h.status === 'victory' || h.isWin) && (h.journey_mode === 'free' || h.soloJourney === 'free') && Number(h.stage_id || h.stageId || 0) <= 50)
+            .map(h => Number(h.stage_id || h.stageId || 0))
         );
       }
 
-      const highestKnown = Math.max(
-        Number(data?.stages_completed_hero || 0),
-        Number(data?.stages_completed || 0),
-        local.stages_completed_hero !== undefined ? local.stages_completed_hero : (local.stages_completed || 0),
-        Number(cloudMeta.stages_completed_hero || 0),
-        Number(cloudMeta.stages_completed || 0),
-        maxStageFromHistory,
-        maxStageFromLocalHist
+      // Função de sanitização: limita a 50 e descarta 999 (ID de modo infinito)
+      const cleanStage = (val) => {
+        const n = Number(val);
+        if (isNaN(n) || n < 0 || n >= 999) return 0;
+        return Math.min(50, n);
+      };
+
+      let rawHero = Math.max(
+        cleanStage(cloudMeta.stages_completed_hero),
+        cleanStage(local.stages_completed_hero),
+        cleanStage(data?.stages_completed_hero),
+        maxStageHeroFromLocalHist
       );
 
-      const resolvedStageHero = highestKnown;
-
-      const resolvedStageFree = Math.max(
-        Number(data?.stages_completed_free || 0),
-        Number(local.stages_completed_free || 0),
-        Number(cloudMeta.stages_completed_free || 0),
-        highestKnown
+      let rawFree = Math.max(
+        cleanStage(cloudMeta.stages_completed_free),
+        cleanStage(local.stages_completed_free),
+        cleanStage(data?.stages_completed_free),
+        maxStageFreeFromLocalHist
       );
 
-      const resolvedStage = resolvedStageHero;
+      // Fallback: quando os campos separados (hero/free) ainda não existem no banco de dados
+      // (perfis antigos só têm stages_completed genérico), usa o valor sanitizado como referência
+      // somente se os valores específicos estiverem zerados e o genérico for um valor válido (<=50)
+      const legacyGeneric = cleanStage(data?.stages_completed);
+      if (rawHero === 0 && legacyGeneric > 0) {
+        rawHero = legacyGeneric;
+      }
+      if (rawFree === 0 && legacyGeneric > 0) {
+        rawFree = legacyGeneric;
+      }
+
+      const resolvedStageHero = rawHero;
+      const resolvedStageFree = rawFree;
+      const resolvedStage = Math.max(resolvedStageHero, resolvedStageFree);
 
       const bestHighScore = Math.max(
         data?.high_score || 0, 
@@ -361,7 +384,7 @@ export function AuthProvider({ children }) {
         ...(data || {}),
         id: userId,
         birth_date: resolvedBirthDate,
-        stages_completed: resolvedStageHero,
+        stages_completed: resolvedStage,
         stages_completed_hero: resolvedStageHero,
         stages_completed_free: resolvedStageFree,
         high_score: bestHighScore,
@@ -416,7 +439,7 @@ export function AuthProvider({ children }) {
               achievements: resolvedAchievements,
               daily_quests_progress: resolvedDailyQuests,
               endless_high_score: resolvedEndlessScore,
-              stages_completed: resolvedStageHero,
+              stages_completed: resolvedStage,
               stages_completed_hero: resolvedStageHero,
               stages_completed_free: resolvedStageFree,
               high_score: bestHighScore,
@@ -796,18 +819,16 @@ export function AuthProvider({ children }) {
 
   // Restaura progresso das fases para um estágio desejado (ex: 42 fases conquistadas anteriormente)
   const restoreStageProgress = async (targetStage = 42, mode = 'all') => {
-    const stageNum = Math.max(1, Number(targetStage) || 42);
+    const stageNum = Math.min(50, Math.max(1, Number(targetStage) || 42));
     const local = localStore.getProfile();
     const current = profile ? { ...local, ...profile } : local;
+    const heroNum = (mode === 'all' || mode === 'hero') ? stageNum : (current.stages_completed_hero || 0);
+    const freeNum = (mode === 'all' || mode === 'free') ? stageNum : (current.stages_completed_free || 0);
     const updated = {
       ...current,
-      ...(mode === 'all' || mode === 'hero' ? {
-        stages_completed: Math.max(current.stages_completed || 0, stageNum),
-        stages_completed_hero: Math.max(current.stages_completed_hero || 0, stageNum)
-      } : {}),
-      ...(mode === 'all' || mode === 'free' ? {
-        stages_completed_free: Math.max(current.stages_completed_free || 0, stageNum)
-      } : {})
+      stages_completed_hero: heroNum,
+      stages_completed_free: freeNum,
+      stages_completed: Math.max(heroNum, freeNum)
     };
     setProfile(updated);
     localStore.saveProfile(updated);

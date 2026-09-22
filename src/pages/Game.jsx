@@ -104,15 +104,11 @@ export function Game({ onNavigate }) {
   const [rematchState, setRematchState] = useState('idle');
   const rematchTimeoutRef = useRef(null);
 
-  // Progresso independente para o modo ativo (Livre ou Herói)
-  // Reconciliação robusta: garante que o progresso total registrado no perfil (ex: 48 fases) desbloqueie as fases
-  const activeCompletedStages = Math.max(
-    soloJourney === 'free'
-      ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
-      : (profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0),
-    profile?.stages_completed || 0,
-    localStore.getProfile()?.stages_completed || 0
-  );
+  // Progresso estritamente independente para cada modo (Livre ou Herói)
+  // Garante que o progresso de um modo nunca vaze para o outro e limita a 50
+  const activeCompletedStages = soloJourney === 'free'
+    ? Math.min(50, Math.max(0, profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0))
+    : Math.min(50, Math.max(0, profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0));
 
   // Fases customizadas para o modo selecionado
   const activeStages = React.useMemo(() => {
@@ -125,8 +121,8 @@ export function Game({ onNavigate }) {
       localStorage.setItem('jumpball_solo_journey', journey);
     } catch (e) { /* ignore */ }
     const journeyCompleted = journey === 'free'
-      ? (profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0)
-      : (profile?.stages_completed_hero ?? profile?.stages_completed ?? localStore.getProfile()?.stages_completed_hero ?? localStore.getProfile()?.stages_completed ?? 0);
+      ? Math.min(50, Math.max(0, profile?.stages_completed_free ?? localStore.getProfile()?.stages_completed_free ?? 0))
+      : Math.min(50, Math.max(0, profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0));
     setSelectedWorldId(Math.min(10, Math.max(1, Math.floor(journeyCompleted / 5) + 1)));
   };
 
@@ -336,26 +332,26 @@ export function Game({ onNavigate }) {
     // Apenas partidas no modo 'solo' avançam os contadores de fases concluídas.
     const isRaceMode = gameMode === 'race_pvp' || gameMode === 'race_ai' || gameMode === 'endless';
 
-    const currentHeroCompleted = Math.max(
-      profileRef.current?.stages_completed_hero ?? profileRef.current?.stages_completed ?? 0,
-      profile?.stages_completed_hero ?? profile?.stages_completed ?? 0,
-      localProf.stages_completed_hero ?? localProf.stages_completed ?? 0
-    );
+    const currentHeroCompleted = Math.min(50, Math.max(
+      profileRef.current?.stages_completed_hero || 0,
+      profile?.stages_completed_hero || 0,
+      localProf.stages_completed_hero || 0
+    ));
 
-    const currentFreeCompleted = Math.max(
-      profileRef.current?.stages_completed_free ?? 0,
-      profile?.stages_completed_free ?? 0,
-      localProf.stages_completed_free ?? 0
-    );
+    const currentFreeCompleted = Math.min(50, Math.max(
+      profileRef.current?.stages_completed_free || 0,
+      profile?.stages_completed_free || 0,
+      localProf.stages_completed_free || 0
+    ));
 
     const isEventStage = Boolean(stageObj?.isEvent);
     // Avança estritamente o progresso do modo solo jogado (nunca nos modos de corrida/duelo)
-    const newHeroCompleted = (!isRaceMode && !isFreeMode && isWin && !isEventStage && stageNumber < 999)
-      ? Math.max(currentHeroCompleted, stageNumber)
+    const newHeroCompleted = (!isRaceMode && !isFreeMode && isWin && !isEventStage && stageNumber <= 50)
+      ? Math.min(50, Math.max(currentHeroCompleted, stageNumber))
       : currentHeroCompleted;
 
-    const newFreeCompleted = (!isRaceMode && isFreeMode && isWin && !isEventStage && stageNumber < 999)
-      ? Math.max(currentFreeCompleted, stageNumber)
+    const newFreeCompleted = (!isRaceMode && isFreeMode && isWin && !isEventStage && stageNumber <= 50)
+      ? Math.min(50, Math.max(currentFreeCompleted, stageNumber))
       : currentFreeCompleted;
 
     const newHighScore = Math.max(profileRef.current?.high_score || 0, localProf.high_score || 0, scoreVal);
@@ -382,7 +378,7 @@ export function Game({ onNavigate }) {
     };
 
     const updates = {
-      stages_completed: newHeroCompleted,
+      stages_completed: Math.max(newHeroCompleted, newFreeCompleted),
       stages_completed_hero: newHeroCompleted,
       stages_completed_free: newFreeCompleted,
       high_score: newHighScore,
@@ -1071,7 +1067,7 @@ export function Game({ onNavigate }) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
-                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">Progresso: {profile?.stages_completed_hero ?? profile?.stages_completed ?? localStore.getProfile()?.stages_completed_hero ?? 0}/50 Fases</span>
+                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">Progresso: {profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0}/50 Fases</span>
                         <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">⚡ Baterias de Energia</span>
                         <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold">🌌 Ataque do Multiverso</span>
                       </div>

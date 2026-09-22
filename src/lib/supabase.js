@@ -86,13 +86,13 @@ export const localStore = {
         return {
           ...defaultProfile,
           ...parsed,
-          stages_completed: parsed.stages_completed !== undefined ? Number(parsed.stages_completed) : defaultProfile.stages_completed,
-          stages_completed_hero: parsed.stages_completed_hero !== undefined
+          stages_completed: Math.min(50, (parsed.stages_completed !== undefined && Number(parsed.stages_completed) < 999) ? Number(parsed.stages_completed) : defaultProfile.stages_completed),
+          stages_completed_hero: Math.min(50, (parsed.stages_completed_hero !== undefined && Number(parsed.stages_completed_hero) < 999)
             ? Number(parsed.stages_completed_hero)
-            : (parsed.stages_completed !== undefined ? Number(parsed.stages_completed) : defaultProfile.stages_completed_hero),
-          stages_completed_free: parsed.stages_completed_free !== undefined
+            : defaultProfile.stages_completed_hero),
+          stages_completed_free: Math.min(50, (parsed.stages_completed_free !== undefined && Number(parsed.stages_completed_free) < 999)
             ? Number(parsed.stages_completed_free)
-            : defaultProfile.stages_completed_free,
+            : defaultProfile.stages_completed_free),
           birth_date: parsed.birth_date !== undefined ? parsed.birth_date : defaultProfile.birth_date,
           gems: parsed.gems !== undefined ? parsed.gems : defaultProfile.gems,
           unlocked_skins: Array.isArray(parsed.unlocked_skins) && parsed.unlocked_skins.length > 0
@@ -122,13 +122,13 @@ export const localStore = {
       const merged = {
         ...existing,
         ...profile,
-        stages_completed: profile.stages_completed !== undefined ? profile.stages_completed : (existing.stages_completed || 0),
+        stages_completed: profile.stages_completed !== undefined ? Math.min(50, profile.stages_completed) : (existing.stages_completed || 0),
         stages_completed_hero: profile.stages_completed_hero !== undefined
-          ? profile.stages_completed_hero
-          : (existing.stages_completed_hero !== undefined ? existing.stages_completed_hero : (existing.stages_completed || 0)),
+          ? Math.min(50, profile.stages_completed_hero)
+          : (existing.stages_completed_hero !== undefined ? Math.min(50, existing.stages_completed_hero) : 0),
         stages_completed_free: profile.stages_completed_free !== undefined
-          ? profile.stages_completed_free
-          : (existing.stages_completed_free || 0),
+          ? Math.min(50, profile.stages_completed_free)
+          : (existing.stages_completed_free !== undefined ? Math.min(50, existing.stages_completed_free) : 0),
         birth_date: profile.birth_date !== undefined ? profile.birth_date : (existing.birth_date || null),
         gems: profile.gems !== undefined ? profile.gems : (existing.gems ?? 100),
         unlocked_skins: Array.from(new Set([...(existing.unlocked_skins || ['neon-cyan', 'plasma-pink', 'solar-gold', 'matrix-green', 'cosmic-purple', 'fireball']), ...(profile.unlocked_skins || [])])),
@@ -181,14 +181,14 @@ export const localStore = {
     profile.high_score = Math.max(profile.high_score || 0, entry.score || 0);
     profile.total_jumps = (profile.total_jumps || 0) + jumpsCount;
     profile.games_played = (profile.games_played || 0) + 1;
-    if (entry.status === 'completed') {
+    if ((entry.status === 'completed' || entry.status === 'victory' || entry.isWin) && stageId <= 50) {
       const isFree = entry.journey_mode === 'free' || entry.soloJourney === 'free';
       if (isFree) {
-        profile.stages_completed_free = Math.max(profile.stages_completed_free || 0, stageId);
+        profile.stages_completed_free = Math.min(50, Math.max(profile.stages_completed_free || 0, stageId));
       } else {
-        profile.stages_completed_hero = Math.max(profile.stages_completed_hero || 0, profile.stages_completed || 0, stageId);
-        profile.stages_completed = profile.stages_completed_hero;
+        profile.stages_completed_hero = Math.min(50, Math.max(profile.stages_completed_hero || 0, stageId));
       }
+      profile.stages_completed = Math.max(profile.stages_completed_hero || 0, profile.stages_completed_free || 0);
     }
     this.saveProfile(profile);
 
