@@ -54,6 +54,20 @@ const PRESET_RADIOS = [
     icon: '⚡'
   },
   {
+    id: 'gospel_praise',
+    name: 'Rádio Super Gospel & Louvor',
+    desc: 'Super FM • Louvor, adoração e mensagens cristãs 24/7',
+    url: 'https://servidor32.brlogic.com:8200/live',
+    icon: '🕊️'
+  },
+  {
+    id: 'gospel_instrumental',
+    name: 'Teomídia Gospel Instrumental',
+    desc: 'Hinos e louvores instrumentais para foco e concentração',
+    url: 'https://usa3.fastcast4u.com/proxy/teomidiainstr?mp=/1',
+    icon: '✨'
+  },
+  {
     id: 'chiptune',
     name: 'CliqHop (Chiptune 8-Bit)',
     desc: 'SomaFM • Beats 8-bit, chiptune e videogame retrô',
@@ -240,7 +254,28 @@ export function Settings({ orientation, requestOrientationPermission, permission
     }
   };
 
+  const handleResetHeroStages = async () => {
+    const confirmed = await showConfirm({
+      title: 'Resetar Modo Herói?',
+      message: 'Tem certeza que deseja zerar apenas o progresso do Modo Herói? Você voltará à Fase 1 do Herói, mas o Modo Livre e todo o histórico serão preservados.',
+      variant: 'warning',
+      confirmText: 'Sim, Resetar Herói',
+      cancelText: 'Cancelar'
+    });
+
+    if (confirmed) {
+      await resetStageProgress('hero');
+      showAlert({
+        title: 'Modo Herói Zerado!',
+        message: 'O progresso do Modo Herói voltou à Fase 1. Seu Modo Livre e histórico de partidas continuam intactos!',
+        variant: 'success'
+      });
+    }
+  };
+
   const stagesCompleted = profile?.stages_completed || 0;
+  const heroCompleted = profile?.stages_completed_hero || 0;
+  const freeCompleted = profile?.stages_completed_free || 0;
   const activeGamma = orientation?.gamma !== 0 ? orientation.gamma : simulatedGamma;
 
   return (
@@ -390,7 +425,8 @@ export function Settings({ orientation, requestOrientationPermission, permission
         </div>
       </div>
 
-      {/* 3. MODO DE CONTROLE PREFERIDO */}
+      {/* 3. MODO DE CONTROLE PREFERIDO (Oculto temporariamente a pedido) */}
+      {/*
       <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -426,6 +462,7 @@ export function Settings({ orientation, requestOrientationPermission, permission
           })}
         </div>
       </div>
+      */}
 
       {/* 4. SEÇÃO DE ÁUDIO E EFEITOS (WEB AUDIO API) */}
       <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-5">
@@ -618,38 +655,50 @@ export function Settings({ orientation, requestOrientationPermission, permission
 
       {/* 6. SEÇÃO DE PROGRESSO DAS FASES (RESETAR FASES E MANTER HISTÓRICO) */}
       <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4 bg-gradient-to-b from-slate-900/60 to-slate-950/80">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-sm">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-white">Progresso das Fases</h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">
-                  {stagesCompleted} / {STAGES.length} Fases Liberadas
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Zere todas as fases para iniciar sua subida novamente a partir da Fase 1
-              </p>
-            </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-sm">
+            <Layers className="w-5 h-5" />
           </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">Progresso das Fases</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Zere um modo ou todos para recomeçar do zero</p>
+          </div>
+        </div>
+
+        {/* Badges de progresso por modo */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+            ⚔️ Herói: {heroCompleted} / 50 fases
+          </span>
+          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            🌿 Livre: {freeCompleted} / 50 fases
+          </span>
+        </div>
+
+        {/* Botões de reset */}
+        <div className="flex flex-col sm:flex-row gap-2.5">
+          <button
+            onClick={handleResetHeroStages}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 border border-amber-500/25 text-amber-300 hover:text-amber-200 font-bold text-xs transition-all shadow-md cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Resetar Modo Herói</span>
+          </button>
 
           <button
             onClick={handleResetStages}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 border border-rose-500/30 text-rose-300 hover:text-rose-200 font-bold text-xs transition-all shadow-md self-start sm:self-auto cursor-pointer"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 border border-rose-500/30 text-rose-300 hover:text-rose-200 font-bold text-xs transition-all shadow-md cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Resetar Fases</span>
+            <span>Resetar Todos os Modos</span>
           </button>
         </div>
 
         <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-start gap-3 text-xs text-slate-400">
           <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            Ao resetar, apenas a <strong>Fase 1 (Floresta Esmeralda)</strong> ficará liberada para jogar novamente. 
-            <span className="text-slate-300 font-medium"> Todo o seu histórico de partidas anteriores, recordes de pontuação e estatísticas continuarão salvos e preservados!</span>
+            Ao resetar, apenas a <strong>Fase 1 (Floresta Esmeralda)</strong> ficará liberada no modo escolhido.
+            <span className="text-slate-300 font-medium"> Todo o seu histórico de partidas, recordes e estatísticas continuarão salvos!</span>
           </p>
         </div>
       </div>

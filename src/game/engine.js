@@ -725,8 +725,9 @@ export class GameEngine {
     }
 
     // Geração de Galões de Combustível da Mochila Mágica (Jetpack Plasma Fuel)
-    // Permite ao jogador reabastecer a mochila em voo e continuar subindo
-    if (Math.random() < 0.08 || (this.spawnedBackpacksCount > 0 && Math.random() < 0.12)) {
+    // Reduzido em 3x para balancear o jogo e não sobrecarregar as plataformas
+    const fuelChance = this.spawnedBackpacksCount > 0 ? 0.04 : 0.025;
+    if (Math.random() < fuelChance) {
       this.backpackFuelCans.push({
         x: pX + pWidth / 2,
         y: y - 30,

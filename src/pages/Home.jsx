@@ -20,10 +20,14 @@ import {
   Crown,
   ChevronRight,
   Swords,
-  PartyPopper
+  PartyPopper,
+  Feather,
+  Rocket,
+  Compass,
+  Users
 } from 'lucide-react';
 import { useAuth, resolveInterestsList } from '../contexts/AuthContext.jsx';
-import { STAGES, BALL_SKINS } from '../game/stages';
+import { STAGES, BALL_SKINS, WORLDS } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
 import SkinPreviewCanvas from '../components/SkinPreviewCanvas';
 
@@ -32,6 +36,8 @@ export function Home({ onNavigate }) {
   const currentSkin = BALL_SKINS.find(s => s.id === (profile?.ball_skin || 'neon-cyan')) || BALL_SKINS[0];
 
   const stagesCompleted = profile?.stages_completed || 0;
+  const stagesHeroCompleted = profile?.stages_completed_hero || 0;
+  const stagesFreeCompleted = profile?.stages_completed_free || 0;
   const highScore = profile?.high_score || 0;
   const totalJumps = profile?.total_jumps || 0;
   const gamesPlayed = profile?.games_played || 0;
@@ -66,6 +72,11 @@ export function Home({ onNavigate }) {
       await updateProfile({ ball_skin: skinId });
     }
   };
+
+  // Amostras de skins por categoria para o showcase
+  const heroineSkins = BALL_SKINS.filter(s => s.category === 'heroines').slice(0, 4);
+  const heroSkins = BALL_SKINS.filter(s => s.category === 'heroes').slice(0, 4);
+  const spaceSkins = BALL_SKINS.filter(s => s.category === 'space' || s.category === 'army').slice(0, 4);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-8">
@@ -103,32 +114,40 @@ export function Home({ onNavigate }) {
                 )}
               </h1>
               <p className="text-slate-400 text-sm max-w-md leading-relaxed">
-                Desafie {STAGES.length} biomas cósmicos, colete gemas e dispute o topo do ranking.
+                Desafie {STAGES.length} fases em 10 mundos épicos, jogue no Modo Herói ou Modo Livre, colecione mais de {BALL_SKINS.length} esferas e domine o topo do ranking.
               </p>
             </div>
 
             {/* Botões de Ação Principais e Links Secundários */}
             <div className="pt-2 space-y-3">
-              <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-2.5 w-full max-w-md">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-2.5 w-full max-w-lg">
                 <button
                   onClick={() => onNavigate('game')}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  className="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
-                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
-                  <span><span className="hidden sm:inline">JOGAR </span>FASES</span>
+                  <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
+                  <span>MODO HERÓI</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('game')}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-orange-400 hover:text-orange-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-orange-500/30 hover:border-orange-500/50 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  className="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                >
+                  <Feather className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span>MODO LIVRE</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('game')}
+                  className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-orange-400 hover:text-orange-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-orange-500/30 hover:border-orange-500/50 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
                   <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
-                  <span><span className="hidden sm:inline">MODO </span>INFINITO</span>
+                  <span>INFINITO</span>
                 </button>
 
                 <button
                   onClick={() => onNavigate('game')}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-slate-800 hover:border-slate-700 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  className="py-2.5 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-slate-800 hover:border-slate-700 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
                   <Swords className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   <span>DUELO 1V1</span>
@@ -150,7 +169,7 @@ export function Home({ onNavigate }) {
                   className="hover:text-cyan-400 transition-colors flex items-center gap-1"
                 >
                   <Palette className="w-3.5 h-3.5 text-cyan-400/80" />
-                  <span>Loja de Esferas</span>
+                  <span>Garagem ({BALL_SKINS.length} Esferas)</span>
                 </button>
                 <span className="text-slate-700">•</span>
                 <button
@@ -233,6 +252,69 @@ export function Home({ onNavigate }) {
           </div>
         </section>
       )}
+
+      {/* 2.5 DESTAQUE DOS MODOS DE JORNADA SOLO */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Modo Herói */}
+        <div
+          onClick={() => onNavigate('game')}
+          className="group relative rounded-3xl p-5 border border-amber-500/30 bg-gradient-to-br from-amber-950/30 via-slate-900/90 to-slate-950 hover:border-amber-400/60 shadow-xl shadow-amber-500/5 transition-all cursor-pointer overflow-hidden flex flex-col justify-between space-y-4"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-500 text-slate-950 flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-500/30 shrink-0 group-hover:scale-105 transition-transform">
+              <Crown className="w-6 h-6" />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              Desafio Supremo
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>Modo Herói</span>
+              <span className="text-xs text-amber-400 font-bold">({stagesHeroCompleted}/50)</span>
+            </h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Jornada linear épica: complete cada fase para desbloquear a próxima. Enfrente chefões titânicos a cada 5 fases e prove sua habilidade suprema!
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs text-amber-300 font-bold">
+            <span>Iniciar Desafio</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* Modo Livre */}
+        <div
+          onClick={() => onNavigate('game')}
+          className="group relative rounded-3xl p-5 border border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900/90 to-slate-950 hover:border-emerald-400/60 shadow-xl shadow-emerald-500/5 transition-all cursor-pointer overflow-hidden flex flex-col justify-between space-y-4"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-400 to-teal-500 text-slate-950 flex items-center justify-center font-black text-2xl shadow-lg shadow-emerald-500/30 shrink-0 group-hover:scale-105 transition-transform">
+              <Feather className="w-6 h-6" />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              Acesso Total
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>Modo Livre</span>
+              <span className="text-xs text-emerald-400 font-bold">({stagesFreeCompleted}/50)</span>
+            </h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Todas as 50 fases e 10 mundos liberados desde o início. Escolha qualquer bioma para treinar, explorar e quebrar recordes sem restrições de bloqueio.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs text-emerald-300 font-bold">
+            <span>Explorar Fases</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </section>
 
       {/* BANNER DE CONVITE PARA O QUIZ DE INTERESSES (SE AINDA NÃO SELECIONOU) */}
       {userInterests.length === 0 && (
@@ -327,6 +409,115 @@ export function Home({ onNavigate }) {
         </div>
       </section>
 
+      {/* 3.5 SHOWCASE DOS 10 MUNDOS TEMÁTICOS */}
+      <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/80 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Compass className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-base sm:text-lg font-bold text-white">
+                Os 10 Mundos Temáticos
+              </h2>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              50 fases no total, distribuídas em 10 mundos com chefões épicos na 5ª fase de cada mundo.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate('game')}
+            className="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all self-start sm:self-auto cursor-pointer"
+          >
+            <span>Ver Fases no Jogo</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {WORLDS.map((w) => (
+            <div
+              key={w.id}
+              onClick={() => onNavigate('game')}
+              className={`p-3.5 rounded-2xl border transition-all text-left relative overflow-hidden bg-gradient-to-br ${w.gradient} ${w.border} hover:scale-[1.02] cursor-pointer flex flex-col justify-between space-y-2`}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Mundo {w.id}
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-400">
+                    Fases {w.stageRange[0]}-{w.stageRange[1]}
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-white truncate">{w.shortName}</h4>
+                <p className="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-snug">
+                  {w.description}
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
+                <span className="text-rose-400 font-semibold truncate max-w-[120px]">
+                  👹 {w.bossName}
+                </span>
+                <span className="text-slate-400">Chefe #{w.bossStageNumber}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3.8 SHOWCASE DE SKINS E COLEÇÕES */}
+      <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-800/80 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Palette className="w-5 h-5 text-purple-400" />
+              <h2 className="text-base sm:text-lg font-bold text-white">
+                Garagem de Esferas ({BALL_SKINS.length}+ Colecionáveis)
+              </h2>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Personalize sua esfera com skins exclusivas de Heroínas, Heróis, Ficção Científica e Forças Especiais.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate('profile')}
+            className="px-4 py-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center gap-1.5 transition-all self-start sm:self-auto cursor-pointer"
+          >
+            <span>Ver Toda a Loja</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+          {[...heroineSkins.slice(0, 3), ...heroSkins.slice(0, 3)].map((skin) => {
+            const isEquipped = skin.id === currentSkin.id;
+            return (
+              <div
+                key={skin.id}
+                onClick={() => onNavigate('profile')}
+                className={`p-3 rounded-2xl border transition-all text-center flex flex-col items-center justify-between space-y-2 cursor-pointer hover:scale-105 ${
+                  isEquipped
+                    ? 'border-cyan-400 bg-cyan-950/20 shadow-lg shadow-cyan-500/10'
+                    : 'glass-card border-slate-800/80 hover:border-slate-700'
+                }`}
+              >
+                <div className="relative py-1">
+                  <SkinPreviewCanvas skinId={skin.id} size={50} shadow={false} animated={false} />
+                </div>
+                <div className="w-full">
+                  <span className="text-[11px] font-bold text-white block truncate">
+                    {skin.name}
+                  </span>
+                  <span className="text-[10px] text-amber-400 font-semibold block mt-0.5">
+                    {skin.priceGems === 0 ? 'Gratuita' : `💎 ${skin.priceGems}`}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* 4. MISSÕES DO PILOTO (CLEAN & DIRETAS) */}
       <section className="glass-panel rounded-3xl p-6 border border-slate-800/80 space-y-4">
         <div className="flex items-center justify-between">
@@ -398,7 +589,7 @@ export function Home({ onNavigate }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-white">
-              Trajetória Cósmica
+              Trajetória Cósmica Completa
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               {STAGES.length} fases com físicas, temas e mecânicas próprias até {maxAltitude.toLocaleString('pt-BR')}m.

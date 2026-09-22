@@ -991,15 +991,15 @@ export function Game({ onNavigate }) {
                     <div
                       onClick={() => handleSoloJourneyChange('free')}
                       className={`group relative rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer overflow-hidden flex flex-col justify-between ${soloJourney === 'free'
-                          ? 'border-emerald-400 bg-gradient-to-br from-emerald-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-emerald-500/10 ring-2 ring-emerald-400/40 scale-[1.01]'
-                          : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-900/90'
+                        ? 'border-emerald-400 bg-gradient-to-br from-emerald-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-emerald-500/10 ring-2 ring-emerald-400/40 scale-[1.01]'
+                        : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-900/90'
                         }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shrink-0 transition-transform group-hover:scale-105 ${soloJourney === 'free'
-                              ? 'bg-gradient-to-tr from-emerald-400 to-teal-500 text-slate-950 shadow-emerald-500/30'
-                              : 'bg-slate-800 text-emerald-400 border border-slate-700'
+                            ? 'bg-gradient-to-tr from-emerald-400 to-teal-500 text-slate-950 shadow-emerald-500/30'
+                            : 'bg-slate-800 text-emerald-400 border border-slate-700'
                             }`}>
                             <Feather className="w-5 h-5" />
                           </div>
@@ -1016,8 +1016,8 @@ export function Game({ onNavigate }) {
                           </div>
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${soloJourney === 'free'
-                            ? 'border-emerald-400 bg-emerald-400 text-slate-950'
-                            : 'border-slate-600'
+                          ? 'border-emerald-400 bg-emerald-400 text-slate-950'
+                          : 'border-slate-600'
                           }`}>
                           {soloJourney === 'free' && <CheckCircle2 className="w-3.5 h-3.5 fill-current" />}
                         </div>
@@ -1034,15 +1034,15 @@ export function Game({ onNavigate }) {
                     <div
                       onClick={() => handleSoloJourneyChange('hero')}
                       className={`group relative rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer overflow-hidden flex flex-col justify-between ${soloJourney === 'hero'
-                          ? 'border-amber-400 bg-gradient-to-br from-amber-950/40 via-purple-950/30 to-slate-950 shadow-xl shadow-amber-500/15 ring-2 ring-amber-400/40 scale-[1.01]'
-                          : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-900/90'
+                        ? 'border-amber-400 bg-gradient-to-br from-amber-950/40 via-purple-950/30 to-slate-950 shadow-xl shadow-amber-500/15 ring-2 ring-amber-400/40 scale-[1.01]'
+                        : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-900/90'
                         }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shrink-0 transition-transform group-hover:scale-105 ${soloJourney === 'hero'
-                              ? 'bg-gradient-to-tr from-amber-400 to-rose-500 text-slate-950 shadow-amber-500/30'
-                              : 'bg-slate-800 text-amber-400 border border-slate-700'
+                            ? 'bg-gradient-to-tr from-amber-400 to-rose-500 text-slate-950 shadow-amber-500/30'
+                            : 'bg-slate-800 text-amber-400 border border-slate-700'
                             }`}>
                             <Crown className="w-5 h-5" />
                           </div>
@@ -1059,8 +1059,8 @@ export function Game({ onNavigate }) {
                           </div>
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${soloJourney === 'hero'
-                            ? 'border-amber-400 bg-amber-400 text-slate-950'
-                            : 'border-slate-600'
+                          ? 'border-amber-400 bg-amber-400 text-slate-950'
+                          : 'border-slate-600'
                           }`}>
                           {soloJourney === 'hero' && <CheckCircle2 className="w-3.5 h-3.5 fill-current" />}
                         </div>
@@ -1075,7 +1075,7 @@ export function Game({ onNavigate }) {
                   </div>
 
                   {/* Banner de Restauração de Fases Anteriores */}
-                  {activeCompletedStages < 42 && (
+                  {/*{activeCompletedStages < 42 && (
                     <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs shadow-lg shadow-amber-500/5">
                       <div className="flex items-center gap-2.5 text-amber-300">
                         <Sparkles className="w-5 h-5 text-amber-400 shrink-0 animate-pulse" />
@@ -1094,6 +1094,7 @@ export function Game({ onNavigate }) {
                       </button>
                     </div>
                   )}
+                  */}
                 </div>
               )}
 
@@ -1212,10 +1213,10 @@ export function Game({ onNavigate }) {
                     type="button"
                     onClick={() => setSelectedWorldId('all')}
                     className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${selectedWorldId === 'all'
-                        ? soloJourney === 'free'
-                          ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20 scale-105'
-                          : 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20 scale-105'
-                        : 'bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60 hover:bg-slate-700/60'
+                      ? soloJourney === 'free'
+                        ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20 scale-105'
+                        : 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20 scale-105'
+                      : 'bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60 hover:bg-slate-700/60'
                       }`}
                   >
                     Ver Todas as 50 Fases
@@ -1240,12 +1241,12 @@ export function Game({ onNavigate }) {
                         type="button"
                         onClick={() => setSelectedWorldId(w.id)}
                         className={`group relative flex items-center gap-2 px-3 py-2 rounded-2xl border shrink-0 transition-all text-left ${isSelected
-                            ? soloJourney === 'free'
-                              ? 'bg-slate-800/90 border-emerald-400/80 shadow-lg shadow-emerald-500/10 scale-105 ring-1 ring-emerald-400/40'
-                              : 'bg-slate-800/90 border-cyan-400/80 shadow-lg shadow-cyan-500/10 scale-105 ring-1 ring-cyan-400/40'
-                            : !isWorldUnlocked
-                              ? 'bg-slate-900/40 border-slate-800 opacity-60 hover:opacity-80'
-                              : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/50'
+                          ? soloJourney === 'free'
+                            ? 'bg-slate-800/90 border-emerald-400/80 shadow-lg shadow-emerald-500/10 scale-105 ring-1 ring-emerald-400/40'
+                            : 'bg-slate-800/90 border-cyan-400/80 shadow-lg shadow-cyan-500/10 scale-105 ring-1 ring-cyan-400/40'
+                          : !isWorldUnlocked
+                            ? 'bg-slate-900/40 border-slate-800 opacity-60 hover:opacity-80'
+                            : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/50'
                           }`}
                       >
                         <div
@@ -1309,8 +1310,8 @@ export function Game({ onNavigate }) {
                       </div>
 
                       <div className={`flex items-center gap-2 shrink-0 self-start sm:self-center px-3 py-1.5 rounded-xl border text-xs font-bold ${soloJourney === 'free'
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                          : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                        : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
                         }`}>
                         <span>{soloJourney === 'free' ? '🏔️' : '👑'}</span>
                         <span>
@@ -1463,13 +1464,13 @@ export function Game({ onNavigate }) {
           {/* Painel do Modo Corrida 1v1 (vs Máquina ou vs Oponente Real) */}
           {(gameMode === 'race_ai' || gameMode === 'race_pvp') && (
             <div className={`w-full mb-1 glass-panel px-3 py-1 rounded-2xl border shrink-0 flex items-center justify-between text-xs shadow-md ${gameMode === 'race_pvp'
-                ? 'border-rose-500/40 bg-rose-950/30'
-                : 'border-purple-500/30 bg-purple-950/30'
+              ? 'border-rose-500/40 bg-rose-950/30'
+              : 'border-purple-500/30 bg-purple-950/30'
               }`}>
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-0.5 rounded-md border text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${gameMode === 'race_pvp'
-                    ? 'bg-rose-500/25 border-rose-400/40 text-rose-300'
-                    : 'bg-purple-500/25 border-purple-400/40 text-purple-300'
+                  ? 'bg-rose-500/25 border-rose-400/40 text-rose-300'
+                  : 'bg-purple-500/25 border-purple-400/40 text-purple-300'
                   }`}>
                   <Swords className="w-3 h-3 text-pink-400" /> {gameMode === 'race_pvp' ? 'Duelo PvP' : 'Corrida'}
                 </span>
@@ -1597,10 +1598,10 @@ export function Game({ onNavigate }) {
 
                 <div>
                   <span className={`text-[10px] uppercase font-bold tracking-widest block ${gameMode === 'race_ai'
-                      ? 'text-purple-400'
-                      : soloJourney === 'free'
-                        ? 'text-emerald-400'
-                        : 'text-amber-400'
+                    ? 'text-purple-400'
+                    : soloJourney === 'free'
+                      ? 'text-emerald-400'
+                      : 'text-amber-400'
                     }`}>
                     {gameMode === 'race_ai'
                       ? `Corrida 1v1 vs Máquina • ${aiDifficulty.toUpperCase()}`
@@ -1720,8 +1721,8 @@ export function Game({ onNavigate }) {
             {gameState === 'game_over' && rematchState !== 'incoming' && (
               <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in z-20">
                 <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border ${lastGameResult?.isEndless
-                    ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                    : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                  ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                  : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
                   }`}>
                   {lastGameResult?.isEndless ? <Flame className="w-8 h-8 fill-current" /> : <Skull className="w-8 h-8" />}
                 </div>
@@ -1807,11 +1808,10 @@ export function Game({ onNavigate }) {
                   ) : (
                     <button
                       onClick={() => startGame(lastGameResult?.isEndless ? ENDLESS_STAGE : selectedStage, lastGameResult?.isEndless ? 'endless' : null)}
-                      className={`py-3.5 rounded-2xl ${
-                        lastGameResult?.isEndless
+                      className={`py-3.5 rounded-2xl ${lastGameResult?.isEndless
                           ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 shadow-orange-500/25'
                           : 'bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-rose-500/25'
-                      } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all`}
+                        } text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all`}
                     >
                       <RotateCcw className="w-4 h-4" />
                       <span>{lastGameResult?.isEndless ? 'JOGAR NOVAMENTE' : 'TENTAR NOVAMENTE'}</span>

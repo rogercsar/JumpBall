@@ -296,14 +296,18 @@ export function AuthProvider({ children }) {
         return Math.min(50, n);
       };
 
-      let rawHero = Math.max(
+      // Determina se houve reset intencional (indicado explicitamente por 0 no local ou na nuvem)
+      const heroIsReset = (local.stages_completed_hero === 0 || cloudMeta?.stages_completed_hero === 0);
+      const freeIsReset = (local.stages_completed_free === 0 || cloudMeta?.stages_completed_free === 0);
+
+      let rawHero = heroIsReset ? 0 : Math.max(
         cleanStage(cloudMeta.stages_completed_hero),
         cleanStage(local.stages_completed_hero),
         cleanStage(data?.stages_completed_hero),
         maxStageHeroFromLocalHist
       );
 
-      let rawFree = Math.max(
+      let rawFree = freeIsReset ? 0 : Math.max(
         cleanStage(cloudMeta.stages_completed_free),
         cleanStage(local.stages_completed_free),
         cleanStage(data?.stages_completed_free),
@@ -311,9 +315,12 @@ export function AuthProvider({ children }) {
       );
 
       // Recuperação e garantia de progresso para a conta Roger César (42 fases no Modo Herói e 48 no Modo Livre)
+      // Exceção: se for um reset intencional, respeita o 0 e não reaplica o piso
       const isRogerUser = userId === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || data?.username === 'Roger César' || cloudMeta?.username === 'Roger César' || local?.username === 'Roger César';
-      if (isRogerUser) {
+      if (isRogerUser && !heroIsReset) {
         rawHero = Math.max(rawHero, 42);
+      }
+      if (isRogerUser && !freeIsReset) {
         rawFree = Math.max(rawFree, 48);
       }
 
@@ -784,10 +791,13 @@ export function AuthProvider({ children }) {
   const resetStageProgress = async (mode = 'all') => {
     const local = localStore.getProfile();
     const current = profile ? { ...local, ...profile } : local;
+    const nextHero = (mode === 'all' || mode === 'hero') ? 0 : (current.stages_completed_hero || 0);
+    const nextFree = (mode === 'all' || mode === 'free') ? 0 : (current.stages_completed_free || 0);
     const updated = {
       ...current,
-      ...(mode === 'all' || mode === 'hero' ? { stages_completed: 0, stages_completed_hero: 0 } : {}),
-      ...(mode === 'all' || mode === 'free' ? { stages_completed_free: 0 } : {})
+      stages_completed_hero: nextHero,
+      stages_completed_free: nextFree,
+      stages_completed: Math.max(nextHero, nextFree)
     };
     setProfile(updated);
     localStore.saveProfile(updated);
