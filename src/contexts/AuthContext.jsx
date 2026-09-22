@@ -183,7 +183,7 @@ export function AuthProvider({ children }) {
             stages_completed: Math.max(freeFloor, sessProf.stages_completed !== undefined ? sessProf.stages_completed : (localProf.stages_completed || 0)),
             stages_completed_hero: Math.max(heroFloor, sessProf.stages_completed_hero !== undefined
               ? sessProf.stages_completed_hero
-              : (metaProf.stages_completed_hero !== undefined ? Number(metaProf.stages_completed_hero) : (localProf.stages_completed_hero !== undefined ? localProf.stages_completed_hero : (localProf.stages_completed || 0)))),
+              : (metaProf.stages_completed_hero !== undefined ? Number(metaProf.stages_completed_hero) : (localProf.stages_completed_hero || 0))),
             stages_completed_free: Math.max(freeFloor, sessProf.stages_completed_free !== undefined
               ? sessProf.stages_completed_free
               : (metaProf.stages_completed_free !== undefined ? Number(metaProf.stages_completed_free) : (localProf.stages_completed_free || 0))),
@@ -300,8 +300,7 @@ export function AuthProvider({ children }) {
         cleanStage(cloudMeta.stages_completed_hero),
         cleanStage(local.stages_completed_hero),
         cleanStage(data?.stages_completed_hero),
-        maxStageHeroFromLocalHist,
-        maxStageFromHistory
+        maxStageHeroFromLocalHist
       );
 
       let rawFree = Math.max(
@@ -318,18 +317,15 @@ export function AuthProvider({ children }) {
         rawFree = Math.max(rawFree, 48);
       }
 
-      // Fallback: quando os campos separados (hero/free) ainda não existem no banco de dados
-      // (perfis antigos só têm stages_completed genérico), usa o valor sanitizado como referência
-      // somente se os valores específicos estiverem zerados e o genérico for um valor válido (<=50)
+      // Fallback: somente se ambos os modos estiverem rigorosamente zerados
+      // em contas antigas, aplica o progresso genérico inicial
       const legacyGeneric = Math.max(
         cleanStage(data?.stages_completed),
         cleanStage(cloudMeta?.stages_completed),
         cleanStage(local?.stages_completed)
       );
-      if (rawHero === 0 && legacyGeneric > 0) {
+      if (rawHero === 0 && rawFree === 0 && legacyGeneric > 0) {
         rawHero = legacyGeneric;
-      }
-      if (rawFree === 0 && legacyGeneric > 0) {
         rawFree = legacyGeneric;
       }
 
@@ -710,7 +706,7 @@ export function AuthProvider({ children }) {
       ball_skin: updates.ball_skin || updates.ballSkin || base.ball_skin || 'neon-cyan',
       daily_quests_progress: updates.daily_quests_progress || base.daily_quests_progress || { date: '', progress: {}, claimed: {} },
       stages_completed: updates.stages_completed !== undefined ? updates.stages_completed : (base.stages_completed || 0),
-      stages_completed_hero: updates.stages_completed_hero !== undefined ? updates.stages_completed_hero : (base.stages_completed_hero !== undefined ? base.stages_completed_hero : (base.stages_completed || 0)),
+      stages_completed_hero: updates.stages_completed_hero !== undefined ? updates.stages_completed_hero : (base.stages_completed_hero !== undefined ? base.stages_completed_hero : 0),
       stages_completed_free: updates.stages_completed_free !== undefined ? updates.stages_completed_free : (base.stages_completed_free || 0),
       high_score: Math.max(base.high_score || 0, updates.high_score !== undefined ? updates.high_score : 0),
       total_jumps: (updates.total_jumps !== undefined) ? updates.total_jumps : (base.total_jumps || 0),

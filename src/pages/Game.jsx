@@ -149,7 +149,7 @@ export function Game({ onNavigate }) {
     const localProf = localStore.getProfile();
     const completed = journey === 'free'
       ? (localProf.stages_completed_free || 0)
-      : (localProf.stages_completed_hero ?? localProf.stages_completed ?? 0);
+      : (localProf.stages_completed_hero || 0);
     return Math.min(10, Math.max(1, Math.floor(completed / 5) + 1));
   });
 
