@@ -1,7 +1,7 @@
 /**
  * JUMPBALL - MODO HERÓI: 30 MUNDOS E 150 FASES (Fases 1 a 150)
  * Inclui os 10 Mundos Clássicos intactos (Fases 1 a 50) + 20 Novos Mundos Inéditos (Fases 51 a 150)
- * com 30 Batalhas de Chefão culminando no Demiurgo Supremo aos 150.000m!
+ * com 30 Batalhas de Chefão e Múltiplas Fases no Modo Horizontal!
  */
 
 export const HERO_WORLDS = [
@@ -453,97 +453,97 @@ export const HERO_WORLDS = [
     ],
     "bossStageNumber": 125,
     "bossName": "Locomotiva Blindada Fantasma",
-    "bossTitle": "O Titã de Aço a Vapor"
+    "bossTitle": "A Máquina do Juízo Final"
   },
   {
     "id": 26,
-    "name": "Mundo 26: Parque Acrobático da Gravidade Zero",
-    "shortName": "Parkour Gravidade 0",
+    "name": "Mundo 26: Estádio Orbital Gravidade Zero",
+    "shortName": "Gravidade Zero",
     "theme": "sports",
-    "icon": "Trophy",
-    "gradient": "from-sky-950/80 to-blue-900/60",
-    "border": "border-sky-400/40",
-    "accentColor": "#0ea5e9",
-    "description": "Arenas verticais com campos antigravitacionais alternados e acrobacias extremas.",
+    "icon": "Medal",
+    "gradient": "from-blue-950/80 via-indigo-950/80 to-slate-950",
+    "border": "border-cyan-400/40",
+    "accentColor": "#06b6d4",
+    "description": "Arena olímpica no espaço sideral com pistas de aceleração, aros holográficos e super impulso.",
     "stageRange": [
       126,
       130
     ],
     "bossStageNumber": 130,
     "bossName": "Campeão da Gravidade Zero",
-    "bossTitle": "O Ás Invicto do Parkour"
+    "bossTitle": "O Invencível das Galáxias"
   },
   {
     "id": 27,
-    "name": "Mundo 27: Confeitaria Proibida dos Deuses",
-    "shortName": "Doce do Apocalipse",
-    "theme": "candy",
+    "name": "Mundo 27: Confeitaria Apocalíptica de Caramelo",
+    "shortName": "Doce Apocalipse",
+    "theme": "gastronomy",
     "icon": "Cookie",
-    "gradient": "from-pink-950/80 to-purple-950/70",
-    "border": "border-pink-400/40",
-    "accentColor": "#ec4899",
-    "description": "Muralhas de açúcar cristal super-resistente, caldas ferventes e doces explosivos.",
+    "gradient": "from-amber-950/80 via-orange-950/80 to-slate-950",
+    "border": "border-orange-400/40",
+    "accentColor": "#f97316",
+    "description": "Doces monumentais hiperbólicos, cascatas de chocolate fervente e biscoitos gigantescos.",
     "stageRange": [
       131,
       135
     ],
     "bossStageNumber": 135,
     "bossName": "Gólem de Caramelo Ardente",
-    "bossTitle": "A Força Açucarada Imparável"
+    "bossTitle": "O Monstro da Calda Quente"
   },
   {
     "id": 28,
-    "name": "Mundo 28: Sinapses Neurais & Vigor Biológico",
-    "shortName": "Mente Quântica",
+    "name": "Mundo 28: Sinapse Cósmica Interdimensional",
+    "shortName": "Sinapse Cósmica",
     "theme": "health",
     "icon": "Activity",
-    "gradient": "from-rose-950/70 to-indigo-950/80",
-    "border": "border-rose-400/40",
-    "accentColor": "#f43f5e",
-    "description": "A rede neural suprema do pensamento humano. Disparos elétricos de dopamina e adrenalina pura.",
+    "gradient": "from-teal-950/80 via-purple-950/80 to-slate-950",
+    "border": "border-teal-400/50",
+    "accentColor": "#14b8a6",
+    "description": "Cérebro estelar universal com neurônios gigantescos conectados por feixes de luz consciente.",
     "stageRange": [
       136,
       140
     ],
     "bossStageNumber": 140,
     "bossName": "Sinapse Hiperativa Omega",
-    "bossTitle": "O Impulso Cósmico da Mente"
+    "bossTitle": "A Consciência Quântica Universal"
   },
   {
     "id": 29,
-    "name": "Mundo 29: Monumentos dos Cinco Continentes",
-    "shortName": "Muralha das Eras",
+    "name": "Mundo 29: Muralha das Sete Eras Ancestrais",
+    "shortName": "Sete Civilizações",
     "theme": "continents",
     "icon": "Landmark",
-    "gradient": "from-slate-900 to-amber-950/80",
+    "gradient": "from-amber-950/80 via-emerald-950/70 to-slate-950",
     "border": "border-amber-400/50",
     "accentColor": "#f59e0b",
-    "description": "Templos e fortalezas de todas as civilizações da Terra unidas em uma só escalada monumental.",
+    "description": "Monumentos acumulados de todas as civilizações que já dominaram a Terra e o espaço.",
     "stageRange": [
       141,
       145
     ],
     "bossStageNumber": 145,
     "bossName": "Colosso das Sete Civilizações",
-    "bossTitle": "O Guardião da História Humana"
+    "bossTitle": "O Titã dos Séculos"
   },
   {
     "id": 30,
-    "name": "Mundo 30: O Demiurgo Supremo aos 150.000m",
-    "shortName": "Zênite Infinito 150k",
-    "theme": "cosmos",
+    "name": "Mundo 30: Zênite Supremo dos 150.000m",
+    "shortName": "Zênite Supremo",
+    "theme": "futuristic",
     "icon": "Crown",
-    "gradient": "from-black via-purple-950 to-amber-950",
+    "gradient": "from-amber-950/90 via-purple-950/90 to-slate-950",
     "border": "border-amber-400/60",
     "accentColor": "#fbbf24",
-    "description": "A fronteira final absoluta da criação! O confronto lendário aos 150.000 metros de altitude!",
+    "description": "O clímax definitivo aos 150.000m! O trono do Demiurgo onde o JumpBall alcança a divindade.",
     "stageRange": [
       146,
       150
     ],
     "bossStageNumber": 150,
     "bossName": "O Demiurgo Eterno do Cosmos",
-    "bossTitle": "A Divindade Suprema do JumpBall"
+    "bossTitle": "O Criador e Destruidor de Universos"
   }
 ];
 
@@ -1956,50 +1956,49 @@ export const HERO_STAGES = [
     "theme": "quantum_core",
     "icon": "Cpu",
     "targetHeight": 51000,
-    "gravity": 0.27,
-    "jumpForce": -13.2,
+    "gravity": 0.32,
+    "jumpForce": -12.5,
     "speedFactor": 2.31,
     "wind": 0,
     "bgGradient": [
-      "#041527",
-      "#082b4c",
-      "#0f487a"
+      "#021a24",
+      "#083344",
+      "#0e7490"
     ],
     "platformColor": "#06b6d4",
     "platformBorder": "#67e8f9",
     "ballGlow": "#22d3ee",
-    "description": "Desafio temático nos 51.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Salte sobre pistas condutoras de cobre dourado energizadas por pulsos quânticos.",
     "hazards": [
-      "conveyor",
-      "lasers"
+      "springs"
     ],
-    "mechanic": "Esteiras de fibra óptica de alta frequência."
+    "mechanic": "Placas de circuito impresso com micro-molas de impulso piezoelétrico."
   },
   {
     "id": 52,
     "number": 52,
-    "title": "Barramento de Dados Taquiônico",
+    "title": "Barramento Taquiônico",
     "theme": "quantum_core",
     "icon": "Zap",
     "targetHeight": 52000,
-    "gravity": 0.28,
-    "jumpForce": -13.2,
-    "speedFactor": 2.32,
+    "gravity": 0.34,
+    "jumpForce": -12.6,
+    "speedFactor": 2.33,
     "wind": 0,
     "bgGradient": [
-      "#041e2b",
-      "#073b52",
-      "#0c5e82"
+      "#03182b",
+      "#073a61",
+      "#0284c7"
     ],
-    "platformColor": "#0ea5e9",
-    "platformBorder": "#7dd3fc",
-    "ballGlow": "#38bdf8",
-    "description": "Desafio temático nos 52.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#0284c7",
+    "platformBorder": "#38bdf8",
+    "ballGlow": "#0ea5e9",
+    "description": "Fluxos de dados hipervelozes empurram você pelas pontes lógicas da placa-mãe.",
     "hazards": [
-      "moving",
-      "conveyor"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Saltos em pacotes de pulso de dados velozes."
+    "mechanic": "Esteiras de fibra óptica em altíssima rotação que aceleram ou freiam a bola."
   },
   {
     "id": 53,
@@ -2008,51 +2007,52 @@ export const HERO_STAGES = [
     "theme": "quantum_core",
     "icon": "Boxes",
     "targetHeight": 53000,
-    "gravity": 0.29,
-    "jumpForce": -13.2,
-    "speedFactor": 2.33,
+    "gravity": 0.36,
+    "jumpForce": -12.6,
+    "speedFactor": 2.34,
     "wind": 0,
     "bgGradient": [
-      "#061a33",
-      "#0d325e",
-      "#134e8e"
+      "#0a1936",
+      "#142c5c",
+      "#1d4ed8"
     ],
     "platformColor": "#3b82f6",
     "platformBorder": "#93c5fd",
     "ballGlow": "#60a5fa",
-    "description": "Desafio temático nos 53.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Pise com extrema leveza! Cada bloco de memória só suporta um único cálculo.",
     "hazards": [
       "fragile",
       "moving"
     ],
-    "mechanic": "Nós de memória que colapsam ao toque."
+    "mechanic": "Bits quânticos que colapsam e se desintegram 0.8s após o contato."
   },
   {
     "id": 54,
     "number": 54,
-    "title": "Labirinto de Feixes Laser",
+    "title": "Túnel do Acelerador de Fótons",
     "theme": "quantum_core",
-    "icon": "Crosshair",
+    "icon": "Rocket",
     "targetHeight": 54000,
-    "gravity": 0.3,
-    "jumpForce": -13.2,
-    "speedFactor": 2.34,
+    "gravity": 0.26,
+    "jumpForce": -12.6,
+    "speedFactor": 2.35,
     "wind": 0,
     "bgGradient": [
-      "#091b36",
-      "#143463",
-      "#1e5299"
+      "#022c3b",
+      "#0e7490",
+      "#06b6d4"
     ],
-    "platformColor": "#6366f1",
-    "platformBorder": "#a5b4fc",
-    "ballGlow": "#818cf8",
-    "description": "Desafio temático nos 54.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#06b6d4",
+    "platformBorder": "#a5f3fc",
+    "ballGlow": "#38bdf8",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Dispare em linha reta pelo colisor de fótons desviando de esteiras e prismas!",
     "hazards": [
-      "lasers",
       "moving",
-      "springs"
+      "conveyor"
     ],
-    "mechanic": "Evasão ágil entre barreiras de lasers sincronizados."
+    "mechanic": "PERCURSO HORIZONTAL! Corra no túnel de feixes laser cruzando portais laterais!",
+    "layout": "horizontal",
+    "targetDistance": 4300
   },
   {
     "id": 55,
@@ -2061,59 +2061,58 @@ export const HERO_STAGES = [
     "theme": "quantum_core",
     "icon": "Crown",
     "targetHeight": 55000,
-    "gravity": 0.31,
-    "jumpForce": -13.2,
-    "speedFactor": 2.35,
+    "gravity": 0.28,
+    "jumpForce": -12.6,
+    "speedFactor": 2.36,
     "wind": 0,
     "bgGradient": [
-      "#020b18",
-      "#0b2040",
-      "#173f78"
+      "#01131c",
+      "#052d3f",
+      "#0369a1"
     ],
-    "platformColor": "#06b6d4",
-    "platformBorder": "#a5f3fc",
+    "platformColor": "#0284c7",
+    "platformBorder": "#38bdf8",
     "ballGlow": "#22d3ee",
-    "description": "BATALHA DE CHEFÃO AOS 55.000m! Derrote Nexus Quântico 9000!",
+    "description": "BATALHA DE CHEFÃO AOS 55.000m! O supercomputador autônomo tenta corromper seu código de salto!",
     "hazards": [
-      "lasers",
-      "conveyor",
       "moving",
-      "fragile"
+      "conveyor",
+      "spikes"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Destrua os núcleos de processamento do supercomputador!",
+    "mechanic": "BATALHA DE CHEFÃO: Desvie dos pulsos de firewall e sobrecarregue os 3 núcleos da IA!",
     "isBossStage": true,
     "bossName": "Nexus Quântico 9000",
     "bossTitle": "IA Central da Rede Quântica",
     "bossHP": 11,
     "bossColor": "#06b6d4",
-    "bossGlow": "#22d3ee",
+    "bossGlow": "#67e8f9",
     "rewardGems": 1100,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 56,
     "number": 56,
-    "title": "Entrada do Desfiladeiro Seco",
+    "title": "Garganta de Arenito Vermelho",
     "theme": "wild_west",
-    "icon": "Sun",
+    "icon": "Wind",
     "targetHeight": 56000,
-    "gravity": 0.32,
-    "jumpForce": -13.2,
-    "speedFactor": 2.36,
-    "wind": 0.25,
+    "gravity": 0.3,
+    "jumpForce": -12.7,
+    "speedFactor": 2.38,
+    "wind": 0.3,
     "bgGradient": [
-      "#281204",
-      "#4a2408",
-      "#733a10"
+      "#291305",
+      "#4d2309",
+      "#78350f"
     ],
     "platformColor": "#d97706",
     "platformBorder": "#fde68a",
     "ballGlow": "#f59e0b",
-    "description": "Desafio temático nos 56.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "O vento uivante do cânion desafia seu equilíbrio entre penhascos alaranjados.",
     "hazards": [
       "wind"
     ],
-    "mechanic": "Rajadas de vento árido desviam a subida entre rochas de arenito."
+    "mechanic": "Rajadas cortantes de poeira desértica empurram a esfera para a direita."
   },
   {
     "id": 57,
@@ -2122,24 +2121,24 @@ export const HERO_STAGES = [
     "theme": "wild_west",
     "icon": "Axe",
     "targetHeight": 57000,
-    "gravity": 0.33,
-    "jumpForce": -13.3,
-    "speedFactor": 2.37,
+    "gravity": 0.32,
+    "jumpForce": -12.7,
+    "speedFactor": 2.39,
     "wind": 0,
     "bgGradient": [
-      "#26150b",
-      "#482a17",
-      "#6f4225"
+      "#24140a",
+      "#452614",
+      "#6b3c20"
     ],
     "platformColor": "#b45309",
-    "platformBorder": "#fcd34d",
+    "platformBorder": "#fed7aa",
     "ballGlow": "#d97706",
-    "description": "Desafio temático nos 57.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Salte sobre assoalhos decrépitos de pinho seco do lendário saloon fantasma.",
     "hazards": [
       "fragile",
       "moving"
     ],
-    "mechanic": "Vigas antigas que rangem e desmoronam."
+    "mechanic": "Trevos e tábuas antigas que rangem e despencam após o salto."
   },
   {
     "id": 58,
@@ -2149,50 +2148,51 @@ export const HERO_STAGES = [
     "icon": "Pickaxe",
     "targetHeight": 58000,
     "gravity": 0.34,
-    "jumpForce": -13.3,
-    "speedFactor": 2.38,
+    "jumpForce": -12.7,
+    "speedFactor": 2.4,
     "wind": 0,
     "bgGradient": [
-      "#1f140d",
-      "#3d291b",
-      "#61422c"
+      "#1c1008",
+      "#382011",
+      "#59331b"
     ],
     "platformColor": "#92400e",
     "platformBorder": "#fde68a",
     "ballGlow": "#b45309",
-    "description": "Desafio temático nos 58.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Desça nas galerias esquecidas da mina de ouro onde brotam espinhos de ferro fundido.",
     "hazards": [
       "spikes",
-      "fragile"
+      "moving"
     ],
-    "mechanic": "Vagonetes velozes e estalactites rochosas pontiagudas."
+    "mechanic": "Vagonetes desgovernados com estacas pontiagudas cruzam os trilhos."
   },
   {
     "id": 59,
     "number": 59,
-    "title": "Ponte Pênsil da Ravina",
+    "title": "Cavalgada na Ferrovia dos Despenhadeiros",
     "theme": "wild_west",
-    "icon": "Wind",
+    "icon": "Crosshair",
     "targetHeight": 59000,
-    "gravity": 0.35,
-    "jumpForce": -13.3,
-    "speedFactor": 2.39,
-    "wind": -0.25,
+    "gravity": 0.36,
+    "jumpForce": -12.7,
+    "speedFactor": 2.42,
+    "wind": 0,
     "bgGradient": [
-      "#2a140a",
-      "#542614",
-      "#823c1f"
+      "#331505",
+      "#662808",
+      "#9a3d0d"
     ],
     "platformColor": "#ea580c",
-    "platformBorder": "#fdba74",
+    "platformBorder": "#fde047",
     "ballGlow": "#f97316",
-    "description": "Desafio temático nos 59.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Atravesse a ponte férrea de madeira antes que o trem fantasma chegue!",
     "hazards": [
-      "wind",
-      "moving",
-      "fragile"
+      "fragile",
+      "moving"
     ],
-    "mechanic": "Ventos uivantes e pranchas instáveis sobre o abismo."
+    "mechanic": "PERCURSO HORIZONTAL! Corra sobre dormentes de madeira suspensos no abismo do cânion!",
+    "layout": "horizontal",
+    "targetDistance": 4400
   },
   {
     "id": 60,
@@ -2202,136 +2202,137 @@ export const HERO_STAGES = [
     "icon": "Crown",
     "targetHeight": 60000,
     "gravity": 0.26,
-    "jumpForce": -13.3,
-    "speedFactor": 2.4,
+    "jumpForce": -12.8,
+    "speedFactor": 2.43,
     "wind": 0,
     "bgGradient": [
-      "#1a0a04",
-      "#3d160a",
-      "#692612"
+      "#1a0802",
+      "#3a1306",
+      "#611f0a"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#fef08a",
-    "ballGlow": "#fbbf24",
-    "description": "BATALHA DE CHEFÃO AOS 60.000m! Derrote Pistoleiro Espectral!",
+    "platformColor": "#b45309",
+    "platformBorder": "#fde68a",
+    "ballGlow": "#f59e0b",
+    "description": "DUELO AO MEIO-DIA AOS 60.000m! O xerife fantasma não permite intrusos em seu desfiladeiro!",
     "hazards": [
       "moving",
       "fragile",
       "spikes"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Desvie dos tiros fantasmagóricos e ative os barris de pólvora!",
+    "mechanic": "BATALHA DE CHEFÃO: Desvie das balas fantasmagóricas e detone barris de pólvora!",
     "isBossStage": true,
     "bossName": "Pistoleiro Espectral",
     "bossTitle": "O Vingador do Cânion",
     "bossHP": 12,
     "bossColor": "#d97706",
-    "bossGlow": "#f59e0b",
+    "bossGlow": "#fbbf24",
     "rewardGems": 1200,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 61,
     "number": 61,
-    "title": "Selva Primordial dos Sauropodes",
+    "title": "Copas das Sequoias Gigantes",
     "theme": "dinosaur",
-    "icon": "Footprints",
+    "icon": "TreePine",
     "targetHeight": 61000,
-    "gravity": 0.27,
-    "jumpForce": -13.3,
-    "speedFactor": 2.41,
+    "gravity": 0.28,
+    "jumpForce": -12.8,
+    "speedFactor": 2.44,
     "wind": 0,
     "bgGradient": [
-      "#072010",
-      "#103d21",
-      "#196135"
+      "#071f11",
+      "#104225",
+      "#186e3d"
     ],
     "platformColor": "#84cc16",
-    "platformBorder": "#d9f99d",
+    "platformBorder": "#bef264",
     "ballGlow": "#a3e635",
-    "description": "Desafio temático nos 61.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Suba pela vegetação pré-histórica colossal intocada há 150 milhões de anos.",
     "hazards": [
-      "moving"
+      "springs"
     ],
-    "mechanic": "Troncos colossais e folhas gigantes que amortecem saltos."
+    "mechanic": "Folhas elásticas primordiais que lançam a esfera com dobro da força."
   },
   {
     "id": 62,
     "number": 62,
-    "title": "Pântano dos Fósseis Vivos",
+    "title": "Pântano dos Fósseis Calcários",
     "theme": "dinosaur",
     "icon": "Waves",
     "targetHeight": 62000,
-    "gravity": 0.28,
-    "jumpForce": -13.3,
-    "speedFactor": 2.42,
+    "gravity": 0.3,
+    "jumpForce": -12.8,
+    "speedFactor": 2.46,
     "wind": 0,
     "bgGradient": [
-      "#0c2415",
-      "#164227",
-      "#22693f"
+      "#0d2616",
+      "#194a2b",
+      "#277344"
     ],
     "platformColor": "#65a30d",
-    "platformBorder": "#bef264",
+    "platformBorder": "#d9f99d",
     "ballGlow": "#84cc16",
-    "description": "Desafio temático nos 62.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Pise com agilidade extrema nas ossadas ancestrais sobre a lama borbulhante.",
     "hazards": [
       "fragile",
-      "springs"
+      "moving"
     ],
-    "mechanic": "Ossadas pré-históricas com molas de seiva antiga."
+    "mechanic": "Costelas fossilizadas de braquiossauros que se esfarelam com o peso."
   },
   {
     "id": 63,
     "number": 63,
-    "title": "Ninho dos Velocirraptores",
+    "title": "Garganta dos Ninhos de Espinhos",
     "theme": "dinosaur",
     "icon": "Zap",
     "targetHeight": 63000,
-    "gravity": 0.29,
-    "jumpForce": -13.3,
-    "speedFactor": 2.43,
+    "gravity": 0.32,
+    "jumpForce": -12.8,
+    "speedFactor": 2.47,
     "wind": 0,
     "bgGradient": [
-      "#122912",
-      "#234a23",
-      "#377337"
+      "#142e12",
+      "#235420",
+      "#367d32"
     ],
     "platformColor": "#4d7c0f",
     "platformBorder": "#a3e635",
     "ballGlow": "#65a30d",
-    "description": "Desafio temático nos 63.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "O ninho das feras está repleto de armadilhas pontiagudas e plataformas instáveis.",
     "hazards": [
-      "moving",
-      "fragile"
+      "spikes",
+      "moving"
     ],
-    "mechanic": "Plataformas rápidas sob a vigilância de predadores jurássicos."
+    "mechanic": "Espinhos venenosos de estegossauro projetados nas laterais das rochas."
   },
   {
     "id": 64,
     "number": 64,
-    "title": "Garganta dos Pterossauros",
+    "title": "Corrida na Trilha dos Velocirraptores",
     "theme": "dinosaur",
-    "icon": "Wind",
+    "icon": "Footprints",
     "targetHeight": 64000,
-    "gravity": 0.3,
-    "jumpForce": -13.4,
-    "speedFactor": 2.44,
-    "wind": 0.25,
+    "gravity": 0.34,
+    "jumpForce": -12.8,
+    "speedFactor": 2.48,
+    "wind": 0,
     "bgGradient": [
-      "#10281b",
-      "#1e4b33",
-      "#2d734e"
+      "#082e14",
+      "#125e29",
+      "#1da347"
     ],
-    "platformColor": "#10b981",
-    "platformBorder": "#a7f3d0",
-    "ballGlow": "#34d399",
-    "description": "Desafio temático nos 64.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#84cc16",
+    "platformBorder": "#fef08a",
+    "ballGlow": "#bef264",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Corra lateralmente em alta velocidade escapando dos predadores da selva!",
     "hazards": [
-      "wind",
       "moving",
       "springs"
     ],
-    "mechanic": "Correntes termais ascendentes na subida aos picos rochosos."
+    "mechanic": "PERCURSO HORIZONTAL! Fuga veloz entre rochedos e raízes jurássicas!",
+    "layout": "horizontal",
+    "targetDistance": 4500
   },
   {
     "id": 65,
@@ -2340,58 +2341,58 @@ export const HERO_STAGES = [
     "theme": "dinosaur",
     "icon": "Crown",
     "targetHeight": 65000,
-    "gravity": 0.31,
-    "jumpForce": -13.4,
-    "speedFactor": 2.45,
+    "gravity": 0.36,
+    "jumpForce": -12.9,
+    "speedFactor": 2.49,
     "wind": 0,
     "bgGradient": [
-      "#08170c",
-      "#14331c",
-      "#235730"
+      "#0a1a09",
+      "#163814",
+      "#255c22"
     ],
-    "platformColor": "#84cc16",
-    "platformBorder": "#ecfccb",
-    "ballGlow": "#a3e635",
-    "description": "BATALHA DE CHEFÃO AOS 65.000m! Derrote T-Rex Titânico Apex!",
+    "platformColor": "#4d7c0f",
+    "platformBorder": "#d9f99d",
+    "ballGlow": "#84cc16",
+    "description": "CONFRONTO PRIMORDIAL AOS 65.000m! Enfrente o rei indiscutível da Era Mesozóica!",
     "hazards": [
       "moving",
       "fragile",
       "spikes"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Fuja das mordidas sísmicas e detone as armadilhas de rocha!",
+    "mechanic": "BATALHA DE CHEFÃO: O T-Rex ruge fazendo pedregulhos caírem! Ative as catapultas de basalto!",
     "isBossStage": true,
     "bossName": "T-Rex Titânico Apex",
     "bossTitle": "O Predador Supremo",
     "bossHP": 13,
     "bossColor": "#65a30d",
-    "bossGlow": "#84cc16",
+    "bossGlow": "#a3e635",
     "rewardGems": 1300,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 66,
     "number": 66,
-    "title": "Ágora de Atenas em Mármore",
+    "title": "Ágora de Mármore de Atenas",
     "theme": "olympus",
     "icon": "Landmark",
     "targetHeight": 66000,
-    "gravity": 0.32,
-    "jumpForce": -13.4,
-    "speedFactor": 2.46,
+    "gravity": 0.26,
+    "jumpForce": -12.9,
+    "speedFactor": 2.51,
     "wind": 0,
     "bgGradient": [
-      "#1c170a",
-      "#3b3117",
-      "#615128"
+      "#261502",
+      "#472804",
+      "#734007"
     ],
-    "platformColor": "#eab308",
-    "platformBorder": "#fef08a",
-    "ballGlow": "#facc15",
-    "description": "Desafio temático nos 66.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#f59e0b",
+    "platformBorder": "#fef3c7",
+    "ballGlow": "#fbbf24",
+    "description": "A praça central dos filósofos e generais da Grécia Antiga sob a bênção de Atena.",
     "hazards": [
-      "springs"
+      "moving"
     ],
-    "mechanic": "Mármore dourado reluzente e impulso dos deuses do Olimpo."
+    "mechanic": "Degraus de mármore translúcido esculpidos com frisos dourados móveis."
   },
   {
     "id": 67,
@@ -2400,77 +2401,78 @@ export const HERO_STAGES = [
     "theme": "olympus",
     "icon": "Boxes",
     "targetHeight": 67000,
-    "gravity": 0.33,
-    "jumpForce": -13.4,
-    "speedFactor": 2.47,
+    "gravity": 0.28,
+    "jumpForce": -12.9,
+    "speedFactor": 2.52,
     "wind": 0,
     "bgGradient": [
-      "#1d1912",
-      "#3d3427",
-      "#635440"
+      "#291807",
+      "#4d2f0e",
+      "#7a4a16"
     ],
-    "platformColor": "#ca8a04",
-    "platformBorder": "#fde047",
-    "ballGlow": "#eab308",
-    "description": "Desafio temático nos 67.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#d97706",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#f59e0b",
+    "description": "Escale os vestígios do templo sagrado suspenso nos céus da Hélade.",
     "hazards": [
       "fragile",
-      "moving"
+      "springs"
     ],
-    "mechanic": "Capitéis coríntios soltos que balançam nas alturas."
+    "mechanic": "Capitéis coríntios rompidos que se desprendem sob fortes impactos."
   },
   {
     "id": 68,
     "number": 68,
-    "title": "Labirinto Subterrâneo de Creta",
+    "title": "Forja Divina de Hefesto",
     "theme": "olympus",
-    "icon": "Compass",
+    "icon": "Anvil",
     "targetHeight": 68000,
-    "gravity": 0.34,
-    "jumpForce": -13.4,
-    "speedFactor": 2.48,
+    "gravity": 0.3,
+    "jumpForce": -12.9,
+    "speedFactor": 2.53,
     "wind": 0,
     "bgGradient": [
-      "#1a151e",
-      "#362c3e",
-      "#594966"
+      "#301205",
+      "#5c240a",
+      "#8c360f"
     ],
-    "platformColor": "#a855f7",
-    "platformBorder": "#e9d5ff",
-    "ballGlow": "#c084fc",
-    "description": "Desafio temático nos 68.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#ea580c",
+    "platformBorder": "#fde047",
+    "ballGlow": "#fb923c",
+    "description": "A forja onde os raios de Zeus são moldados em bronze celestial e fogo eterno.",
     "hazards": [
       "spikes",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Paredes estreitas e armadilhas ancestrais de espinhos."
+    "mechanic": "Bigornas celestes e brasas olímpicas incandescentes que ferem no contato."
   },
   {
     "id": 69,
     "number": 69,
-    "title": "Portão Dourado do Monte Olimpo",
+    "title": "Pátio das Bigas do Monte Olimpo",
     "theme": "olympus",
-    "icon": "Shield",
+    "icon": "Landmark",
     "targetHeight": 69000,
-    "gravity": 0.35,
-    "jumpForce": -13.4,
-    "speedFactor": 2.49,
+    "gravity": 0.32,
+    "jumpForce": -13,
+    "speedFactor": 2.55,
     "wind": 0,
     "bgGradient": [
-      "#211a0c",
-      "#47371a",
-      "#785d2d"
+      "#331d04",
+      "#663908",
+      "#9e580c"
     ],
     "platformColor": "#f59e0b",
-    "platformBorder": "#fef08a",
-    "ballGlow": "#fbbf24",
-    "description": "Desafio temático nos 69.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformBorder": "#ffffff",
+    "ballGlow": "#fde047",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Acelere pelo hipódromo dos deuses gregos sobre pistas velozes!",
     "hazards": [
-      "moving",
-      "springs",
-      "fragile"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Degraus divinos que conduzem aos aposentos dos titãs."
+    "mechanic": "PERCURSO HORIZONTAL! Pista monumental das corridas de bigas celestes com esteiras de ouro!",
+    "layout": "horizontal",
+    "targetDistance": 4600
   },
   {
     "id": 70,
@@ -2479,30 +2481,30 @@ export const HERO_STAGES = [
     "theme": "olympus",
     "icon": "Crown",
     "targetHeight": 70000,
-    "gravity": 0.26,
-    "jumpForce": -13.4,
-    "speedFactor": 2.5,
+    "gravity": 0.34,
+    "jumpForce": -13,
+    "speedFactor": 2.56,
     "wind": 0,
     "bgGradient": [
-      "#181206",
-      "#3b2b0f",
-      "#664b1a"
+      "#1f0f02",
+      "#3b1e04",
+      "#5e3006"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#fffbeb",
+    "platformColor": "#b45309",
+    "platformBorder": "#fde68a",
     "ballGlow": "#fbbf24",
-    "description": "BATALHA DE CHEFÃO AOS 70.000m! Derrote Minotauro de Bronze!",
+    "description": "DUELO NO LABIRINTO AOS 70.000m! O colosso taurino de bronze forjado quer esmagar seu avanço!",
     "hazards": [
       "moving",
       "fragile",
       "spikes"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Desvie das investidas do Minotauro e faça-o colidir com as colunas!",
+    "mechanic": "BATALHA DE CHEFÃO: O Minotauro investe em linha reta quebrando plataformas! Acerte as lanças de Ares!",
     "isBossStage": true,
     "bossName": "Minotauro de Bronze",
-    "bossTitle": "Guardião do Labirinto Mítico",
+    "bossTitle": "Guardião do Labirinto",
     "bossHP": 14,
-    "bossColor": "#b45309",
+    "bossColor": "#d97706",
     "bossGlow": "#f59e0b",
     "rewardGems": 1400,
     "hasParallelUniverseAttack": false
@@ -2510,108 +2512,107 @@ export const HERO_STAGES = [
   {
     "id": 71,
     "number": 71,
-    "title": "Mega-Rampa do Skate Park Aéreo",
+    "title": "Mega-Rampa do Half-Pipe Aéreo",
     "theme": "sports",
     "icon": "Medal",
     "targetHeight": 71000,
-    "gravity": 0.27,
-    "jumpForce": -13.4,
-    "speedFactor": 2.51,
+    "gravity": 0.36,
+    "jumpForce": -13,
+    "speedFactor": 2.57,
     "wind": 0,
     "bgGradient": [
-      "#0c1b2e",
-      "#15365c",
-      "#205794"
+      "#0b1a38",
+      "#17336e",
+      "#2551ad"
     ],
     "platformColor": "#3b82f6",
-    "platformBorder": "#bfdbfe",
+    "platformBorder": "#93c5fd",
     "ballGlow": "#60a5fa",
-    "description": "Desafio temático nos 71.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Pratique manobras insanas no maior half-pipe suspenso da galáxia esportiva.",
     "hazards": [
-      "conveyor",
       "springs"
     ],
-    "mechanic": "Superfícies de uretano com impulsos acrobáticos extremos."
+    "mechanic": "Rampas elásticas com super amortecimento que projetam saltos parabólicos perfeitos."
   },
   {
     "id": 72,
     "number": 72,
-    "title": "Circuito da Ginástica Gravitacional",
+    "title": "Circuito da Ginástica Rítmica",
     "theme": "sports",
-    "icon": "Orbit",
+    "icon": "Activity",
     "targetHeight": 72000,
-    "gravity": 0.28,
-    "jumpForce": -13.5,
-    "speedFactor": 2.52,
+    "gravity": 0.26,
+    "jumpForce": -13.1,
+    "speedFactor": 2.59,
     "wind": 0,
     "bgGradient": [
-      "#0f2238",
-      "#1a436e",
-      "#2769ad"
+      "#11163b",
+      "#222c73",
+      "#3747b8"
     ],
-    "platformColor": "#06b6d4",
-    "platformBorder": "#a5f3fc",
-    "ballGlow": "#22d3ee",
-    "description": "Desafio temático nos 72.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#6366f1",
+    "platformBorder": "#c7d2fe",
+    "ballGlow": "#818cf8",
+    "description": "Sincronize seus saltos com o ritmo dos holofotes e conquiste notas perfeitas dos jurados.",
     "hazards": [
-      "springs",
-      "moving"
+      "moving",
+      "fragile"
     ],
-    "mechanic": "Trampolins sincronizados de salto quádruplo."
+    "mechanic": "Barras móveis que balançam em sincronia musical com aterrissagens cronometradas."
   },
   {
     "id": 73,
     "number": 73,
-    "title": "Pista de Bobsled Congelada",
+    "title": "Sprint dos 100 Metros Espaciais",
     "theme": "sports",
-    "icon": "Snowflake",
+    "icon": "Trophy",
     "targetHeight": 73000,
-    "gravity": 0.29,
-    "jumpForce": -13.5,
-    "speedFactor": 2.53,
-    "wind": -0.25,
+    "gravity": 0.28,
+    "jumpForce": -13.1,
+    "speedFactor": 2.6,
+    "wind": 0,
     "bgGradient": [
-      "#082030",
-      "#103e5c",
-      "#1b6494"
+      "#08204d",
+      "#10419c",
+      "#1d6bf3"
     ],
-    "platformColor": "#38bdf8",
-    "platformBorder": "#e0f2fe",
-    "ballGlow": "#7dd3fc",
-    "description": "Desafio temático nos 73.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#2563eb",
+    "platformBorder": "#fde047",
+    "ballGlow": "#38bdf8",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Dispare em arrancada pura na pista sintética com cronômetro em tempo real!",
     "hazards": [
-      "ice_slick",
-      "wind",
-      "moving"
+      "conveyor",
+      "springs"
     ],
-    "mechanic": "Curvas de baixíssimo atrito e arrancadas velozes."
+    "mechanic": "PERCURSO HORIZONTAL! Reta plana de alta velocidade com esteiras turbo e barreiras baixas!",
+    "layout": "horizontal",
+    "targetDistance": 4800
   },
   {
     "id": 74,
     "number": 74,
-    "title": "Velódromo das Alturas",
+    "title": "Velódromo dos Aros de Fogo",
     "theme": "sports",
-    "icon": "Zap",
+    "icon": "Orbit",
     "targetHeight": 74000,
     "gravity": 0.3,
-    "jumpForce": -13.5,
-    "speedFactor": 2.54,
+    "jumpForce": -13.1,
+    "speedFactor": 2.61,
     "wind": 0,
     "bgGradient": [
-      "#0b233a",
-      "#164573",
-      "#236eb8"
+      "#052338",
+      "#0b4670",
+      "#126dae"
     ],
-    "platformColor": "#2563eb",
-    "platformBorder": "#93c5fd",
-    "ballGlow": "#3b82f6",
-    "description": "Desafio temático nos 74.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#0284c7",
+    "platformBorder": "#7dd3fc",
+    "ballGlow": "#38bdf8",
+    "description": "Pedale nas alturas em uma pista oval futurista projetada para quebrar recordes mundiais.",
     "hazards": [
       "conveyor",
-      "moving",
-      "fragile"
+      "spikes"
     ],
-    "mechanic": "Esteiras ovais de inclinação extrema e altíssima rotação."
+    "mechanic": "Curvas parabólicas perigosas com faixas de atrito variável e aros em chamas."
   },
   {
     "id": 75,
@@ -2620,25 +2621,26 @@ export const HERO_STAGES = [
     "theme": "sports",
     "icon": "Crown",
     "targetHeight": 75000,
-    "gravity": 0.31,
-    "jumpForce": -13.5,
-    "speedFactor": 2.55,
+    "gravity": 0.32,
+    "jumpForce": -13.1,
+    "speedFactor": 2.63,
     "wind": 0,
     "bgGradient": [
-      "#061626",
-      "#0f3154",
-      "#1a4e85"
+      "#061329",
+      "#0e2957",
+      "#17428c"
     ],
-    "platformColor": "#3b82f6",
-    "platformBorder": "#dbeafe",
-    "ballGlow": "#60a5fa",
-    "description": "BATALHA DE CHEFÃO AOS 75.000m! Derrote Gladiador Campeão Titã!",
+    "platformColor": "#1d4ed8",
+    "platformBorder": "#fbbf24",
+    "ballGlow": "#3b82f6",
+    "description": "FINAL DO CAMPEONATO AOS 75.000m! Prove ser o atleta absoluto sob o olhar de milhões na torcida!",
     "hazards": [
-      "conveyor",
       "moving",
-      "springs"
+      "fragile",
+      "springs",
+      "conveyor"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Supere os reflexos do campeão olímpico nas plataformas de duelo!",
+    "mechanic": "BATALHA DE CHEFÃO: O Campeão arremessa bumerangues e discos de ouro! Ative o placar do estádio!",
     "isBossStage": true,
     "bossName": "Gladiador Campeão Titã",
     "bossTitle": "O Soberano das Arenas",
@@ -2655,103 +2657,104 @@ export const HERO_STAGES = [
     "theme": "gastronomy",
     "icon": "Utensils",
     "targetHeight": 76000,
-    "gravity": 0.32,
-    "jumpForce": -13.5,
-    "speedFactor": 2.56,
+    "gravity": 0.34,
+    "jumpForce": -13.2,
+    "speedFactor": 2.64,
     "wind": 0,
     "bgGradient": [
-      "#280d07",
-      "#521a0f",
-      "#852a18"
+      "#2d1004",
+      "#572108",
+      "#87330d"
     ],
     "platformColor": "#ea580c",
-    "platformBorder": "#fdba74",
+    "platformBorder": "#fed7aa",
     "ballGlow": "#f97316",
-    "description": "Desafio temático nos 76.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Caminhe com cuidado sobre as alças de cobre e chapas quentes da cozinha monumental.",
     "hazards": [
-      "fragile",
-      "moving"
+      "moving",
+      "spikes"
     ],
-    "mechanic": "Superfícies de ferro fundido com labaredas periódicas de vapor."
+    "mechanic": "Bordas de frigideira quentes que estalam e faíscam óleo fervente."
   },
   {
     "id": 77,
     "number": 77,
     "title": "Caldeirão dos Caldos Efervescentes",
     "theme": "gastronomy",
-    "icon": "Flame",
+    "icon": "Coffee",
     "targetHeight": 77000,
-    "gravity": 0.33,
-    "jumpForce": -13.5,
-    "speedFactor": 2.57,
+    "gravity": 0.36,
+    "jumpForce": -13.2,
+    "speedFactor": 2.65,
     "wind": 0,
     "bgGradient": [
-      "#2a1005",
-      "#57220b",
-      "#8a3712"
+      "#331405",
+      "#66280a",
+      "#9e3e0f"
     ],
     "platformColor": "#f97316",
-    "platformBorder": "#fed7aa",
+    "platformBorder": "#fde68a",
     "ballGlow": "#fb923c",
-    "description": "Desafio temático nos 77.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Aproveite a efervescência do caldeirão cósmico para voar mais alto entre conchas douradas.",
     "hazards": [
       "springs",
-      "moving"
+      "fragile"
     ],
-    "mechanic": "Bolhas de vapor aromático que funcionam como catapultas verticais."
+    "mechanic": "Bolhas colossais de sopa aromática que estouram com grande força de empuxo."
   },
   {
     "id": 78,
     "number": 78,
-    "title": "Esteira Industrial de Especiarias",
+    "title": "Esteira Industrial de Temperos",
     "theme": "gastronomy",
     "icon": "Boxes",
     "targetHeight": 78000,
-    "gravity": 0.34,
-    "jumpForce": -13.5,
-    "speedFactor": 2.58,
+    "gravity": 0.26,
+    "jumpForce": -13.2,
+    "speedFactor": 2.66,
     "wind": 0,
     "bgGradient": [
-      "#2b1308",
-      "#542710",
-      "#853d1a"
+      "#2e1605",
+      "#5c2c0a",
+      "#8f4510"
     ],
     "platformColor": "#d97706",
-    "platformBorder": "#fde68a",
+    "platformBorder": "#fde047",
     "ballGlow": "#f59e0b",
-    "description": "Desafio temático nos 78.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Pistas rolantes industriais transportando sacas de açafrão, canela e ervas raras.",
     "hazards": [
       "conveyor",
-      "fragile"
+      "moving"
     ],
-    "mechanic": "Esteiras rolantes de trituração com fluxo contínuo de canela e pimenta."
+    "mechanic": "Rolos mecânicos de moagem com grãos de pimenta que rolam e desviam o salto."
   },
   {
     "id": 79,
     "number": 79,
-    "title": "Fornalha das Grelhas de Basalto",
+    "title": "Esteira dos Confeitos da Grande Cozinha",
     "theme": "gastronomy",
-    "icon": "Flame",
+    "icon": "Utensils",
     "targetHeight": 79000,
-    "gravity": 0.35,
-    "jumpForce": -13.6,
-    "speedFactor": 2.59,
+    "gravity": 0.28,
+    "jumpForce": -13.2,
+    "speedFactor": 2.68,
     "wind": 0,
     "bgGradient": [
-      "#300b05",
-      "#61170a",
-      "#9c2610"
+      "#381704",
+      "#702e08",
+      "#ad470d"
     ],
-    "platformColor": "#ef4444",
-    "platformBorder": "#fca5a5",
-    "ballGlow": "#f87171",
-    "description": "Desafio temático nos 79.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#f59e0b",
+    "platformBorder": "#ffffff",
+    "ballGlow": "#fbbf24",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Corra lateralmente pela bancada do banquete dos deuses gastronômicos!",
     "hazards": [
-      "moving",
-      "spikes",
-      "fragile"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Grelhas incandescentes que exigem pisadas rápidas e precisas."
+    "mechanic": "PERCURSO HORIZONTAL! Travessia sobre bandejas de doces rolantes e tortas gigantes!",
+    "layout": "horizontal",
+    "targetDistance": 4800
   },
   {
     "id": 80,
@@ -2760,30 +2763,31 @@ export const HERO_STAGES = [
     "theme": "gastronomy",
     "icon": "Crown",
     "targetHeight": 80000,
-    "gravity": 0.26,
-    "jumpForce": -13.6,
-    "speedFactor": 2.6,
+    "gravity": 0.3,
+    "jumpForce": -13.3,
+    "speedFactor": 2.69,
     "wind": 0,
     "bgGradient": [
-      "#220603",
-      "#4a0d06",
-      "#7d160b"
+      "#240a02",
+      "#471404",
+      "#6e1f06"
     ],
-    "platformColor": "#ea580c",
-    "platformBorder": "#ffedd5",
-    "ballGlow": "#f97316",
-    "description": "BATALHA DE CHEFÃO AOS 80.000m! Derrote Chef Magmático Vulcânico!",
+    "platformColor": "#c2410c",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#ea580c",
+    "description": "O PRATO PRINCIPAL AOS 80.000m! O mestre cuca do magma quer transformar seu salto em banquete!",
     "hazards": [
-      "conveyor",
       "moving",
-      "fragile"
+      "fragile",
+      "spikes",
+      "conveyor"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Apague as chamas do caldeirão gigante usando os interruptores de vapor!",
+    "mechanic": "BATALHA DE CHEFÃO: O Chef arremessa cutelos e caldas ardentes! Apague os queimadores de lava!",
     "isBossStage": true,
     "bossName": "Chef Magmático Vulcânico",
     "bossTitle": "Mestre da Fornalha Flamejante",
     "bossHP": 16,
-    "bossColor": "#dc2626",
+    "bossColor": "#ea580c",
     "bossGlow": "#f97316",
     "rewardGems": 1600,
     "hasParallelUniverseAttack": false
@@ -2791,106 +2795,107 @@ export const HERO_STAGES = [
   {
     "id": 81,
     "number": 81,
-    "title": "Hélice Dupla de DNA Primordial",
+    "title": "Hélice Dupla do Código Genético",
     "theme": "health",
     "icon": "Dna",
     "targetHeight": 81000,
-    "gravity": 0.27,
-    "jumpForce": -13.6,
-    "speedFactor": 2.61,
+    "gravity": 0.32,
+    "jumpForce": -13.3,
+    "speedFactor": 2.7,
     "wind": 0,
     "bgGradient": [
-      "#05221d",
-      "#0b473d",
-      "#137363"
+      "#041f1c",
+      "#0a3d38",
+      "#10635b"
     ],
     "platformColor": "#14b8a6",
     "platformBorder": "#99f6e4",
     "ballGlow": "#2dd4bf",
-    "description": "Desafio temático nos 81.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Suba pela fita de DNA cósmica que guarda as instruções fundamentais da vida eterna.",
     "hazards": [
-      "moving"
+      "springs"
     ],
-    "mechanic": "Bases nitrogenadas giratórias formando uma escada helicoidal contínua."
+    "mechanic": "Pontes de hidrogênio espirais que giram e impulsionam com vibração biológica."
   },
   {
     "id": 82,
     "number": 82,
     "title": "Corrente dos Anticorpos Velozes",
     "theme": "health",
-    "icon": "Shield",
+    "icon": "Activity",
     "targetHeight": 82000,
-    "gravity": 0.28,
-    "jumpForce": -13.6,
-    "speedFactor": 2.62,
+    "gravity": 0.34,
+    "jumpForce": -13.3,
+    "speedFactor": 2.72,
     "wind": 0,
     "bgGradient": [
-      "#08261e",
-      "#104d3d",
-      "#1a7860"
+      "#052420",
+      "#0c4740",
+      "#147367"
     ],
     "platformColor": "#0d9488",
     "platformBorder": "#5eead4",
     "ballGlow": "#14b8a6",
-    "description": "Desafio temático nos 82.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Desvie dos glóbulos hiperativos que reagem com força a qualquer elemento invasor.",
     "hazards": [
       "moving",
       "fragile"
     ],
-    "mechanic": "Células imunológicas circulam velozmente entre os caminhos linfáticos."
+    "mechanic": "Células de defesa esféricas que patrulham os vasos com movimento senoidal."
   },
   {
     "id": 83,
     "number": 83,
-    "title": "Ventrículo dos Pulsos Cardíacos",
+    "title": "Ventrículo dos Pulsos Bioelétricos",
     "theme": "health",
     "icon": "Heart",
     "targetHeight": 83000,
-    "gravity": 0.29,
-    "jumpForce": -13.6,
-    "speedFactor": 2.63,
+    "gravity": 0.36,
+    "jumpForce": -13.3,
+    "speedFactor": 2.73,
     "wind": 0,
     "bgGradient": [
-      "#240914",
-      "#4d142c",
-      "#7d2047"
+      "#072622",
+      "#0f4d45",
+      "#187d70"
     ],
-    "platformColor": "#f43f5e",
-    "platformBorder": "#fecdd3",
-    "ballGlow": "#fb7185",
-    "description": "Desafio temático nos 83.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#0f766e",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#0d9488",
+    "description": "Sinta a pulsação colossal do núcleo vital e salte exatamente no momento do sístole.",
     "hazards": [
-      "springs",
-      "moving"
+      "spikes",
+      "springs"
     ],
-    "mechanic": "Batimentos cardíacos em ritmo regular projetam impulsos gigantescos."
+    "mechanic": "Batimentos cardíacos regulares que geram ondas de choque a cada 2.5 segundos."
   },
   {
     "id": 84,
     "number": 84,
-    "title": "Sinapse das Fibras Nervosas",
+    "title": "Artéria Principal da Vida",
     "theme": "health",
-    "icon": "Zap",
+    "icon": "Heart",
     "targetHeight": 84000,
-    "gravity": 0.3,
-    "jumpForce": -13.6,
-    "speedFactor": 2.64,
+    "gravity": 0.26,
+    "jumpForce": -13.3,
+    "speedFactor": 2.74,
     "wind": 0,
     "bgGradient": [
-      "#0a2228",
-      "#144652",
-      "#216e80"
+      "#08302b",
+      "#115e54",
+      "#1b9183"
     ],
-    "platformColor": "#06b6d4",
-    "platformBorder": "#a5f3fc",
-    "ballGlow": "#22d3ee",
-    "description": "Desafio temático nos 84.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#14b8a6",
+    "platformBorder": "#ffffff",
+    "ballGlow": "#5eead4",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Navegue horizontalmente pela grande artéria em ritmo de alta velocidade!",
     "hazards": [
-      "lasers",
-      "moving",
-      "springs"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Disparos elétricos de neurotransmissores acelerando a transmissão."
+    "mechanic": "PERCURSO HORIZONTAL! Túnel arterial com fluxo plasmático contínuo e desvios rápidos!",
+    "layout": "horizontal",
+    "targetDistance": 5000
   },
   {
     "id": 85,
@@ -2899,138 +2904,139 @@ export const HERO_STAGES = [
     "theme": "health",
     "icon": "Crown",
     "targetHeight": 85000,
-    "gravity": 0.31,
-    "jumpForce": -13.6,
-    "speedFactor": 2.65,
+    "gravity": 0.28,
+    "jumpForce": -13.4,
+    "speedFactor": 2.75,
     "wind": 0,
     "bgGradient": [
-      "#031713",
-      "#0a332b",
-      "#135c4e"
+      "#031715",
+      "#082e2a",
+      "#0f4a43"
     ],
-    "platformColor": "#14b8a6",
-    "platformBorder": "#ccfbf1",
-    "ballGlow": "#2dd4bf",
-    "description": "BATALHA DE CHEFÃO AOS 85.000m! Derrote Patógeno Quântico Alfa!",
+    "platformColor": "#115e59",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#14b8a6",
+    "description": "QUARANTENA ABSOLUTA AOS 85.000m! Erradique a anomalia microscópica antes que contamine o cosmos!",
     "hazards": [
-      "lasers",
       "moving",
-      "fragile"
+      "fragile",
+      "spikes",
+      "springs"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Neutralize o vírus mutante ativando os anticorpos nos polos de cura!",
+    "mechanic": "BATALHA DE CHEFÃO: O vírus se divide em réplicas! Injete as doses de anticorpos curativos!",
     "isBossStage": true,
     "bossName": "Patógeno Quântico Alfa",
     "bossTitle": "Mutação Viral Hipercinética",
     "bossHP": 17,
     "bossColor": "#0d9488",
-    "bossGlow": "#14b8a6",
+    "bossGlow": "#2dd4bf",
     "rewardGems": 1700,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 86,
     "number": 86,
-    "title": "Camada de Ozônio Iônica",
+    "title": "Camada de Ozônio Ionizada",
     "theme": "sky_realm",
     "icon": "Cloud",
     "targetHeight": 86000,
-    "gravity": 0.32,
-    "jumpForce": -13.6,
-    "speedFactor": 2.66,
-    "wind": 0.25,
+    "gravity": 0.3,
+    "jumpForce": -13.4,
+    "speedFactor": 2.77,
+    "wind": 0,
     "bgGradient": [
-      "#0e1d3d",
-      "#1a356e",
-      "#2851a6"
+      "#08182b",
+      "#103157",
+      "#1a4f8c"
     ],
     "platformColor": "#38bdf8",
-    "platformBorder": "#e0f2fe",
+    "platformBorder": "#bae6fd",
     "ballGlow": "#7dd3fc",
-    "description": "Desafio temático nos 86.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "Flutue nas franjas do espaço onde o céu se funde com o infinito azul-violeta.",
     "hazards": [
-      "wind"
+      "springs"
     ],
-    "mechanic": "Ar ultra-rarefeito com gravidade reduzida e ventos cortantes de alta altitude."
+    "mechanic": "Atmosfera rarefeita: gravidade reduzida para 0.22 permitindo super saltos flutuantes."
   },
   {
     "id": 87,
     "number": 87,
-    "title": "Cortina da Aurora Boreal Polar",
+    "title": "Nuvem de Granizo Cumulonimbus",
     "theme": "sky_realm",
-    "icon": "Sparkles",
+    "icon": "Wind",
     "targetHeight": 87000,
-    "gravity": 0.33,
-    "jumpForce": -13.7,
-    "speedFactor": 2.67,
-    "wind": 0,
+    "gravity": 0.32,
+    "jumpForce": -13.4,
+    "speedFactor": 2.78,
+    "wind": -0.35,
     "bgGradient": [
-      "#062326",
-      "#0c474d",
-      "#14737d"
+      "#061a33",
+      "#0d3566",
+      "#1454a3"
     ],
-    "platformColor": "#2dd4bf",
-    "platformBorder": "#ccfbf1",
-    "ballGlow": "#5eead4",
-    "description": "Desafio temático nos 87.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#0284c7",
+    "platformBorder": "#e0f2fe",
+    "ballGlow": "#38bdf8",
+    "description": "Enfrente o coração de uma tempestade supercelular carregada de raios e saraiva cósmica.",
     "hazards": [
-      "moving",
-      "springs"
+      "wind",
+      "spikes"
     ],
-    "mechanic": "Feixes de plasma magnético verde-esmeralda que ondulam suavemente."
+    "mechanic": "Rajadas gélidas da esquerda e pedras pontiagudas de gelo caindo das nuvens."
   },
   {
     "id": 88,
     "number": 88,
-    "title": "Nuvem Cumulonimbus de Granizo",
+    "title": "Cortina Eletromagnética da Aurora",
     "theme": "sky_realm",
-    "icon": "Snowflake",
+    "icon": "Sparkles",
     "targetHeight": 88000,
     "gravity": 0.34,
-    "jumpForce": -13.7,
-    "speedFactor": 2.68,
-    "wind": 0.25,
+    "jumpForce": -13.4,
+    "speedFactor": 2.79,
+    "wind": 0,
     "bgGradient": [
-      "#0f1c30",
-      "#1c3357",
-      "#2b4d82"
+      "#0b1638",
+      "#172c6e",
+      "#2547b0"
     ],
-    "platformColor": "#60a5fa",
-    "platformBorder": "#dbeafe",
-    "ballGlow": "#93c5fd",
-    "description": "Desafio temático nos 88.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#06b6d4",
+    "platformBorder": "#c4b5fd",
+    "ballGlow": "#38bdf8",
+    "description": "Dancem sobre as fitas luminescentes da aurora polar que pintam a escuridão estratosférica.",
     "hazards": [
-      "ice_slick",
-      "fragile",
-      "wind"
+      "moving",
+      "fragile"
     ],
-    "mechanic": "Pedras de gelo flutuantes e descargas elétricas estáticas."
+    "mechanic": "Fitilhos de plasma verde e violeta que oscilam e mudam de altura suavemente."
   },
   {
     "id": 89,
     "number": 89,
-    "title": "Turbulência do Vórtice Polar",
+    "title": "Corredor das Correntes de Jato",
     "theme": "sky_realm",
     "icon": "Wind",
     "targetHeight": 89000,
-    "gravity": 0.35,
-    "jumpForce": -13.7,
-    "speedFactor": 2.69,
-    "wind": -0.25,
+    "gravity": 0.36,
+    "jumpForce": -13.5,
+    "speedFactor": 2.81,
+    "wind": 0.25,
     "bgGradient": [
-      "#121d36",
-      "#223661",
-      "#345294"
+      "#0a2247",
+      "#14458f",
+      "#1f6bd9"
     ],
-    "platformColor": "#818cf8",
-    "platformBorder": "#e0e7ff",
-    "ballGlow": "#a5b4fc",
-    "description": "Desafio temático nos 89.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#38bdf8",
+    "platformBorder": "#ffffff",
+    "ballGlow": "#7dd3fc",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Voe pelas correntes de jato da estratosfera a velocidades supersônicas!",
     "hazards": [
       "wind",
-      "moving",
-      "fragile"
+      "moving"
     ],
-    "mechanic": "Rajadas giratórias de vento cruzado testando o equilíbrio fino."
+    "mechanic": "PERCURSO HORIZONTAL! Vento de cauda favorável em alta altitude com turbulências repentinas!",
+    "layout": "horizontal",
+    "targetDistance": 5100
   },
   {
     "id": 90,
@@ -3040,25 +3046,25 @@ export const HERO_STAGES = [
     "icon": "Crown",
     "targetHeight": 90000,
     "gravity": 0.26,
-    "jumpForce": -13.7,
-    "speedFactor": 2.7,
-    "wind": 0.25,
+    "jumpForce": -13.5,
+    "speedFactor": 2.82,
+    "wind": 0,
     "bgGradient": [
-      "#081226",
-      "#10254c",
-      "#1b3d7a"
+      "#041221",
+      "#082542",
+      "#0f3d6b"
     ],
-    "platformColor": "#38bdf8",
-    "platformBorder": "#f0f9ff",
-    "ballGlow": "#7dd3fc",
-    "description": "BATALHA DE CHEFÃO AOS 90.000m! Derrote Fênix das Tempestades!",
+    "platformColor": "#0369a1",
+    "platformBorder": "#bae6fd",
+    "ballGlow": "#0ea5e9",
+    "description": "TEMPESTADE ZÊNITE AOS 90.000m! Domine a senhora alada dos ciclones árticos!",
     "hazards": [
-      "wind",
       "moving",
       "fragile",
-      "springs"
+      "wind",
+      "spikes"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Voe entre as rajadas polares da Fênix e descarregue os raios nas penas solares!",
+    "mechanic": "BATALHA DE CHEFÃO: A Fênix bate as asas criando furacões! Ative os para-raios de titânio!",
     "isBossStage": true,
     "bossName": "Fênix das Tempestades",
     "bossTitle": "Senhora dos Ventos Polares",
@@ -3071,106 +3077,108 @@ export const HERO_STAGES = [
   {
     "id": 91,
     "number": 91,
-    "title": "Grande Muralha das Cordilheiras",
+    "title": "Pirâmides Esculpidas dos Andes",
     "theme": "continents",
-    "icon": "Globe",
+    "icon": "Pyramid",
     "targetHeight": 91000,
-    "gravity": 0.27,
-    "jumpForce": -13.7,
-    "speedFactor": 2.71,
-    "wind": 0,
+    "gravity": 0.28,
+    "jumpForce": -13.5,
+    "speedFactor": 2.83,
+    "wind": 0.2,
     "bgGradient": [
-      "#191e12",
-      "#333d24",
-      "#52613b"
+      "#062116",
+      "#0d422c",
+      "#146946"
     ],
-    "platformColor": "#84cc16",
-    "platformBorder": "#ecfccb",
-    "ballGlow": "#a3e635",
-    "description": "Desafio temático nos 91.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#10b981",
+    "platformBorder": "#a7f3d0",
+    "ballGlow": "#34d399",
+    "description": "As montanhas sagradas da cordilheira andina guardam segredos astronômicos milenares.",
     "hazards": [
-      "moving"
+      "moving",
+      "wind"
     ],
-    "mechanic": "Fortalezas de pedra milenar se estendendo sobre serras infinitas."
+    "mechanic": "Plataformas de basalto esculpidas com cantaria inca que deslizam entre precipícios."
   },
   {
     "id": 92,
     "number": 92,
-    "title": "Pirâmides Esculpidas dos Andes",
+    "title": "Fiordes Glaciais da Escandinávia",
     "theme": "continents",
-    "icon": "Landmark",
+    "icon": "Snowflake",
     "targetHeight": 92000,
-    "gravity": 0.28,
-    "jumpForce": -13.7,
-    "speedFactor": 2.72,
+    "gravity": 0.3,
+    "jumpForce": -13.6,
+    "speedFactor": 2.85,
     "wind": 0,
     "bgGradient": [
-      "#1f180e",
-      "#3d301c",
-      "#634f2e"
+      "#06241c",
+      "#0d4738",
+      "#157058"
     ],
-    "platformColor": "#eab308",
-    "platformBorder": "#fef08a",
-    "ballGlow": "#facc15",
-    "description": "Desafio temático nos 92.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#059669",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#10b981",
+    "description": "O reino dos vikings e das geleiras azuis esculpidas pela passagem do tempo.",
     "hazards": [
       "fragile",
       "springs"
     ],
-    "mechanic": "Plataformas de cantaria monolítica suspensas a 4.000m nas montanhas."
+    "mechanic": "Icebergs suspensos sobre águas esmeraldas que estalam e dão saltos frescos."
   },
   {
     "id": 93,
     "number": 93,
-    "title": "Cânions Vermelhos da Austrália",
+    "title": "Cânions Vermelhos de Uluru",
     "theme": "continents",
-    "icon": "Sun",
+    "icon": "Landmark",
     "targetHeight": 93000,
-    "gravity": 0.29,
-    "jumpForce": -13.7,
-    "speedFactor": 2.73,
-    "wind": -0.25,
+    "gravity": 0.32,
+    "jumpForce": -13.6,
+    "speedFactor": 2.86,
+    "wind": 0,
     "bgGradient": [
-      "#261208",
-      "#4d2511",
-      "#7b3c1c"
+      "#260f06",
+      "#4d1e0c",
+      "#7a3013"
     ],
     "platformColor": "#ea580c",
-    "platformBorder": "#fed7aa",
+    "platformBorder": "#fde68a",
     "ballGlow": "#f97316",
-    "description": "Desafio temático nos 93.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "description": "O coração sagrado do outback australiano pulsando sob a luz dourada do poente.",
     "hazards": [
-      "wind",
+      "spikes",
       "moving"
     ],
-    "mechanic": "Monólitos sagrados de argila vermelha sob calor solar constante."
+    "mechanic": "Monólitos avermelhados de arenito com formações pontiagudas de quartzo ferroso."
   },
   {
     "id": 94,
     "number": 94,
-    "title": "Fiordes Glaciais da Escandinávia",
+    "title": "Passarela da Grande Muralha Milenar",
     "theme": "continents",
-    "icon": "Anchor",
+    "icon": "Shield",
     "targetHeight": 94000,
-    "gravity": 0.3,
-    "jumpForce": -13.8,
-    "speedFactor": 2.74,
+    "gravity": 0.34,
+    "jumpForce": -13.6,
+    "speedFactor": 2.87,
     "wind": 0,
     "bgGradient": [
-      "#081d29",
-      "#113b52",
-      "#1b5e82"
+      "#082e1f",
+      "#115c3e",
+      "#1b8f60"
     ],
-    "platformColor": "#06b6d4",
-    "platformBorder": "#cffafe",
-    "ballGlow": "#22d3ee",
-    "description": "Desafio temático nos 94.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#10b981",
+    "platformBorder": "#fde047",
+    "ballGlow": "#34d399",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Salte entre as guaritas imperiais e torres de sinalização de fumaça!",
     "hazards": [
-      "ice_slick",
       "moving",
       "fragile"
     ],
-    "mechanic": "Paredões de rocha negra banhados por águas cristalinas profundas."
+    "mechanic": "PERCURSO HORIZONTAL! Corrida pelas ameias e torres de pedra da muralha milenar!",
+    "layout": "horizontal",
+    "targetDistance": 5200
   },
   {
     "id": 95,
@@ -3179,31 +3187,32 @@ export const HERO_STAGES = [
     "theme": "continents",
     "icon": "Crown",
     "targetHeight": 95000,
-    "gravity": 0.31,
-    "jumpForce": -13.8,
-    "speedFactor": 2.75,
+    "gravity": 0.36,
+    "jumpForce": -13.6,
+    "speedFactor": 2.88,
     "wind": 0,
     "bgGradient": [
-      "#141108",
-      "#2e2714",
-      "#4d4121"
+      "#041a11",
+      "#093322",
+      "#0f5237"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#fef3c7",
-    "ballGlow": "#fbbf24",
-    "description": "BATALHA DE CHEFÃO AOS 95.000m! Derrote Esfinge Imperial Global!",
+    "platformColor": "#047857",
+    "platformBorder": "#fef08a",
+    "ballGlow": "#10b981",
+    "description": "O JULGAMENTO DAS CIVILIZAÇÕES AOS 95.000m! Desvende os mistérios da guardiã planetária!",
     "hazards": [
       "moving",
       "fragile",
+      "spikes",
       "springs"
     ],
-    "mechanic": "BATALHA DE CHEFÃO: Resolva os enigmas rúnicos dos cinco continentes para destrancar o zênite!",
+    "mechanic": "BATALHA DE CHEFÃO: A Esfinge propõe enigmas gravitacionais! Pise nas runas corretas!",
     "isBossStage": true,
     "bossName": "Esfinge Imperial Global",
     "bossTitle": "Guardião dos Sete Continentes",
     "bossHP": 19,
-    "bossColor": "#d97706",
-    "bossGlow": "#f59e0b",
+    "bossColor": "#10b981",
+    "bossGlow": "#34d399",
     "rewardGems": 1900,
     "hasParallelUniverseAttack": false
   },
@@ -3212,108 +3221,106 @@ export const HERO_STAGES = [
     "number": 96,
     "title": "Horizonte de Eventos Quântico",
     "theme": "futuristic",
-    "icon": "Rocket",
+    "icon": "Infinity",
     "targetHeight": 96000,
-    "gravity": 0.32,
-    "jumpForce": -13.8,
-    "speedFactor": 2.76,
+    "gravity": 0.26,
+    "jumpForce": -13.7,
+    "speedFactor": 2.9,
     "wind": 0,
     "bgGradient": [
-      "#120826",
-      "#26114d",
-      "#3e1c7d"
+      "#1e0a2e",
+      "#3b1459",
+      "#5e208c"
     ],
-    "platformColor": "#a855f7",
-    "platformBorder": "#f3e8ff",
-    "ballGlow": "#c084fc",
-    "description": "Desafio temático nos 96.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#c084fc",
+    "platformBorder": "#f5d0fe",
+    "ballGlow": "#d8b4fe",
+    "description": "A borda da realidade cósmica aos 96.000m onde a luz dobra em círculos perfeitos.",
     "hazards": [
-      "conveyor",
-      "moving"
+      "conveyor"
     ],
-    "mechanic": "Distorção da gravidade ao se aproximar dos 100.000 metros de altitude."
+    "mechanic": "Gravidade extrema que suga levemente para o centro com esteiras gravitacionais."
   },
   {
     "id": 97,
     "number": 97,
-    "title": "Fenda do Hiperespaço 100k",
+    "title": "Fenda Taquiônica dos 100k",
     "theme": "futuristic",
-    "icon": "Orbit",
+    "icon": "Zap",
     "targetHeight": 97000,
-    "gravity": 0.33,
-    "jumpForce": -13.8,
-    "speedFactor": 2.77,
+    "gravity": 0.28,
+    "jumpForce": -13.7,
+    "speedFactor": 2.91,
     "wind": 0,
     "bgGradient": [
-      "#150629",
-      "#2c0d54",
-      "#491787"
+      "#240d36",
+      "#451969",
+      "#6e28a6"
     ],
-    "platformColor": "#d946ef",
-    "platformBorder": "#fae8ff",
-    "ballGlow": "#e879f9",
-    "description": "Desafio temático nos 97.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#a855f7",
+    "platformBorder": "#e9d5ff",
+    "ballGlow": "#c084fc",
+    "description": "O tempo começa a se desfragmentar à medida que a altitude dos 100.000m se aproxima.",
     "hazards": [
       "moving",
-      "fragile",
-      "springs"
+      "fragile"
     ],
-    "mechanic": "Plataformas de energia taquiônica que piscam no espaço-tempo."
+    "mechanic": "Fissuras no continuum temporal que teleportam a esfera entre plataformas."
   },
   {
     "id": 98,
     "number": 98,
     "title": "Rede Neural das Constelações",
     "theme": "futuristic",
-    "icon": "Cpu",
+    "icon": "Orbit",
     "targetHeight": 98000,
-    "gravity": 0.34,
-    "jumpForce": -13.8,
-    "speedFactor": 2.78,
+    "gravity": 0.3,
+    "jumpForce": -13.7,
+    "speedFactor": 2.92,
     "wind": 0,
     "bgGradient": [
-      "#070f29",
-      "#102054",
-      "#1a3385"
+      "#290f3d",
+      "#511e7a",
+      "#8030bf"
     ],
-    "platformColor": "#3b82f6",
-    "platformBorder": "#dbeafe",
-    "ballGlow": "#60a5fa",
-    "description": "Desafio temático nos 98.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#9333ea",
+    "platformBorder": "#f3e8ff",
+    "ballGlow": "#a855f7",
+    "description": "Conecte estrelas vivas através de saltos audaciosos acima de todas as galáxias conhecidas.",
     "hazards": [
-      "conveyor",
-      "lasers",
-      "moving"
+      "fragile",
+      "springs"
     ],
-    "mechanic": "Linhas cósmicas condutoras de poder primordial entre galáxias."
+    "mechanic": "Sinapses estelares que se acendem e apagam criando caminhos efêmeros."
   },
   {
     "id": 99,
     "number": 99,
-    "title": "Vórtice Cronológico Pré-Zênite",
+    "title": "Túnel do Hiperespaço Interestelar",
     "theme": "futuristic",
-    "icon": "Infinity",
+    "icon": "Rocket",
     "targetHeight": 99000,
-    "gravity": 0.35,
-    "jumpForce": -13.8,
-    "speedFactor": 2.79,
+    "gravity": 0.32,
+    "jumpForce": -13.7,
+    "speedFactor": 2.94,
     "wind": 0,
     "bgGradient": [
-      "#160824",
-      "#2e124a",
-      "#4c1e7a"
+      "#33144d",
+      "#662899",
+      "#9e3ee8"
     ],
-    "platformColor": "#c084fc",
-    "platformBorder": "#f5d0fe",
-    "ballGlow": "#d8b4fe",
-    "description": "Desafio temático nos 99.000m de altitude! Domine as plataformas com reflexos aguçados.",
+    "platformColor": "#a855f7",
+    "platformBorder": "#ffffff",
+    "ballGlow": "#e879f9",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Voe através do túnel de minhoca galáctico com reflexos relâmpago!",
     "hazards": [
+      "conveyor",
       "moving",
-      "fragile",
-      "lasers",
-      "springs"
+      "fragile"
     ],
-    "mechanic": "A penúltima fronteira dos 100.000m com múltiplas armadilhas em aceleração."
+    "mechanic": "PERCURSO HORIZONTAL! Arrancada máxima na velocidade da dobra estelar rumo ao Zênite!",
+    "layout": "horizontal",
+    "targetDistance": 5400
   },
   {
     "id": 100,
@@ -3322,139 +3329,139 @@ export const HERO_STAGES = [
     "theme": "futuristic",
     "icon": "Crown",
     "targetHeight": 100000,
-    "gravity": 0.26,
+    "gravity": 0.34,
     "jumpForce": -13.8,
-    "speedFactor": 2.8,
+    "speedFactor": 2.95,
     "wind": 0,
     "bgGradient": [
-      "#000000",
-      "#18072b",
-      "#3b0d66"
+      "#1c082b",
+      "#361054",
+      "#561a85"
     ],
-    "platformColor": "#fbbf24",
-    "platformBorder": "#fef08a",
-    "ballGlow": "#f59e0b",
-    "description": "BATALHA DE CHEFÃO AOS 100.000m! Derrote Chronos, O Senhor das Eras!",
+    "platformColor": "#7e22ce",
+    "platformBorder": "#fde047",
+    "ballGlow": "#a855f7",
+    "description": "O MARCO DO CENTENÁRIO AOS 100.000m! O governante supremo das dimensões aguarda seu salto final!",
     "hazards": [
       "moving",
-      "springs",
       "fragile",
-      "conveyor",
-      "lasers"
+      "spikes",
+      "conveyor"
     ],
-    "mechanic": "BATALHA DE CHEFÃO LENDÁRIA AOS 100.000m: 20 HP e dobra de tempo! Ataque temporal supremo!",
+    "mechanic": "BATALHA DE CHEFÃO LENDÁRIA: Chronos congela o tempo e inverte a gravidade! Desvie e vença!",
     "isBossStage": true,
     "bossName": "Chronos, O Senhor das Eras",
     "bossTitle": "Imperador do Vácuo Infinito",
     "bossHP": 20,
-    "bossColor": "#eab308",
-    "bossGlow": "#fbbf24",
-    "rewardGems": 3000,
-    "hasParallelUniverseAttack": true
+    "bossColor": "#9333ea",
+    "bossGlow": "#c084fc",
+    "rewardGems": 2000,
+    "hasParallelUniverseAttack": false
   },
   {
     "id": 101,
     "number": 101,
-    "title": "Abismo Mariana: Nível 1",
+    "title": "Entrada do Vértice Abissal",
     "theme": "ocean",
-    "icon": "Sparkles",
+    "icon": "Waves",
     "targetHeight": 101000,
-    "gravity": 0.32,
-    "jumpForce": -14.2,
-    "speedFactor": 3.14,
+    "gravity": 0.36,
+    "jumpForce": -13.8,
+    "speedFactor": 2.96,
     "wind": 0,
     "bgGradient": [
-      "#010f1e",
-      "#03203c",
-      "#06396b"
+      "#021221",
+      "#052747",
+      "#0a457a"
     ],
     "platformColor": "#0284c7",
-    "platformBorder": "#ffffff",
+    "platformBorder": "#7dd3fc",
     "ballGlow": "#38bdf8",
-    "description": "Escalada extrema na estratosfera aos 101.000m!",
+    "description": "Mergulhe no abismo oceânico cósmico invertido onde a escuridão é rompida por neon natural.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Águas pesadas com resistência fluida e plataformas bioluminescentes de corais."
   },
   {
     "id": 102,
     "number": 102,
-    "title": "Abismo Mariana: Nível 2",
+    "title": "Fontes Hidrotérmicas Negras",
     "theme": "ocean",
-    "icon": "Sparkles",
+    "icon": "Flame",
     "targetHeight": 102000,
-    "gravity": 0.33,
-    "jumpForce": -14.2,
-    "speedFactor": 3.15,
+    "gravity": 0.26,
+    "jumpForce": -13.8,
+    "speedFactor": 2.98,
     "wind": 0,
     "bgGradient": [
-      "#010f1e",
-      "#03203c",
-      "#06396b"
+      "#03182b",
+      "#083359",
+      "#0e5694"
     ],
-    "platformColor": "#0284c7",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#38bdf8",
-    "description": "Escalada extrema na estratosfera aos 102.000m!",
+    "platformColor": "#0369a1",
+    "platformBorder": "#fdba74",
+    "ballGlow": "#0284c7",
+    "description": "Chaminés vulcânicas expelindo minerais aquecidos a 400°C sob a pressão das profundezas.",
     "hazards": [
-      "moving",
-      "springs"
+      "springs",
+      "spikes"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Jatos termais submarinos de alta pressão que lançam a esfera com calor súbito."
   },
   {
     "id": 103,
     "number": 103,
-    "title": "Abismo Mariana: Nível 3",
+    "title": "Cemitério de Submarinos de Titânio",
     "theme": "ocean",
-    "icon": "Sparkles",
+    "icon": "Anchor",
     "targetHeight": 103000,
-    "gravity": 0.34,
-    "jumpForce": -14.2,
-    "speedFactor": 3.16,
+    "gravity": 0.28,
+    "jumpForce": -13.8,
+    "speedFactor": 2.99,
     "wind": 0,
     "bgGradient": [
-      "#010f1e",
-      "#03203c",
-      "#06396b"
+      "#041e36",
+      "#0b3d6b",
+      "#1263ab"
     ],
-    "platformColor": "#0284c7",
-    "platformBorder": "#ffffff",
+    "platformColor": "#075985",
+    "platformBorder": "#94a3b8",
     "ballGlow": "#38bdf8",
-    "description": "Escalada extrema na estratosfera aos 103.000m!",
+    "description": "Escale pelas carcaças de expedições pretéritas que sucumbiram à pressão esmagadora.",
     "hazards": [
       "fragile",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Cascos de naves exploradoras submersas que rangem e cedem com o peso."
   },
   {
     "id": 104,
     "number": 104,
-    "title": "Abismo Mariana: Nível 4",
+    "title": "Trincheira das Correntes de Fundo",
     "theme": "ocean",
-    "icon": "Sparkles",
+    "icon": "Waves",
     "targetHeight": 104000,
-    "gravity": 0.24,
-    "jumpForce": -14.2,
-    "speedFactor": 3.17,
+    "gravity": 0.3,
+    "jumpForce": -13.8,
+    "speedFactor": 3,
     "wind": 0,
     "bgGradient": [
-      "#010f1e",
-      "#03203c",
-      "#06396b"
+      "#052542",
+      "#0d4b82",
+      "#1677cc"
     ],
     "platformColor": "#0284c7",
     "platformBorder": "#ffffff",
-    "ballGlow": "#38bdf8",
-    "description": "Escalada extrema na estratosfera aos 104.000m!",
+    "ballGlow": "#7dd3fc",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Deslize horizontalmente pelo leito submarino esquivando de algas vivas!",
     "hazards": [
       "moving",
-      "springs"
+      "conveyor"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Travessia lateral contra correntes de água pesada e cardumes elétricos!",
+    "layout": "horizontal",
+    "targetDistance": 5300
   },
   {
     "id": 105,
@@ -3463,138 +3470,138 @@ export const HERO_STAGES = [
     "theme": "ocean",
     "icon": "Crown",
     "targetHeight": 105000,
-    "gravity": 0.26,
-    "jumpForce": -14.3,
-    "speedFactor": 3.18,
+    "gravity": 0.32,
+    "jumpForce": -13.9,
+    "speedFactor": 3.01,
     "wind": 0,
     "bgGradient": [
-      "#010f1e",
-      "#03203c",
-      "#06396b"
+      "#010c17",
+      "#031c33",
+      "#073259"
     ],
-    "platformColor": "#0284c7",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#38bdf8",
-    "description": "BATALHA DE CHEFÃO AOS 105.000m! Supere Kraken Abissal de Neon!",
+    "platformColor": "#0369a1",
+    "platformBorder": "#38bdf8",
+    "ballGlow": "#0ea5e9",
+    "description": "PESADELO DAS FOSSAS AOS 105.000m! Enfrente o monstro cefalópode de tentáculos bioluminescentes!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
-      "conveyor"
+      "spikes"
     ],
-    "mechanic": "Confronto de Chefão: Terror das Fossas Oceânicas. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: Tentáculos colossais emergem da escuridão! Ative as cargas de profundidade!",
     "isBossStage": true,
     "bossName": "Kraken Abissal de Neon",
     "bossTitle": "Terror das Fossas Oceânicas",
-    "bossHP": 20,
+    "bossHP": 21,
     "bossColor": "#0284c7",
     "bossGlow": "#38bdf8",
-    "rewardGems": 2000,
+    "rewardGems": 2100,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 106,
     "number": 106,
-    "title": "Cristais de Fogo: Nível 1",
+    "title": "Dunas de Quartzo Prismático",
     "theme": "crystal",
-    "icon": "Sparkles",
+    "icon": "Gem",
     "targetHeight": 106000,
-    "gravity": 0.27,
-    "jumpForce": -14.3,
-    "speedFactor": 3.19,
+    "gravity": 0.34,
+    "jumpForce": -13.9,
+    "speedFactor": 3.03,
     "wind": 0,
     "bgGradient": [
-      "#1e1402",
-      "#3d2905",
-      "#6b480a"
+      "#241902",
+      "#473204",
+      "#735107"
     ],
     "platformColor": "#eab308",
-    "platformBorder": "#ffffff",
+    "platformBorder": "#fef08a",
     "ballGlow": "#fde047",
-    "description": "Escalada extrema na estratosfera aos 106.000m!",
+    "description": "O deserto cósmico onde cada grão de areia é um diamante bruto brilhando sob sóis gêmeos.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Plataformas de cristal multifacetado que refratam luz e aceleram levemente o salto."
   },
   {
     "id": 107,
     "number": 107,
-    "title": "Cristais de Fogo: Nível 2",
+    "title": "Caverna dos Geodos Gigantes",
     "theme": "crystal",
     "icon": "Sparkles",
     "targetHeight": 107000,
-    "gravity": 0.28,
-    "jumpForce": -14.3,
-    "speedFactor": 3.2,
+    "gravity": 0.36,
+    "jumpForce": -13.9,
+    "speedFactor": 3.04,
     "wind": 0,
     "bgGradient": [
-      "#1e1402",
-      "#3d2905",
-      "#6b480a"
+      "#261c05",
+      "#4d380a",
+      "#7a5910"
     ],
-    "platformColor": "#eab308",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde047",
-    "description": "Escalada extrema na estratosfera aos 107.000m!",
+    "platformColor": "#ca8a04",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#eab308",
+    "description": "Penetre no ventre da terra cósmica forrado de estalagmites ametistas brilhantes.",
     "hazards": [
-      "moving",
-      "springs"
+      "spikes",
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Cristais de calcita pontiagudos com pontas afiadas que quebram sob pressão."
   },
   {
     "id": 108,
     "number": 108,
-    "title": "Cristais de Fogo: Nível 3",
+    "title": "Obeliscos Refletores de Fótons",
     "theme": "crystal",
-    "icon": "Sparkles",
+    "icon": "Boxes",
     "targetHeight": 108000,
-    "gravity": 0.3,
-    "jumpForce": -14.3,
-    "speedFactor": 3.21,
+    "gravity": 0.26,
+    "jumpForce": -13.9,
+    "speedFactor": 3.05,
     "wind": 0,
     "bgGradient": [
-      "#1e1402",
-      "#3d2905",
-      "#6b480a"
+      "#2b2007",
+      "#543f0e",
+      "#856317"
     ],
-    "platformColor": "#eab308",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde047",
-    "description": "Escalada extrema na estratosfera aos 108.000m!",
+    "platformColor": "#a16207",
+    "platformBorder": "#fde68a",
+    "ballGlow": "#ca8a04",
+    "description": "Espelhos monumentais alinhados para canalizar a energia da estrela central do mundo.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Monólitos translúcidos que conduzem feixes solares com esteiras de reflexão."
   },
   {
     "id": 109,
     "number": 109,
-    "title": "Cristais de Fogo: Nível 4",
+    "title": "Passo do Vale dos Espelhos",
     "theme": "crystal",
-    "icon": "Sparkles",
+    "icon": "Gem",
     "targetHeight": 109000,
-    "gravity": 0.32,
-    "jumpForce": -14.3,
-    "speedFactor": 3.22,
+    "gravity": 0.28,
+    "jumpForce": -14,
+    "speedFactor": 3.07,
     "wind": 0,
     "bgGradient": [
-      "#1e1402",
-      "#3d2905",
-      "#6b480a"
+      "#332605",
+      "#664c0a",
+      "#9e7710"
     ],
     "platformColor": "#eab308",
     "platformBorder": "#ffffff",
     "ballGlow": "#fde047",
-    "description": "Escalada extrema na estratosfera aos 109.000m!",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Atravesse a passarela de vidro cristalino cintilante em velocidade pura!",
     "hazards": [
-      "moving",
-      "springs"
+      "fragile",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Corrida entre espelhos solares gigantescos refletindo calor!",
+    "layout": "horizontal",
+    "targetDistance": 5300
   },
   {
     "id": 110,
@@ -3603,30 +3610,30 @@ export const HERO_STAGES = [
     "theme": "crystal",
     "icon": "Crown",
     "targetHeight": 110000,
-    "gravity": 0.33,
-    "jumpForce": -14.3,
-    "speedFactor": 3.23,
+    "gravity": 0.3,
+    "jumpForce": -14,
+    "speedFactor": 3.08,
     "wind": 0,
     "bgGradient": [
-      "#1e1402",
-      "#3d2905",
-      "#6b480a"
+      "#1c1302",
+      "#382704",
+      "#593e06"
     ],
-    "platformColor": "#eab308",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde047",
-    "description": "BATALHA DE CHEFÃO AOS 110.000m! Supere Escorpião de Cristal Solar!",
+    "platformColor": "#ca8a04",
+    "platformBorder": "#fef08a",
+    "ballGlow": "#eab308",
+    "description": "DUELO NO SOL DO MEIO-DIA AOS 110.000m! O predador de carapaça adamantina ataca!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
+      "spikes",
       "conveyor"
     ],
-    "mechanic": "Confronto de Chefão: Ferrão Primordial de Quartzo. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O ferrão de cristal dispara feixes de plasma! Reflita a luz nos espelhos de bronze!",
     "isBossStage": true,
     "bossName": "Escorpião de Cristal Solar",
     "bossTitle": "Ferrão Primordial de Quartzo",
-    "bossHP": 21,
+    "bossHP": 22,
     "bossColor": "#eab308",
     "bossGlow": "#fde047",
     "rewardGems": 2200,
@@ -3635,106 +3642,107 @@ export const HERO_STAGES = [
   {
     "id": 111,
     "number": 111,
-    "title": "Acelerador Hádrons: Nível 1",
+    "title": "Câmara de Vácuo Magnético",
     "theme": "quantum",
-    "icon": "Sparkles",
+    "icon": "Atom",
     "targetHeight": 111000,
-    "gravity": 0.34,
-    "jumpForce": -14.3,
-    "speedFactor": 3.24,
+    "gravity": 0.32,
+    "jumpForce": -14,
+    "speedFactor": 3.09,
     "wind": 0,
     "bgGradient": [
-      "#120c24",
-      "#26194d",
-      "#422c82"
+      "#130a24",
+      "#261547",
+      "#3c2170"
     ],
     "platformColor": "#8b5cf6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#c4b5fd",
-    "description": "Escalada extrema na estratosfera aos 111.000m!",
+    "platformBorder": "#c4b5fd",
+    "ballGlow": "#a78bfa",
+    "description": "O anel principal do acelerador onde prótons giram 11.000 vezes por segundo.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Supercondutores criogênicos resfriados a hélio líquido que mantêm a esfera em levitação."
   },
   {
     "id": 112,
     "number": 112,
-    "title": "Acelerador Hádrons: Nível 2",
+    "title": "Colisor de Quarks e Léptons",
     "theme": "quantum",
-    "icon": "Sparkles",
+    "icon": "Zap",
     "targetHeight": 112000,
-    "gravity": 0.24,
-    "jumpForce": -14.3,
-    "speedFactor": 3.25,
+    "gravity": 0.34,
+    "jumpForce": -14.1,
+    "speedFactor": 3.11,
     "wind": 0,
     "bgGradient": [
-      "#120c24",
-      "#26194d",
-      "#422c82"
+      "#170c2e",
+      "#2e185c",
+      "#47258f"
     ],
-    "platformColor": "#8b5cf6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#c4b5fd",
-    "description": "Escalada extrema na estratosfera aos 112.000m!",
+    "platformColor": "#7c3aed",
+    "platformBorder": "#ddd6fe",
+    "ballGlow": "#8b5cf6",
+    "description": "Colida com precisão milimétrica para aproveitar a energia liberada na fissão quântica.",
     "hazards": [
-      "moving",
-      "springs"
+      "springs",
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Detonações subatômicas regulares que fornecem super impulso instantâneo."
   },
   {
     "id": 113,
     "number": 113,
-    "title": "Acelerador Hádrons: Nível 3",
+    "title": "Trilhas de Íons Pesados",
     "theme": "quantum",
-    "icon": "Sparkles",
+    "icon": "Boxes",
     "targetHeight": 113000,
-    "gravity": 0.26,
-    "jumpForce": -14.4,
-    "speedFactor": 3.25,
+    "gravity": 0.36,
+    "jumpForce": -14.1,
+    "speedFactor": 3.12,
     "wind": 0,
     "bgGradient": [
-      "#120c24",
-      "#26194d",
-      "#422c82"
+      "#1b0f36",
+      "#351e6b",
+      "#532fa3"
     ],
-    "platformColor": "#8b5cf6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#c4b5fd",
-    "description": "Escalada extrema na estratosfera aos 113.000m!",
+    "platformColor": "#6d28d9",
+    "platformBorder": "#c4b5fd",
+    "ballGlow": "#7c3aed",
+    "description": "Feixes de partículas pesadas de chumbo aceleradas em direção ao ponto de impacto.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "conveyor",
+      "spikes"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Esteiras magnéticas de alta indução com faíscas elétricas de alta voltagem."
   },
   {
     "id": 114,
     "number": 114,
-    "title": "Acelerador Hádrons: Nível 4",
+    "title": "O Anel Circular de Partículas",
     "theme": "quantum",
-    "icon": "Sparkles",
+    "icon": "Orbit",
     "targetHeight": 114000,
-    "gravity": 0.27,
-    "jumpForce": -14.4,
-    "speedFactor": 3.26,
+    "gravity": 0.26,
+    "jumpForce": -14.1,
+    "speedFactor": 3.13,
     "wind": 0,
     "bgGradient": [
-      "#120c24",
-      "#26194d",
-      "#422c82"
+      "#201240",
+      "#402480",
+      "#6338c7"
     ],
     "platformColor": "#8b5cf6",
     "platformBorder": "#ffffff",
     "ballGlow": "#c4b5fd",
-    "description": "Escalada extrema na estratosfera aos 114.000m!",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Acelere até 99% da velocidade da luz pelo túnel magnético!",
     "hazards": [
-      "moving",
-      "springs"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Loop subterrâneo de 27km percorrido em velocidade relativística!",
+    "layout": "horizontal",
+    "targetDistance": 5400
   },
   {
     "id": 115,
@@ -3744,137 +3752,139 @@ export const HERO_STAGES = [
     "icon": "Crown",
     "targetHeight": 115000,
     "gravity": 0.28,
-    "jumpForce": -14.4,
-    "speedFactor": 3.27,
+    "jumpForce": -14.1,
+    "speedFactor": 3.14,
     "wind": 0,
     "bgGradient": [
-      "#120c24",
-      "#26194d",
-      "#422c82"
+      "#0f071c",
+      "#1e0e38",
+      "#301659"
     ],
-    "platformColor": "#8b5cf6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#c4b5fd",
-    "description": "BATALHA DE CHEFÃO AOS 115.000m! Supere Bóson Descontrolado!",
+    "platformColor": "#5b21b6",
+    "platformBorder": "#ddd6fe",
+    "ballGlow": "#8b5cf6",
+    "description": "SINGULARIDADE SUBATÔMICA AOS 115.000m! Impeça a criação de um micro buraco negro!",
     "hazards": [
       "moving",
       "fragile",
       "springs",
       "conveyor"
     ],
-    "mechanic": "Confronto de Chefão: A Partícula Devoradora. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O bóson colapsa matéria! Ative os campos magnéticos de contenção!",
     "isBossStage": true,
     "bossName": "Bóson Descontrolado",
     "bossTitle": "A Partícula Devoradora",
-    "bossHP": 22,
+    "bossHP": 23,
     "bossColor": "#8b5cf6",
     "bossGlow": "#c4b5fd",
-    "rewardGems": 2400,
+    "rewardGems": 2300,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 116,
     "number": 116,
-    "title": "Ninho Pterodáctilo: Nível 1",
+    "title": "Encosta dos Fósseis Glaciais",
     "theme": "dinosaur",
-    "icon": "Sparkles",
+    "icon": "Snowflake",
     "targetHeight": 116000,
     "gravity": 0.3,
-    "jumpForce": -14.4,
-    "speedFactor": 3.28,
-    "wind": 0,
+    "jumpForce": -14.2,
+    "speedFactor": 3.16,
+    "wind": 0.3,
     "bgGradient": [
-      "#071a17",
-      "#0f3630",
-      "#1a5950"
+      "#051c1c",
+      "#0a3838",
+      "#105959"
     ],
     "platformColor": "#14b8a6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#5eead4",
-    "description": "Escalada extrema na estratosfera aos 116.000m!",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#2dd4bf",
+    "description": "Suba a montanha dos dinossauros onde o frio preservou esqueletos inteiros de milhões de anos.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "wind",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Placas de rocha cobertas de gelo escorregadio com ventos laterais de geleira."
   },
   {
     "id": 117,
     "number": 117,
-    "title": "Ninho Pterodáctilo: Nível 2",
+    "title": "Ninhos Suspensos nas Escarpas",
     "theme": "dinosaur",
-    "icon": "Sparkles",
+    "icon": "TreePine",
     "targetHeight": 117000,
     "gravity": 0.32,
-    "jumpForce": -14.4,
-    "speedFactor": 3.29,
+    "jumpForce": -14.2,
+    "speedFactor": 3.17,
     "wind": 0,
     "bgGradient": [
-      "#071a17",
-      "#0f3630",
-      "#1a5950"
+      "#072424",
+      "#0e4747",
+      "#156e6e"
     ],
-    "platformColor": "#14b8a6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#5eead4",
-    "description": "Escalada extrema na estratosfera aos 117.000m!",
+    "platformColor": "#0d9488",
+    "platformBorder": "#5eead4",
+    "ballGlow": "#14b8a6",
+    "description": "Escale pelas fendas íngremes onde as mães pterodáctilos criam seus filhotes alados.",
     "hazards": [
-      "moving",
-      "springs"
+      "springs",
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Ramos fossilizados elásticos e ninhos com ovos petrificados que balançam no vento."
   },
   {
     "id": 118,
     "number": 118,
-    "title": "Ninho Pterodáctilo: Nível 3",
+    "title": "Desfiladeiro dos Picos de Gelo",
     "theme": "dinosaur",
-    "icon": "Sparkles",
+    "icon": "Zap",
     "targetHeight": 118000,
-    "gravity": 0.33,
-    "jumpForce": -14.4,
-    "speedFactor": 3.3,
-    "wind": 0,
+    "gravity": 0.34,
+    "jumpForce": -14.2,
+    "speedFactor": 3.18,
+    "wind": -0.3,
     "bgGradient": [
-      "#071a17",
-      "#0f3630",
-      "#1a5950"
+      "#082929",
+      "#115252",
+      "#1a8080"
     ],
-    "platformColor": "#14b8a6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#5eead4",
-    "description": "Escalada extrema na estratosfera aos 118.000m!",
+    "platformColor": "#0f766e",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#0d9488",
+    "description": "O vento corta como navalha enquanto pedras pontiagudas ameaçam perfurar sua subida.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "spikes",
+      "wind"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Estalactites de gelo jurássico pontiagudas penduradas sobre o abismo."
   },
   {
     "id": 119,
     "number": 119,
-    "title": "Ninho Pterodáctilo: Nível 4",
+    "title": "Planalto do Voo das Bestas Aladas",
     "theme": "dinosaur",
-    "icon": "Sparkles",
+    "icon": "Wind",
     "targetHeight": 119000,
-    "gravity": 0.34,
-    "jumpForce": -14.4,
-    "speedFactor": 3.31,
-    "wind": 0,
+    "gravity": 0.36,
+    "jumpForce": -14.2,
+    "speedFactor": 3.2,
+    "wind": 0.2,
     "bgGradient": [
-      "#071a17",
-      "#0f3630",
-      "#1a5950"
+      "#0a3333",
+      "#146666",
+      "#209e9e"
     ],
     "platformColor": "#14b8a6",
     "platformBorder": "#ffffff",
     "ballGlow": "#5eead4",
-    "description": "Escalada extrema na estratosfera aos 119.000m!",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Salte entre as correntes térmicas dos picos nevados pré-históricos!",
     "hazards": [
       "moving",
-      "springs"
+      "wind"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Cruzando cumes verticais lado a lado com pterossauros em pleno voo!",
+    "layout": "horizontal",
+    "targetDistance": 5400
   },
   {
     "id": 120,
@@ -3883,138 +3893,141 @@ export const HERO_STAGES = [
     "theme": "dinosaur",
     "icon": "Crown",
     "targetHeight": 120000,
-    "gravity": 0.24,
-    "jumpForce": -14.4,
-    "speedFactor": 3.32,
+    "gravity": 0.26,
+    "jumpForce": -14.3,
+    "speedFactor": 3.21,
     "wind": 0,
     "bgGradient": [
-      "#071a17",
-      "#0f3630",
-      "#1a5950"
+      "#041414",
+      "#082929",
+      "#0e4242"
     ],
-    "platformColor": "#14b8a6",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#5eead4",
-    "description": "BATALHA DE CHEFÃO AOS 120.000m! Supere Quetzalcoatlus Supremo!",
+    "platformColor": "#115e59",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#14b8a6",
+    "description": "O SENHOR DOS CÉUS MESOZÓICOS AOS 120.000m! Conquiste o ápice do ninho jurássico!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
-      "conveyor"
+      "wind",
+      "spikes"
     ],
-    "mechanic": "Confronto de Chefão: Soberano Alado dos Céus Jurássicos. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O réptil alado de 12 metros dá rasantes furiosos! Ative as redes balísticas!",
     "isBossStage": true,
     "bossName": "Quetzalcoatlus Supremo",
     "bossTitle": "Soberano Alado dos Céus Jurássicos",
-    "bossHP": 23,
+    "bossHP": 24,
     "bossColor": "#14b8a6",
-    "bossGlow": "#5eead4",
-    "rewardGems": 2600,
+    "bossGlow": "#2dd4bf",
+    "rewardGems": 2400,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 121,
     "number": 121,
-    "title": "Trem Fantasma Oeste: Nível 1",
+    "title": "Estação Abandonada de Tombstone",
     "theme": "wild_west",
-    "icon": "Sparkles",
+    "icon": "Crosshair",
     "targetHeight": 121000,
-    "gravity": 0.26,
-    "jumpForce": -14.5,
-    "speedFactor": 3.33,
+    "gravity": 0.28,
+    "jumpForce": -14.3,
+    "speedFactor": 3.22,
     "wind": 0,
     "bgGradient": [
-      "#1f0f06",
-      "#3d1d0c",
-      "#693315"
+      "#261304",
+      "#4a2608",
+      "#783c0d"
     ],
     "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde68a",
-    "description": "Escalada extrema na estratosfera aos 121.000m!",
+    "platformBorder": "#fef3c7",
+    "ballGlow": "#fbbf24",
+    "description": "O sino da estação soa na névoa do deserto anunciando a passagem do comboio amaldiçoado.",
     "hazards": [
       "fragile",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Pranchas de carvalho velho da plataforma de embarque que cedem com rangidos."
   },
   {
     "id": 122,
     "number": 122,
-    "title": "Trem Fantasma Oeste: Nível 2",
+    "title": "Corte da Serra de Fogo",
     "theme": "wild_west",
-    "icon": "Sparkles",
+    "icon": "Flame",
     "targetHeight": 122000,
-    "gravity": 0.27,
-    "jumpForce": -14.5,
-    "speedFactor": 3.34,
+    "gravity": 0.3,
+    "jumpForce": -14.3,
+    "speedFactor": 3.24,
     "wind": 0,
     "bgGradient": [
-      "#1f0f06",
-      "#3d1d0c",
-      "#693315"
+      "#2e1405",
+      "#5c280b",
+      "#8f3e11"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde68a",
-    "description": "Escalada extrema na estratosfera aos 122.000m!",
+    "platformColor": "#ea580c",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#f97316",
+    "description": "Túneis escavados na rocha viva onde chamas dançam pelas frestas dos dormentes.",
     "hazards": [
-      "moving",
-      "springs"
+      "spikes",
+      "conveyor"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Trilhos incandescentes aquecidos por carvão espectral que queimam no contato."
   },
   {
     "id": 123,
     "number": 123,
-    "title": "Trem Fantasma Oeste: Nível 3",
+    "title": "O Expresso do Purgatório em Disparada",
     "theme": "wild_west",
-    "icon": "Sparkles",
+    "icon": "Rocket",
     "targetHeight": 123000,
-    "gravity": 0.28,
-    "jumpForce": -14.5,
-    "speedFactor": 3.35,
+    "gravity": 0.32,
+    "jumpForce": -14.3,
+    "speedFactor": 3.25,
     "wind": 0,
     "bgGradient": [
-      "#1f0f06",
-      "#3d1d0c",
-      "#693315"
+      "#361706",
+      "#6b2d0c",
+      "#a34513"
     ],
     "platformColor": "#f59e0b",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fde68a",
-    "description": "Escalada extrema na estratosfera aos 123.000m!",
+    "ballGlow": "#fde047",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Corra sobre o teto metálico dos vagões em chamas do expresso fantasma!",
     "hazards": [
+      "conveyor",
       "fragile",
-      "conveyor"
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Pulando de vagão em vagão de um trem blindado a 150 km/h!",
+    "layout": "horizontal",
+    "targetDistance": 5500
   },
   {
     "id": 124,
     "number": 124,
-    "title": "Trem Fantasma Oeste: Nível 4",
+    "title": "Ponte Pênsil da Ravina Negra",
     "theme": "wild_west",
-    "icon": "Sparkles",
+    "icon": "Axe",
     "targetHeight": 124000,
-    "gravity": 0.3,
-    "jumpForce": -14.5,
-    "speedFactor": 3.36,
+    "gravity": 0.34,
+    "jumpForce": -14.3,
+    "speedFactor": 3.26,
     "wind": 0,
     "bgGradient": [
-      "#1f0f06",
-      "#3d1d0c",
-      "#693315"
+      "#3b1b08",
+      "#733510",
+      "#ab4f18"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde68a",
-    "description": "Escalada extrema na estratosfera aos 124.000m!",
+    "platformColor": "#d97706",
+    "platformBorder": "#fde68a",
+    "ballGlow": "#f59e0b",
+    "description": "A travessia mais perigosa de todo o oeste: 800 metros de vão sobre o abismo insondável.",
     "hazards": [
-      "moving",
+      "fragile",
       "springs"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Cabos de aço arrebentando e vigas que despencam aos pares sobre o precipício."
   },
   {
     "id": 125,
@@ -4023,138 +4036,140 @@ export const HERO_STAGES = [
     "theme": "wild_west",
     "icon": "Crown",
     "targetHeight": 125000,
-    "gravity": 0.32,
-    "jumpForce": -14.5,
-    "speedFactor": 3.37,
+    "gravity": 0.36,
+    "jumpForce": -14.4,
+    "speedFactor": 3.27,
     "wind": 0,
     "bgGradient": [
-      "#1f0f06",
-      "#3d1d0c",
-      "#693315"
+      "#1c0c03",
+      "#381906",
+      "#59270a"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fde68a",
-    "description": "BATALHA DE CHEFÃO AOS 125.000m! Supere Locomotiva Blindada Fantasma!",
+    "platformColor": "#b45309",
+    "platformBorder": "#fde68a",
+    "ballGlow": "#f59e0b",
+    "description": "O APITO FINAL AOS 125.000m! Pare a locomotiva demoníaca antes que ela destrua a linha cósmica!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
+      "spikes",
       "conveyor"
     ],
-    "mechanic": "Confronto de Chefão: O Titã de Aço a Vapor. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O monstro de aço solta vapor superaquecido! Jogue água na caldeira central!",
     "isBossStage": true,
     "bossName": "Locomotiva Blindada Fantasma",
-    "bossTitle": "O Titã de Aço a Vapor",
-    "bossHP": 24,
+    "bossTitle": "A Máquina do Juízo Final",
+    "bossHP": 25,
     "bossColor": "#f59e0b",
-    "bossGlow": "#fde68a",
-    "rewardGems": 2800,
+    "bossGlow": "#fbbf24",
+    "rewardGems": 2500,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 126,
     "number": 126,
-    "title": "Parkour Gravidade 0: Nível 1",
+    "title": "Domo dos Aros Holográficos",
     "theme": "sports",
-    "icon": "Sparkles",
+    "icon": "Orbit",
     "targetHeight": 126000,
-    "gravity": 0.33,
-    "jumpForce": -14.5,
-    "speedFactor": 3.38,
+    "gravity": 0.26,
+    "jumpForce": -14.4,
+    "speedFactor": 3.29,
     "wind": 0,
     "bgGradient": [
-      "#051829",
-      "#0d3252",
-      "#165082"
+      "#071b30",
+      "#0f3761",
+      "#175799"
     ],
-    "platformColor": "#0ea5e9",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#7dd3fc",
-    "description": "Escalada extrema na estratosfera aos 126.000m!",
+    "platformColor": "#06b6d4",
+    "platformBorder": "#a5f3fc",
+    "ballGlow": "#38bdf8",
+    "description": "A arena futurista onde atletas competem sem peso em meio a estrelas cintilantes.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "springs"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Anéis flutuantes no vácuo que dão propulsão magnética extra a cada travessia."
   },
   {
     "id": 127,
     "number": 127,
-    "title": "Parkour Gravidade 0: Nível 2",
+    "title": "Pistas Cruzadas de Propulsão",
     "theme": "sports",
-    "icon": "Sparkles",
+    "icon": "Activity",
     "targetHeight": 127000,
-    "gravity": 0.34,
-    "jumpForce": -14.5,
-    "speedFactor": 3.39,
+    "gravity": 0.28,
+    "jumpForce": -14.4,
+    "speedFactor": 3.3,
     "wind": 0,
     "bgGradient": [
-      "#051829",
-      "#0d3252",
-      "#165082"
+      "#0a223d",
+      "#144378",
+      "#1e68b8"
     ],
-    "platformColor": "#0ea5e9",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#7dd3fc",
-    "description": "Escalada extrema na estratosfera aos 127.000m!",
+    "platformColor": "#0284c7",
+    "platformBorder": "#7dd3fc",
+    "ballGlow": "#38bdf8",
+    "description": "Corredores iluminados por LEDs que cruzam a arena em malhas geométricas velozes.",
     "hazards": [
-      "moving",
-      "springs"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Esteiras com velocidades contrastantes que testam reflexos a cada fração de segundo."
   },
   {
     "id": 128,
     "number": 128,
-    "title": "Parkour Gravidade 0: Nível 3",
+    "title": "Barreiras Eletrizadas de Salto",
     "theme": "sports",
-    "icon": "Sparkles",
+    "icon": "Zap",
     "targetHeight": 128000,
-    "gravity": 0.24,
-    "jumpForce": -14.5,
-    "speedFactor": 3.39,
+    "gravity": 0.3,
+    "jumpForce": -14.4,
+    "speedFactor": 3.31,
     "wind": 0,
     "bgGradient": [
-      "#051829",
-      "#0d3252",
-      "#165082"
+      "#0d294a",
+      "#1a5191",
+      "#277cdb"
     ],
-    "platformColor": "#0ea5e9",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#7dd3fc",
-    "description": "Escalada extrema na estratosfera aos 128.000m!",
+    "platformColor": "#3b82f6",
+    "platformBorder": "#bfdbfe",
+    "ballGlow": "#60a5fa",
+    "description": "Salte sobre as traves de energia sem encostar nas pontas de descarga iônica.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "spikes",
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Obstáculos de alta tensão com feixes que pulsam a cada intervalo de 2 segundos."
   },
   {
     "id": 129,
     "number": 129,
-    "title": "Parkour Gravidade 0: Nível 4",
+    "title": "Reta Final da Maratona Galáctica",
     "theme": "sports",
-    "icon": "Sparkles",
+    "icon": "Trophy",
     "targetHeight": 129000,
-    "gravity": 0.26,
+    "gravity": 0.32,
     "jumpForce": -14.5,
-    "speedFactor": 3.4,
+    "speedFactor": 3.33,
     "wind": 0,
     "bgGradient": [
-      "#051829",
-      "#0d3252",
-      "#165082"
+      "#103259",
+      "#2062ad",
+      "#3094fa"
     ],
-    "platformColor": "#0ea5e9",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#7dd3fc",
-    "description": "Escalada extrema na estratosfera aos 129.000m!",
+    "platformColor": "#06b6d4",
+    "platformBorder": "#fde047",
+    "ballGlow": "#38bdf8",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Corra a grande maratona espacial rumo à fita de chegada estelar!",
     "hazards": [
-      "moving",
-      "springs"
+      "conveyor",
+      "springs",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Pista olímpica suspensa no vácuo estelar com esteiras e obstáculos!",
+    "layout": "horizontal",
+    "targetDistance": 5500
   },
   {
     "id": 130,
@@ -4163,278 +4178,280 @@ export const HERO_STAGES = [
     "theme": "sports",
     "icon": "Crown",
     "targetHeight": 130000,
-    "gravity": 0.27,
-    "jumpForce": -14.6,
-    "speedFactor": 3.41,
+    "gravity": 0.34,
+    "jumpForce": -14.5,
+    "speedFactor": 3.34,
     "wind": 0,
     "bgGradient": [
-      "#051829",
-      "#0d3252",
-      "#165082"
+      "#051526",
+      "#0b2b4d",
+      "#124378"
     ],
-    "platformColor": "#0ea5e9",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#7dd3fc",
-    "description": "BATALHA DE CHEFÃO AOS 130.000m! Supere Campeão da Gravidade Zero!",
+    "platformColor": "#0369a1",
+    "platformBorder": "#fde047",
+    "ballGlow": "#0ea5e9",
+    "description": "FINAL DO TORNEIO CÓSMICO AOS 130.000m! Destrone a lenda invicta dos esportes interplanetários!",
     "hazards": [
       "moving",
       "fragile",
       "springs",
       "conveyor"
     ],
-    "mechanic": "Confronto de Chefão: O Ás Invicto do Parkour. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O campeão usa impulso orbital triplo! Use as molas para superá-lo no ar!",
     "isBossStage": true,
     "bossName": "Campeão da Gravidade Zero",
-    "bossTitle": "O Ás Invicto do Parkour",
-    "bossHP": 25,
-    "bossColor": "#0ea5e9",
-    "bossGlow": "#7dd3fc",
-    "rewardGems": 3000,
+    "bossTitle": "O Invencível das Galáxias",
+    "bossHP": 26,
+    "bossColor": "#0284c7",
+    "bossGlow": "#38bdf8",
+    "rewardGems": 2600,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 131,
     "number": 131,
-    "title": "Doce do Apocalipse: Nível 1",
-    "theme": "candy",
-    "icon": "Sparkles",
+    "title": "Geleia de Morango Saltitante",
+    "theme": "gastronomy",
+    "icon": "Cookie",
     "targetHeight": 131000,
-    "gravity": 0.28,
-    "jumpForce": -14.6,
-    "speedFactor": 3.42,
+    "gravity": 0.36,
+    "jumpForce": -14.5,
+    "speedFactor": 3.35,
     "wind": 0,
     "bgGradient": [
-      "#1f0714",
-      "#3d0f28",
-      "#691a45"
+      "#2e1005",
+      "#59210a",
+      "#8a3310"
     ],
-    "platformColor": "#ec4899",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fbcfe8",
-    "description": "Escalada extrema na estratosfera aos 131.000m!",
+    "platformColor": "#f97316",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#fb923c",
+    "description": "Um mundo feito inteiramente de confeitos mágicos onde cada salto é uma explosão doce.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "springs"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Blocos de gelatina vermelha super elásticos com amortecimento suave e impulsos duplos."
   },
   {
     "id": 132,
     "number": 132,
-    "title": "Doce do Apocalipse: Nível 2",
-    "theme": "candy",
-    "icon": "Sparkles",
+    "title": "Cascatas de Chocolate Amargo",
+    "theme": "gastronomy",
+    "icon": "Waves",
     "targetHeight": 132000,
-    "gravity": 0.3,
+    "gravity": 0.26,
     "jumpForce": -14.6,
-    "speedFactor": 3.43,
+    "speedFactor": 3.37,
     "wind": 0,
     "bgGradient": [
-      "#1f0714",
-      "#3d0f28",
-      "#691a45"
+      "#331406",
+      "#63280c",
+      "#963d12"
     ],
-    "platformColor": "#ec4899",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fbcfe8",
-    "description": "Escalada extrema na estratosfera aos 132.000m!",
+    "platformColor": "#b45309",
+    "platformBorder": "#fde68a",
+    "ballGlow": "#d97706",
+    "description": "Rios espessos de cacau a 70% fluindo entre montanhas de suspiro e chantilly.",
     "hazards": [
       "moving",
-      "springs"
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Barras de chocolate crocante que quebram com estalo sob aterrissagens duras."
   },
   {
     "id": 133,
     "number": 133,
-    "title": "Doce do Apocalipse: Nível 3",
-    "theme": "candy",
-    "icon": "Sparkles",
+    "title": "Floresta dos Pirulitos de Vidro",
+    "theme": "gastronomy",
+    "icon": "Zap",
     "targetHeight": 133000,
-    "gravity": 0.32,
+    "gravity": 0.28,
     "jumpForce": -14.6,
-    "speedFactor": 3.44,
+    "speedFactor": 3.38,
     "wind": 0,
     "bgGradient": [
-      "#1f0714",
-      "#3d0f28",
-      "#691a45"
+      "#381708",
+      "#6e2e10",
+      "#a64619"
     ],
-    "platformColor": "#ec4899",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fbcfe8",
-    "description": "Escalada extrema na estratosfera aos 133.000m!",
+    "platformColor": "#ea580c",
+    "platformBorder": "#fef08a",
+    "ballGlow": "#f97316",
+    "description": "Árvores de pirulito transparente com espinhos de caramelo quebradiço e cortante.",
     "hazards": [
-      "fragile",
+      "spikes",
       "conveyor"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Estacas de açúcar caramelizado pontiagudas e esteiras de bala toffee que puxam a bola."
   },
   {
     "id": 134,
     "number": 134,
-    "title": "Doce do Apocalipse: Nível 4",
-    "theme": "candy",
-    "icon": "Sparkles",
+    "title": "Passarela dos Biscoitos Crocantes",
+    "theme": "gastronomy",
+    "icon": "Cookie",
     "targetHeight": 134000,
-    "gravity": 0.33,
+    "gravity": 0.3,
     "jumpForce": -14.6,
-    "speedFactor": 3.45,
+    "speedFactor": 3.39,
     "wind": 0,
     "bgGradient": [
-      "#1f0714",
-      "#3d0f28",
-      "#691a45"
+      "#401b0a",
+      "#7a3414",
+      "#b84f1f"
     ],
-    "platformColor": "#ec4899",
+    "platformColor": "#f59e0b",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fbcfe8",
-    "description": "Escalada extrema na estratosfera aos 134.000m!",
+    "ballGlow": "#fbbf24",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Atravesse a bancada das confeitarias cósmicas sem cair no leite quente!",
     "hazards": [
-      "moving",
-      "springs"
+      "fragile",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Corrida sobre bolachas gigantescas que esfarelam a cada pisada!",
+    "layout": "horizontal",
+    "targetDistance": 5500
   },
   {
     "id": 135,
     "number": 135,
     "title": "👑 CHEFÃO 27: Gólem de Caramelo Ardente",
-    "theme": "candy",
+    "theme": "gastronomy",
     "icon": "Crown",
     "targetHeight": 135000,
-    "gravity": 0.34,
+    "gravity": 0.32,
     "jumpForce": -14.6,
-    "speedFactor": 3.46,
+    "speedFactor": 3.4,
     "wind": 0,
     "bgGradient": [
-      "#1f0714",
-      "#3d0f28",
-      "#691a45"
+      "#240d04",
+      "#451908",
+      "#6b270c"
     ],
-    "platformColor": "#ec4899",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fbcfe8",
-    "description": "BATALHA DE CHEFÃO AOS 135.000m! Supere Gólem de Caramelo Ardente!",
+    "platformColor": "#c2410c",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#ea580c",
+    "description": "SOBREMESA FINAL AOS 135.000m! Derrote o titã doce de caramelo antes que ele endureça seu caminho!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
+      "spikes",
       "conveyor"
     ],
-    "mechanic": "Confronto de Chefão: A Força Açucarada Imparável. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O Gólem lança bombas de calda fervente! Resfrie-o com cristais de menta!",
     "isBossStage": true,
     "bossName": "Gólem de Caramelo Ardente",
-    "bossTitle": "A Força Açucarada Imparável",
-    "bossHP": 26,
-    "bossColor": "#ec4899",
-    "bossGlow": "#fbcfe8",
-    "rewardGems": 3200,
+    "bossTitle": "O Monstro da Calda Quente",
+    "bossHP": 27,
+    "bossColor": "#ea580c",
+    "bossGlow": "#fbbf24",
+    "rewardGems": 2700,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 136,
     "number": 136,
-    "title": "Mente Quântica: Nível 1",
+    "title": "Dendritos de Prata Estelar",
     "theme": "health",
-    "icon": "Sparkles",
+    "icon": "Activity",
     "targetHeight": 136000,
-    "gravity": 0.24,
-    "jumpForce": -14.6,
-    "speedFactor": 3.47,
+    "gravity": 0.34,
+    "jumpForce": -14.7,
+    "speedFactor": 3.42,
     "wind": 0,
     "bgGradient": [
-      "#210610",
-      "#420d20",
-      "#701637"
+      "#041a18",
+      "#083330",
+      "#0e524d"
     ],
-    "platformColor": "#f43f5e",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fecdd3",
-    "description": "Escalada extrema na estratosfera aos 136.000m!",
+    "platformColor": "#14b8a6",
+    "platformBorder": "#99f6e4",
+    "ballGlow": "#2dd4bf",
+    "description": "Salte pelas ramificações do córtex cósmico onde pensamentos universais se formam.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "springs"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Ramificações neurais que propagam potenciais de ação e impulsionam saltos harmônicos."
   },
   {
     "id": 137,
     "number": 137,
-    "title": "Mente Quântica: Nível 2",
+    "title": "Labirinto da Memória Quântica",
     "theme": "health",
-    "icon": "Sparkles",
+    "icon": "Boxes",
     "targetHeight": 137000,
-    "gravity": 0.26,
-    "jumpForce": -14.6,
-    "speedFactor": 3.48,
+    "gravity": 0.36,
+    "jumpForce": -14.7,
+    "speedFactor": 3.43,
     "wind": 0,
     "bgGradient": [
-      "#210610",
-      "#420d20",
-      "#701637"
+      "#06211e",
+      "#0b423d",
+      "#126961"
     ],
-    "platformColor": "#f43f5e",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fecdd3",
-    "description": "Escalada extrema na estratosfera aos 137.000m!",
+    "platformColor": "#0d9488",
+    "platformBorder": "#5eead4",
+    "ballGlow": "#14b8a6",
+    "description": "Recordações de estrelas extintas flutuando em meio a correntes bioelétricas suaves.",
     "hazards": [
-      "moving",
-      "springs"
+      "fragile",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Plataformas que representam memórias antigas que desvanecem 0.7s após a ativação."
   },
   {
     "id": 138,
     "number": 138,
-    "title": "Mente Quântica: Nível 3",
+    "title": "Nódulo de Conexão Axônica",
     "theme": "health",
-    "icon": "Sparkles",
+    "icon": "Zap",
     "targetHeight": 138000,
-    "gravity": 0.27,
+    "gravity": 0.26,
     "jumpForce": -14.7,
-    "speedFactor": 3.49,
+    "speedFactor": 3.44,
     "wind": 0,
     "bgGradient": [
-      "#210610",
-      "#420d20",
-      "#701637"
+      "#082925",
+      "#10524b",
+      "#197d73"
     ],
-    "platformColor": "#f43f5e",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fecdd3",
-    "description": "Escalada extrema na estratosfera aos 138.000m!",
+    "platformColor": "#0f766e",
+    "platformBorder": "#c4b5fd",
+    "ballGlow": "#0d9488",
+    "description": "O ponto de confluência onde bilhões de impulsos nervosos do universo colidem.",
     "hazards": [
-      "fragile",
+      "spikes",
       "conveyor"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Feixes de neurotransmissores com descargas elétricas ritmadas nos intervalos de sinapse."
   },
   {
     "id": 139,
     "number": 139,
-    "title": "Mente Quântica: Nível 4",
+    "title": "Via Expressa dos Impulsos Cerebrais",
     "theme": "health",
-    "icon": "Sparkles",
+    "icon": "Rocket",
     "targetHeight": 139000,
     "gravity": 0.28,
     "jumpForce": -14.7,
-    "speedFactor": 3.5,
+    "speedFactor": 3.46,
     "wind": 0,
     "bgGradient": [
-      "#210610",
-      "#420d20",
-      "#701637"
+      "#0a332f",
+      "#14665e",
+      "#209e92"
     ],
-    "platformColor": "#f43f5e",
+    "platformColor": "#14b8a6",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fecdd3",
-    "description": "Escalada extrema na estratosfera aos 139.000m!",
+    "ballGlow": "#5eead4",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Percorra o tronco neural em alta velocidade desviando de sobrecargas elétricas!",
     "hazards": [
-      "moving",
-      "springs"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Corrida na velocidade do pensamento puro pelos axônios celestes!",
+    "layout": "horizontal",
+    "targetDistance": 5600
   },
   {
     "id": 140,
@@ -4444,137 +4461,140 @@ export const HERO_STAGES = [
     "icon": "Crown",
     "targetHeight": 140000,
     "gravity": 0.3,
-    "jumpForce": -14.7,
-    "speedFactor": 3.51,
+    "jumpForce": -14.8,
+    "speedFactor": 3.47,
     "wind": 0,
     "bgGradient": [
-      "#210610",
-      "#420d20",
-      "#701637"
+      "#031413",
+      "#072926",
+      "#0c423e"
     ],
-    "platformColor": "#f43f5e",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fecdd3",
-    "description": "BATALHA DE CHEFÃO AOS 140.000m! Supere Sinapse Hiperativa Omega!",
+    "platformColor": "#115e59",
+    "platformBorder": "#a5f3fc",
+    "ballGlow": "#14b8a6",
+    "description": "DESPERTAR DA MENTE AOS 140.000m! Prove a pureza da sua intenção diante da consciência viva do cosmos!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
-      "conveyor"
+      "spikes",
+      "springs"
     ],
-    "mechanic": "Confronto de Chefão: O Impulso Cósmico da Mente. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: A mente cósmica dispara ilusões visuais! Pise nos núcleos de razão verdadeira!",
     "isBossStage": true,
     "bossName": "Sinapse Hiperativa Omega",
-    "bossTitle": "O Impulso Cósmico da Mente",
-    "bossHP": 27,
-    "bossColor": "#f43f5e",
-    "bossGlow": "#fecdd3",
-    "rewardGems": 3400,
+    "bossTitle": "A Consciência Quântica Universal",
+    "bossHP": 28,
+    "bossColor": "#0d9488",
+    "bossGlow": "#2dd4bf",
+    "rewardGems": 2800,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 141,
     "number": 141,
-    "title": "Muralha das Eras: Nível 1",
+    "title": "Terraços Flutuantes da Mesopotâmia",
     "theme": "continents",
-    "icon": "Sparkles",
+    "icon": "Landmark",
     "targetHeight": 141000,
     "gravity": 0.32,
-    "jumpForce": -14.7,
-    "speedFactor": 3.52,
+    "jumpForce": -14.8,
+    "speedFactor": 3.48,
     "wind": 0,
     "bgGradient": [
-      "#171207",
-      "#33270f",
-      "#574219"
+      "#241402",
+      "#472704",
+      "#733f07"
     ],
     "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fef08a",
-    "description": "Escalada extrema na estratosfera aos 141.000m!",
+    "platformBorder": "#fef3c7",
+    "ballGlow": "#fbbf24",
+    "description": "Tijolos cozidos no sol da Babilônia sustentando árvores que tocam as estrelas.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "conveyor",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Jardins de zigurates com esteiras de água corrente que aceleram o movimento lateral."
   },
   {
     "id": 142,
     "number": 142,
-    "title": "Muralha das Eras: Nível 2",
+    "title": "Colunatas dos Templos Faraônicos",
     "theme": "continents",
-    "icon": "Sparkles",
+    "icon": "Pyramid",
     "targetHeight": 142000,
-    "gravity": 0.33,
-    "jumpForce": -14.7,
-    "speedFactor": 3.53,
+    "gravity": 0.34,
+    "jumpForce": -14.8,
+    "speedFactor": 3.5,
     "wind": 0,
     "bgGradient": [
-      "#171207",
-      "#33270f",
-      "#574219"
+      "#291705",
+      "#4d2c09",
+      "#7a460e"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fef08a",
-    "description": "Escalada extrema na estratosfera aos 142.000m!",
+    "platformColor": "#d97706",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#f59e0b",
+    "description": "O legado de Karnak e Luxor erguido aos 142.000m como testamento da ambição humana.",
     "hazards": [
       "moving",
-      "springs"
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Pilares esculpidos com hieróglifos de ouro que deslizam verticalmente."
   },
   {
     "id": 143,
     "number": 143,
-    "title": "Muralha das Eras: Nível 3",
+    "title": "Calçada Monumental dos Faraós e Reis",
     "theme": "continents",
-    "icon": "Sparkles",
+    "icon": "Crown",
     "targetHeight": 143000,
-    "gravity": 0.34,
-    "jumpForce": -14.7,
-    "speedFactor": 3.53,
+    "gravity": 0.36,
+    "jumpForce": -14.8,
+    "speedFactor": 3.51,
     "wind": 0,
     "bgGradient": [
-      "#171207",
-      "#33270f",
-      "#574219"
+      "#331d06",
+      "#66390b",
+      "#9e5912"
     ],
     "platformColor": "#f59e0b",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fef08a",
-    "description": "Escalada extrema na estratosfera aos 143.000m!",
+    "ballGlow": "#fde047",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Corra pela avenida sagrada dos impérios do passado até o portão das eras!",
     "hazards": [
+      "moving",
       "fragile",
-      "conveyor"
+      "springs"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL! Grande avenida cerimonial com obeliscos e arcos triunfais!",
+    "layout": "horizontal",
+    "targetDistance": 5600
   },
   {
     "id": 144,
     "number": 144,
-    "title": "Muralha das Eras: Nível 4",
+    "title": "Bastilhas dos Cumes da Antiguidade",
     "theme": "continents",
-    "icon": "Sparkles",
+    "icon": "Shield",
     "targetHeight": 144000,
-    "gravity": 0.24,
-    "jumpForce": -14.7,
-    "speedFactor": 3.54,
-    "wind": 0,
+    "gravity": 0.26,
+    "jumpForce": -14.8,
+    "speedFactor": 3.52,
+    "wind": 0.35,
     "bgGradient": [
-      "#171207",
-      "#33270f",
-      "#574219"
+      "#3d2208",
+      "#75420f",
+      "#b36517"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fef08a",
-    "description": "Escalada extrema na estratosfera aos 144.000m!",
+    "platformColor": "#b45309",
+    "platformBorder": "#fde68a",
+    "ballGlow": "#f59e0b",
+    "description": "As torres de vigia finais que guardavam o portal para a última dimensão do cosmos.",
     "hazards": [
-      "moving",
-      "springs"
+      "wind",
+      "spikes"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Fortalezas de pedra com ameias protegidas contra vendavais e setas pontiagudas."
   },
   {
     "id": 145,
@@ -4583,172 +4603,179 @@ export const HERO_STAGES = [
     "theme": "continents",
     "icon": "Crown",
     "targetHeight": 145000,
-    "gravity": 0.26,
-    "jumpForce": -14.7,
-    "speedFactor": 3.55,
+    "gravity": 0.28,
+    "jumpForce": -14.9,
+    "speedFactor": 3.53,
     "wind": 0,
     "bgGradient": [
-      "#171207",
-      "#33270f",
-      "#574219"
+      "#1c0f02",
+      "#381f03",
+      "#593106"
     ],
-    "platformColor": "#f59e0b",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fef08a",
-    "description": "BATALHA DE CHEFÃO AOS 145.000m! Supere Colosso das Sete Civilizações!",
+    "platformColor": "#92400e",
+    "platformBorder": "#fef08a",
+    "ballGlow": "#d97706",
+    "description": "A PROVA DA HISTÓRIA AOS 145.000m! Supere a fusão dos maiores guerreiros que o mundo já viu!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
-      "conveyor"
+      "spikes",
+      "conveyor",
+      "springs"
     ],
-    "mechanic": "Confronto de Chefão: O Guardião da História Humana. Desvie das ondas cósmicas e vença!",
+    "mechanic": "BATALHA DE CHEFÃO: O titã empunha as armas de 7 impérios! Ative os selos de cada era!",
     "isBossStage": true,
     "bossName": "Colosso das Sete Civilizações",
-    "bossTitle": "O Guardião da História Humana",
-    "bossHP": 28,
-    "bossColor": "#f59e0b",
-    "bossGlow": "#fef08a",
-    "rewardGems": 3600,
+    "bossTitle": "O Titã dos Séculos",
+    "bossHP": 29,
+    "bossColor": "#d97706",
+    "bossGlow": "#fbbf24",
+    "rewardGems": 2900,
     "hasParallelUniverseAttack": false
   },
   {
     "id": 146,
     "number": 146,
-    "title": "Zênite Infinito 150k: Nível 1",
-    "theme": "cosmos",
+    "title": "Limiar do Vácuo Absoluto",
+    "theme": "futuristic",
     "icon": "Sparkles",
     "targetHeight": 146000,
-    "gravity": 0.27,
-    "jumpForce": -14.8,
-    "speedFactor": 3.56,
+    "gravity": 0.3,
+    "jumpForce": -14.9,
+    "speedFactor": 3.55,
     "wind": 0,
     "bgGradient": [
-      "#000000",
-      "#170726",
-      "#300f52"
+      "#241502",
+      "#472a04",
+      "#734307"
     ],
     "platformColor": "#fbbf24",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fef3c7",
-    "description": "Escalada extrema na estratosfera aos 146.000m!",
+    "ballGlow": "#fde047",
+    "description": "Você cruzou a fronteira do conhecido: o espaço agora é ouro líquido e silêncio absoluto.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "springs",
+      "moving"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Plataformas de matéria pura cristalizada com impulsos celestiais perfeitos."
   },
   {
     "id": 147,
     "number": 147,
-    "title": "Zênite Infinito 150k: Nível 2",
-    "theme": "cosmos",
-    "icon": "Sparkles",
+    "title": "Espiral das Constelações Vivas",
+    "theme": "futuristic",
+    "icon": "Orbit",
     "targetHeight": 147000,
-    "gravity": 0.28,
-    "jumpForce": -14.8,
-    "speedFactor": 3.57,
+    "gravity": 0.32,
+    "jumpForce": -14.9,
+    "speedFactor": 3.56,
     "wind": 0,
     "bgGradient": [
-      "#000000",
-      "#170726",
-      "#300f52"
+      "#291804",
+      "#4f2f08",
+      "#7d4a0d"
     ],
-    "platformColor": "#fbbf24",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fef3c7",
-    "description": "Escalada extrema na estratosfera aos 147.000m!",
+    "platformColor": "#f59e0b",
+    "platformBorder": "#fef08a",
+    "ballGlow": "#fbbf24",
+    "description": "Cada plataforma é uma supernova em gestação sustentando seu avanço final.",
     "hazards": [
       "moving",
-      "springs"
+      "fragile"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Estrelas vivas em órbita rápida que se fundem e se separam sob seus pés."
   },
   {
     "id": 148,
     "number": 148,
-    "title": "Zênite Infinito 150k: Nível 3",
-    "theme": "cosmos",
-    "icon": "Sparkles",
+    "title": "Fronteira Dimensional do Hiperespaço",
+    "theme": "futuristic",
+    "icon": "Infinity",
     "targetHeight": 148000,
-    "gravity": 0.3,
-    "jumpForce": -14.8,
-    "speedFactor": 3.58,
-    "wind": 0,
+    "gravity": 0.34,
+    "jumpForce": -14.9,
+    "speedFactor": 3.57,
+    "wind": -0.3,
     "bgGradient": [
-      "#000000",
-      "#170726",
-      "#300f52"
+      "#301c05",
+      "#5c360a",
+      "#8c5310"
     ],
-    "platformColor": "#fbbf24",
-    "platformBorder": "#ffffff",
-    "ballGlow": "#fef3c7",
-    "description": "Escalada extrema na estratosfera aos 148.000m!",
+    "platformColor": "#d97706",
+    "platformBorder": "#fed7aa",
+    "ballGlow": "#f59e0b",
+    "description": "O universo está colapsando em pura beleza luminescente aos 148.000m de altitude.",
     "hazards": [
-      "fragile",
-      "conveyor"
+      "conveyor",
+      "wind",
+      "spikes"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "Esteiras de dobra temporal com ventos dimensionais e cristais de matéria escura."
   },
   {
     "id": 149,
     "number": 149,
-    "title": "Zênite Infinito 150k: Nível 4",
-    "theme": "cosmos",
-    "icon": "Sparkles",
+    "title": "O Corredor da Eternidade Cósmica",
+    "theme": "futuristic",
+    "icon": "Crown",
     "targetHeight": 149000,
-    "gravity": 0.32,
-    "jumpForce": -14.8,
+    "gravity": 0.36,
+    "jumpForce": -15,
     "speedFactor": 3.59,
     "wind": 0,
     "bgGradient": [
-      "#000000",
-      "#170726",
-      "#300f52"
+      "#382006",
+      "#6b3e0c",
+      "#a35f12"
     ],
     "platformColor": "#fbbf24",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fef3c7",
-    "description": "Escalada extrema na estratosfera aos 149.000m!",
+    "ballGlow": "#fde047",
+    "description": "🏃‍♂️ PERCURSO HORIZONTAL! Corra pelo tapete dourado das galáxias rumo ao confronto derradeiro!",
     "hazards": [
       "moving",
+      "conveyor",
+      "fragile",
       "springs"
     ],
-    "mechanic": "Plataformas energéticas e acrobacias aéreas de alta velocidade."
+    "mechanic": "PERCURSO HORIZONTAL SUPREMO! O teste horizontal final antes do trono dos deuses!",
+    "layout": "horizontal",
+    "targetDistance": 5800
   },
   {
     "id": 150,
     "number": 150,
     "title": "👑 CHEFÃO 30: O Demiurgo Eterno do Cosmos",
-    "theme": "cosmos",
+    "theme": "futuristic",
     "icon": "Crown",
     "targetHeight": 150000,
-    "gravity": 0.33,
-    "jumpForce": -14.8,
+    "gravity": 0.26,
+    "jumpForce": -15,
     "speedFactor": 3.6,
     "wind": 0,
     "bgGradient": [
-      "#000000",
-      "#170726",
-      "#300f52"
+      "#1a0f02",
+      "#361f04",
+      "#543106"
     ],
-    "platformColor": "#fbbf24",
+    "platformColor": "#f59e0b",
     "platformBorder": "#ffffff",
-    "ballGlow": "#fef3c7",
-    "description": "BATALHA DE CHEFÃO AOS 150.000m! Supere O Demiurgo Eterno do Cosmos!",
+    "ballGlow": "#fbbf24",
+    "description": "O CLÍMAX ABSOLUTO AOS 150.000m! Conquiste o trono eterno e torne-se a Lenda Imortal do JumpBall!",
     "hazards": [
       "moving",
       "fragile",
-      "springs",
-      "conveyor"
+      "spikes",
+      "conveyor",
+      "springs"
     ],
-    "mechanic": "Confronto de Chefão: A Divindade Suprema do JumpBall. Desvie das ondas cósmicas e vença!",
+    "mechanic": "O CONFRONTO SUPREMO: Inversão total de gravidade, feixes cósmicos e Ataque do Multiverso!",
     "isBossStage": true,
     "bossName": "O Demiurgo Eterno do Cosmos",
-    "bossTitle": "A Divindade Suprema do JumpBall",
-    "bossHP": 29,
+    "bossTitle": "O Criador e Destruidor de Universos",
+    "bossHP": 30,
     "bossColor": "#fbbf24",
-    "bossGlow": "#fef3c7",
+    "bossGlow": "#ffffff",
     "rewardGems": 5000,
     "hasParallelUniverseAttack": true
   }
