@@ -658,6 +658,133 @@ export class BackgroundRenderer {
       }
     }
 
+    // Gastronomia: vapores e chispas de frigideira
+    else if (this.theme === 'gastronomy') {
+      for (let i = 0; i < 32; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 5 + 2,
+          speedY: -(Math.random() * 0.9 + 0.3),
+          speedX: (Math.random() - 0.5) * 0.5,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.03 + 0.01,
+          color: Math.random() > 0.5 ? 'rgba(255, 200, 80,' : 'rgba(255, 120, 50,'
+        });
+      }
+    }
+
+    // Dinossauros: cinzas e esporos pré-históricos
+    else if (this.theme === 'dinosaur') {
+      for (let i = 0; i < 34; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1,
+          speedY: -(Math.random() * 0.7 + 0.2),
+          speedX: (Math.random() - 0.5) * 0.6,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.03 + 0.01,
+          color: Math.random() > 0.5 ? 'rgba(134, 239, 172,' : 'rgba(217, 119, 6,'
+        });
+      }
+    }
+
+    // Velho Oeste: poeira vermelha
+    else if (this.theme === 'wild_west') {
+      for (let i = 0; i < 38; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.5 + 0.8,
+          speedX: Math.random() * 2.0 + 1.0,
+          speedY: Math.random() * 0.4 - 0.2,
+          opacity: Math.random() * 0.4 + 0.2
+        });
+      }
+    }
+
+    // Esportes: confetes coloridos
+    else if (this.theme === 'sports') {
+      const confettiColors = ['rgba(239, 68, 68,', 'rgba(59, 130, 246,', 'rgba(234, 179, 8,', 'rgba(34, 197, 94,'];
+      for (let i = 0; i < 36; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 4 + 2,
+          speedY: Math.random() * 1.4 + 0.4,
+          speedX: (Math.random() - 0.5) * 1.5,
+          wobble: Math.random() * Math.PI * 2,
+          wobbleSpeed: 0.06,
+          color: confettiColors[Math.floor(Math.random() * confettiColors.length)]
+        });
+      }
+    }
+
+    // Saúde: partículas DNA e células
+    else if (this.theme === 'health') {
+      for (let i = 0; i < 30; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 3 + 1.5,
+          speedY: -(Math.random() * 0.5 + 0.2),
+          speedX: (Math.random() - 0.5) * 0.3,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.06 + 0.02,
+          color: Math.random() > 0.4 ? 'rgba(52, 211, 153,' : 'rgba(248, 113, 113,'
+        });
+      }
+    }
+
+    // Reino do Céu: plumas e fragmentos etéreos
+    else if (this.theme === 'sky_realm') {
+      for (let i = 0; i < 30; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 5 + 2,
+          speedY: Math.random() * 0.5 + 0.2,
+          speedX: (Math.random() - 0.5) * 0.4,
+          wobble: Math.random() * Math.PI * 2,
+          wobbleSpeed: 0.02,
+          color: Math.random() > 0.4 ? 'rgba(255, 255, 255,' : 'rgba(186, 230, 253,'
+        });
+      }
+    }
+
+    // Continentes: brilhos dourados
+    else if (this.theme === 'continents') {
+      for (let i = 0; i < 28; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.5 + 1,
+          speedY: -(Math.random() * 0.4 + 0.15),
+          speedX: (Math.random() - 0.5) * 0.3,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.04 + 0.02,
+          color: Math.random() > 0.5 ? 'rgba(250, 204, 21,' : 'rgba(254, 240, 138,'
+        });
+      }
+    }
+
+    // Futurístico: pontos de luz neon
+    else if (this.theme === 'futuristic') {
+      for (let i = 0; i < 45; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.5 + 0.8,
+          speedY: -(Math.random() * 2.0 + 0.5),
+          speedX: (Math.random() - 0.5) * 0.8,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.08 + 0.03,
+          color: Math.random() > 0.5 ? 'rgba(56, 189, 248,' : 'rgba(167, 139, 250,'
+        });
+      }
+    }
+
     // Partículas temáticas dinâmicas para os novos temas
     if (this.particles.length === 0) {
       for (let i = 0; i < 28; i++) {
@@ -868,28 +995,28 @@ export class BackgroundRenderer {
         this.drawComputer(ctx, cameraY);
         break;
       case 'wild_west':
-        this.drawDesert(ctx, cameraY);
+        this.drawWildWest(ctx, cameraY);
         break;
       case 'dinosaur':
-        this.drawForest(ctx, cameraY);
+        this.drawDinosaur(ctx, cameraY);
         break;
       case 'sports':
-        this.drawSoccer(ctx, cameraY);
+        this.drawSports(ctx, cameraY);
         break;
       case 'gastronomy':
-        this.drawCandy(ctx, cameraY);
+        this.drawGastronomy(ctx, cameraY);
         break;
       case 'health':
-        this.drawCrystal(ctx, cameraY);
+        this.drawHealth(ctx, cameraY);
         break;
       case 'sky_realm':
-        this.drawSky(ctx, cameraY);
+        this.drawSkyRealm(ctx, cameraY);
         break;
       case 'continents':
-        this.drawOlympus(ctx, cameraY);
+        this.drawContinents(ctx, cameraY);
         break;
       case 'futuristic':
-        this.drawCyberpunk(ctx, cameraY);
+        this.drawFuturistic(ctx, cameraY);
         break;
       default:
         this.drawDefaultGrid(ctx, cameraY);
@@ -2386,6 +2513,910 @@ export class BackgroundRenderer {
       // Tora na direita
       ctx.fillRect(this.width - 110, ty + 60, 110, 22);
       ctx.strokeRect(this.width - 110, ty + 60, 110, 22);
+    }
+  }
+
+  // ================================================================
+  // NOVOS TEMAS — MUNDOS 11-20
+  // ================================================================
+
+  // GASTRONOMIA — Cozinha de Alta Culinária
+  drawGastronomy(ctx, cameraY) {
+    // Brilho quente de cozinha ao fundo
+    const kitchenGlow = ctx.createLinearGradient(0, this.height - 200, 0, this.height);
+    kitchenGlow.addColorStop(0, 'transparent');
+    kitchenGlow.addColorStop(0.6, 'rgba(251, 146, 60, 0.18)');
+    kitchenGlow.addColorStop(1, 'rgba(234, 88, 12, 0.35)');
+    ctx.fillStyle = kitchenGlow;
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // Silhuetas de utensílios: colheres e garfos gigantes (Parallax 0.05)
+    const p0 = -cameraY * 0.05;
+    ctx.fillStyle = 'rgba(15, 10, 5, 0.7)';
+    ctx.strokeStyle = 'rgba(251, 146, 60, 0.3)';
+    ctx.lineWidth = 1.5;
+
+    // Garfo Esquerdo
+    const forkY = 80 + (p0 % 200);
+    ctx.beginPath();
+    ctx.moveTo(30, forkY + 200);
+    ctx.lineTo(30, forkY);
+    // Dentes do garfo
+    ctx.moveTo(18, forkY); ctx.lineTo(18, forkY - 40);
+    ctx.moveTo(24, forkY); ctx.lineTo(24, forkY - 45);
+    ctx.moveTo(30, forkY); ctx.lineTo(30, forkY - 42);
+    ctx.moveTo(36, forkY); ctx.lineTo(36, forkY - 38);
+    ctx.stroke();
+
+    // Colher Direita
+    const spoonY = 120 + (p0 % 180);
+    ctx.beginPath();
+    ctx.moveTo(this.width - 30, spoonY + 180);
+    ctx.lineTo(this.width - 30, spoonY + 30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(this.width - 30, spoonY, 16, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Fogão industrial com chamas (Parallax 0.12)
+    const p1 = -cameraY * 0.12;
+    const stoveY = this.height - 150 + (p1 % 120);
+    ctx.fillStyle = 'rgba(30, 20, 10, 0.85)';
+    ctx.fillRect(20, stoveY, this.width - 40, 80);
+    ctx.strokeStyle = 'rgba(251, 146, 60, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, stoveY, this.width - 40, 80);
+
+    // Queimadores com chamas
+    const burnerPositions = [60, 140, this.width - 140, this.width - 60];
+    for (const bx of burnerPositions) {
+      // Anel do queimador
+      ctx.strokeStyle = 'rgba(100, 100, 100, 0.6)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(bx, stoveY + 30, 20, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Chama animada
+      const flameH = 20 + Math.sin(this.time * 4 + bx) * 8;
+      const flameGrad = ctx.createLinearGradient(bx, stoveY + 10 - flameH, bx, stoveY + 10);
+      flameGrad.addColorStop(0, 'rgba(59, 130, 246, 0.9)');
+      flameGrad.addColorStop(0.4, 'rgba(251, 146, 60, 0.8)');
+      flameGrad.addColorStop(1, 'rgba(234, 88, 12, 0.5)');
+      ctx.fillStyle = flameGrad;
+      ctx.beginPath();
+      ctx.moveTo(bx - 10, stoveY + 10);
+      ctx.quadraticCurveTo(bx - 5, stoveY + 10 - flameH * 0.7, bx, stoveY + 10 - flameH);
+      ctx.quadraticCurveTo(bx + 5, stoveY + 10 - flameH * 0.7, bx + 10, stoveY + 10);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Silhuetas de alimentos flutuando: pizza, bolo, queijo (Parallax 0.2)
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const p2 = -cameraY * 0.2;
+    const foodItems = [
+      { x: this.width * 0.2, y: 200 + (p2 % 300), type: 'pizza' },
+      { x: this.width * 0.5, y: 350 + (p2 % 260), type: 'cake' },
+      { x: this.width * 0.75, y: 150 + (p2 % 280), type: 'cheese' },
+    ];
+    for (const food of foodItems) {
+      if (food.type === 'pizza') {
+        ctx.fillStyle = 'rgba(217, 119, 6, 0.15)';
+        ctx.beginPath();
+        ctx.moveTo(food.x, food.y - 35);
+        ctx.arc(food.x, food.y, 35, -Math.PI * 0.8, -Math.PI * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else if (food.type === 'cake') {
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.12)';
+        ctx.fillRect(food.x - 28, food.y, 56, 35);
+        ctx.fillRect(food.x - 20, food.y - 22, 40, 22);
+        ctx.strokeStyle = 'rgba(244, 114, 182, 0.22)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(food.x - 28, food.y, 56, 35);
+      } else if (food.type === 'cheese') {
+        ctx.fillStyle = 'rgba(234, 179, 8, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(food.x - 30, food.y + 20);
+        ctx.lineTo(food.x, food.y - 20);
+        ctx.lineTo(food.x + 30, food.y + 20);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    // Vapor subindo das panelas
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const steamPositions = [80, 160, this.width * 0.5, this.width - 80];
+    for (let si = 0; si < steamPositions.length; si++) {
+      const sx = steamPositions[si];
+      const steamOffset = (this.time * 60 + si * 40) % (this.height * 0.6);
+      for (let sy = 0; sy < 3; sy++) {
+        const steamY = this.height - 180 - steamOffset - sy * 60;
+        if (steamY < -40) continue;
+        const alpha = Math.max(0, 0.18 - (steamOffset / (this.height * 0.6)) * 0.18);
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.beginPath();
+        const sway = Math.sin(this.time * 1.5 + si + sy) * 12;
+        ctx.ellipse(sx + sway, steamY, 14 + sy * 4, 22, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // DINOSSAUROS — Era Jurássica
+  drawDinosaur(ctx, cameraY) {
+    // Vulcão distante fumegando (Parallax 0.03)
+    const p0 = -cameraY * 0.03;
+    const volX = this.width * 0.15;
+    const volY = this.height * 0.45 + (p0 % 50);
+    ctx.fillStyle = 'rgba(60, 15, 5, 0.65)';
+    ctx.beginPath();
+    ctx.moveTo(volX - 80, this.height);
+    ctx.lineTo(volX, volY);
+    ctx.lineTo(volX + 80, this.height);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fumaça do vulcão
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 4; i++) {
+      const smokeY = volY - 30 - i * 35 + Math.sin(this.time + i) * 10;
+      const smokeAlpha = 0.12 - i * 0.025;
+      ctx.fillStyle = `rgba(100, 80, 60, ${smokeAlpha})`;
+      ctx.beginPath();
+      ctx.arc(volX + Math.sin(this.time * 0.4 + i) * 15, smokeY, 28 + i * 12, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Silhueta de Braquiossauro distante (Parallax 0.05)
+    const p1 = -cameraY * 0.05;
+    const dinoX = this.width * 0.65;
+    const dinoBaseY = this.height - 80 + (p1 % 100);
+    ctx.fillStyle = 'rgba(20, 40, 10, 0.55)';
+    // Corpo
+    ctx.beginPath();
+    ctx.ellipse(dinoX, dinoBaseY - 40, 70, 40, -0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Pescoço longo
+    ctx.beginPath();
+    ctx.moveTo(dinoX + 50, dinoBaseY - 50);
+    ctx.quadraticCurveTo(dinoX + 90, dinoBaseY - 160, dinoX + 70, dinoBaseY - 240);
+    ctx.lineTo(dinoX + 90, dinoBaseY - 245);
+    ctx.quadraticCurveTo(dinoX + 110, dinoBaseY - 160, dinoX + 70, dinoBaseY - 50);
+    ctx.closePath();
+    ctx.fill();
+    // Cabeça pequena
+    ctx.beginPath();
+    ctx.ellipse(dinoX + 78, dinoBaseY - 255, 18, 12, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    // Cauda
+    ctx.beginPath();
+    ctx.moveTo(dinoX - 60, dinoBaseY - 30);
+    ctx.quadraticCurveTo(dinoX - 120, dinoBaseY, dinoX - 160, dinoBaseY - 15);
+    ctx.lineTo(dinoX - 155, dinoBaseY - 5);
+    ctx.quadraticCurveTo(dinoX - 115, dinoBaseY + 8, dinoX - 50, dinoBaseY - 20);
+    ctx.closePath();
+    ctx.fill();
+    // Pernas
+    for (let leg = 0; leg < 4; leg++) {
+      const lx = dinoX - 50 + leg * 28;
+      ctx.fillRect(lx, dinoBaseY, 12, 42);
+    }
+
+    // Plantas Pré-históricas / Fetos (Parallax 0.14)
+    const p2 = -cameraY * 0.14;
+    ctx.fillStyle = 'rgba(10, 50, 10, 0.7)';
+    for (let x = 0; x < this.width + 60; x += 90) {
+      const plantY = this.height - 60 + (p2 % 80);
+      // Samambaia / Feto
+      ctx.beginPath();
+      ctx.moveTo(x, plantY);
+      ctx.quadraticCurveTo(x - 20, plantY - 60, x - 40, plantY - 100);
+      ctx.lineTo(x - 38, plantY - 98);
+      ctx.quadraticCurveTo(x - 18, plantY - 55, x + 2, plantY);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(x, plantY);
+      ctx.quadraticCurveTo(x + 20, plantY - 55, x + 45, plantY - 95);
+      ctx.lineTo(x + 43, plantY - 93);
+      ctx.quadraticCurveTo(x + 18, plantY - 50, x + 2, plantY);
+      ctx.fill();
+    }
+
+    // Silhueta de Pterodáctilo voando no céu (Parallax 0.06)
+    const p3 = -cameraY * 0.06;
+    const pteroX = ((this.time * 35) % (this.width + 140)) - 70;
+    const pteroY = 140 + Math.sin(this.time * 0.8) * 25 + (p3 % 80);
+    ctx.fillStyle = 'rgba(20, 15, 5, 0.6)';
+    // Corpo
+    ctx.beginPath();
+    ctx.ellipse(pteroX, pteroY, 18, 8, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    // Asa esquerda
+    ctx.beginPath();
+    ctx.moveTo(pteroX - 10, pteroY);
+    ctx.quadraticCurveTo(pteroX - 45, pteroY - 15 + Math.sin(this.time * 3) * 10, pteroX - 70, pteroY + 5);
+    ctx.lineTo(pteroX - 65, pteroY + 10);
+    ctx.quadraticCurveTo(pteroX - 40, pteroY, pteroX - 8, pteroY + 4);
+    ctx.fill();
+    // Asa direita (espelhada)
+    ctx.beginPath();
+    ctx.moveTo(pteroX + 10, pteroY);
+    ctx.quadraticCurveTo(pteroX + 45, pteroY - 15 + Math.sin(this.time * 3 + 1) * 10, pteroX + 70, pteroY + 5);
+    ctx.lineTo(pteroX + 65, pteroY + 10);
+    ctx.quadraticCurveTo(pteroX + 40, pteroY, pteroX + 8, pteroY + 4);
+    ctx.fill();
+    // Crista e bico
+    ctx.beginPath();
+    ctx.moveTo(pteroX + 16, pteroY - 4);
+    ctx.lineTo(pteroX + 38, pteroY - 18);
+    ctx.lineTo(pteroX + 44, pteroY - 2);
+    ctx.fill();
+  }
+
+  // VELHO OESTE — Wild West
+  drawWildWest(ctx, cameraY) {
+    // Sol escaldante amarelo-laranja (Parallax 0.02)
+    const sunY = 130 + (-cameraY * 0.02);
+    const sunGrad = ctx.createRadialGradient(this.width * 0.7, sunY, 10, this.width * 0.7, sunY, 120);
+    sunGrad.addColorStop(0, 'rgba(253, 224, 71, 0.95)');
+    sunGrad.addColorStop(0.35, 'rgba(245, 158, 11, 0.5)');
+    sunGrad.addColorStop(0.8, 'rgba(194, 65, 12, 0.18)');
+    sunGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = sunGrad;
+    ctx.beginPath();
+    ctx.arc(this.width * 0.7, sunY, 120, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mesa / Plateau Rochoso ao fundo (Parallax 0.06)
+    const p0 = -cameraY * 0.06;
+    ctx.fillStyle = 'rgba(120, 53, 15, 0.6)';
+    // Mesa esquerda
+    ctx.beginPath();
+    ctx.moveTo(-20, this.height);
+    ctx.lineTo(-20, this.height - 180 + (p0 % 60));
+    ctx.lineTo(100, this.height - 220 + (p0 % 60));
+    ctx.lineTo(180, this.height - 180 + (p0 % 60));
+    ctx.lineTo(180, this.height);
+    ctx.closePath();
+    ctx.fill();
+
+    // Estrato de rocha da mesa
+    ctx.strokeStyle = 'rgba(180, 83, 9, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-20, this.height - 140 + (p0 % 60));
+    ctx.lineTo(180, this.height - 140 + (p0 % 60));
+    ctx.stroke();
+
+    // Mesa direita menor
+    ctx.fillStyle = 'rgba(146, 64, 14, 0.5)';
+    ctx.beginPath();
+    ctx.moveTo(this.width + 20, this.height);
+    ctx.lineTo(this.width + 20, this.height - 130 + (p0 % 60));
+    ctx.lineTo(this.width - 60, this.height - 160 + (p0 % 60));
+    ctx.lineTo(this.width - 130, this.height - 130 + (p0 % 60));
+    ctx.lineTo(this.width - 130, this.height);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cactos variados (Parallax 0.14)
+    const p1 = -cameraY * 0.14;
+    const cactusPositions = [50, 140, this.width * 0.4, this.width * 0.6, this.width - 80];
+    ctx.fillStyle = 'rgba(21, 80, 30, 0.7)';
+    ctx.strokeStyle = 'rgba(34, 120, 50, 0.5)';
+    ctx.lineWidth = 2;
+
+    for (let ci = 0; ci < cactusPositions.length; ci++) {
+      const cx = cactusPositions[ci];
+      const cy = this.height - 100 + (p1 % 90) + Math.sin(ci) * 20;
+      const cHeight = 90 + Math.sin(ci * 1.4) * 25;
+
+      // Tronco central
+      ctx.beginPath();
+      ctx.roundRect(cx - 9, cy - cHeight, 18, cHeight, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Braço esquerdo
+      if (ci % 2 === 0) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 9, cy - cHeight * 0.55);
+        ctx.lineTo(cx - 38, cy - cHeight * 0.55);
+        ctx.lineTo(cx - 38, cy - cHeight * 0.8);
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = 'rgba(21, 80, 30, 0.7)';
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(34, 120, 50, 0.5)';
+      }
+      // Braço direito
+      if (ci % 3 !== 0) {
+        ctx.beginPath();
+        ctx.moveTo(cx + 9, cy - cHeight * 0.45);
+        ctx.lineTo(cx + 35, cy - cHeight * 0.45);
+        ctx.lineTo(cx + 35, cy - cHeight * 0.7);
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = 'rgba(21, 80, 30, 0.7)';
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(34, 120, 50, 0.5)';
+      }
+    }
+
+    // Ossos / Caveira no chão
+    const p2 = -cameraY * 0.22;
+    const skullX = this.width * 0.35 + Math.sin(p2 * 0.01) * 30;
+    const skullY = this.height - 55 + (p2 % 110);
+    ctx.fillStyle = 'rgba(248, 236, 200, 0.25)';
+    ctx.beginPath();
+    ctx.arc(skullX, skullY, 14, 0, Math.PI * 2);
+    ctx.fill();
+    // Dois olhos da caveira
+    ctx.fillStyle = 'rgba(20, 10, 0, 0.5)';
+    ctx.beginPath();
+    ctx.arc(skullX - 5, skullY - 2, 4, 0, Math.PI * 2);
+    ctx.arc(skullX + 5, skullY - 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ESPORTES — Estádio dos Campeões
+  drawSports(ctx, cameraY) {
+    // Holofotes do estádio (Parallax 0.04)
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const p0 = -cameraY * 0.04;
+    const lights = [
+      { x: 40, y: 60 + (p0 % 40) },
+      { x: this.width - 40, y: 80 + (p0 % 40) },
+    ];
+    for (const light of lights) {
+      const beamGrad = ctx.createLinearGradient(light.x, light.y, this.width / 2, this.height * 0.7);
+      beamGrad.addColorStop(0, 'rgba(253, 224, 71, 0.25)');
+      beamGrad.addColorStop(0.6, 'rgba(253, 224, 71, 0.06)');
+      beamGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = beamGrad;
+      ctx.beginPath();
+      ctx.moveTo(light.x - 8, light.y);
+      ctx.lineTo(light.x + 8, light.y);
+      ctx.lineTo(this.width / 2 + 120, this.height * 0.7);
+      ctx.lineTo(this.width / 2 - 120, this.height * 0.7);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Arquibancada com torcida (silhuetas) (Parallax 0.1)
+    const p1 = -cameraY * 0.1;
+    ctx.fillStyle = 'rgba(15, 20, 40, 0.75)';
+    // Arquibancada esquerda
+    ctx.beginPath();
+    ctx.moveTo(-10, this.height);
+    ctx.lineTo(-10, this.height - 180 + (p1 % 60));
+    ctx.lineTo(130, this.height - 160 + (p1 % 60));
+    ctx.lineTo(130, this.height);
+    ctx.closePath();
+    ctx.fill();
+    // Arquibancada direita
+    ctx.beginPath();
+    ctx.moveTo(this.width + 10, this.height);
+    ctx.lineTo(this.width + 10, this.height - 170 + (p1 % 60));
+    ctx.lineTo(this.width - 120, this.height - 155 + (p1 % 60));
+    ctx.lineTo(this.width - 120, this.height);
+    ctx.closePath();
+    ctx.fill();
+
+    // Silhuetas de torcedores levantando os braços
+    ctx.fillStyle = 'rgba(5, 10, 25, 0.85)';
+    const standY = this.height - 185 + (p1 % 60);
+    for (let fx = 0; fx < 130; fx += 14) {
+      const fanH = 18 + Math.sin(fx * 0.5 + this.time * 2) * 6;
+      // Corpo
+      ctx.beginPath();
+      ctx.arc(fx + 7, standY - fanH * 0.4, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(fx + 4, standY - fanH * 0.4 + 4, 6, fanH * 0.5);
+      // Braços levantados
+      ctx.fillRect(fx + 1, standY - fanH * 0.55, 3, fanH * 0.3);
+      ctx.fillRect(fx + 10, standY - fanH * 0.55, 3, fanH * 0.3);
+    }
+
+    // Traves de futebol no campo (Parallax 0.18)
+    const p2 = -cameraY * 0.18;
+    const goalX = this.width / 2;
+    const goalY = this.height - 90 + (p2 % 100);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    // Travessão
+    ctx.moveTo(goalX - 50, goalY - 60);
+    ctx.lineTo(goalX + 50, goalY - 60);
+    // Postes
+    ctx.moveTo(goalX - 50, goalY - 60);
+    ctx.lineTo(goalX - 50, goalY);
+    ctx.moveTo(goalX + 50, goalY - 60);
+    ctx.lineTo(goalX + 50, goalY);
+    ctx.stroke();
+
+    // Gramado com linhas (Parallax 0.25)
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.2)';
+    ctx.lineWidth = 1;
+    const grassY = this.height - 50 + (p2 % 120);
+    ctx.beginPath();
+    ctx.arc(this.width / 2, grassY, 60, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(this.width / 2, grassY - 60);
+    ctx.lineTo(this.width / 2, grassY + 60);
+    ctx.stroke();
+
+    // Bola de futebol flutuando (Parallax 0.22)
+    const ballX = this.width * 0.3 + Math.sin(this.time * 0.8) * 20;
+    const ballY = 200 + Math.cos(this.time * 0.6) * 25 + (-cameraY * 0.22) % 200;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(20, 20, 20, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // Gomos da bola
+    ctx.strokeStyle = 'rgba(30, 30, 30, 0.25)';
+    ctx.beginPath();
+    ctx.arc(ballX - 6, ballY - 7, 8, 0.5, 3.2);
+    ctx.moveTo(ballX + 3, ballY + 6);
+    ctx.arc(ballX + 8, ballY + 8, 9, 2.5, 5.5);
+    ctx.stroke();
+  }
+
+  // SAÚDE / MÉDICO — Medicina Vital
+  drawHealth(ctx, cameraY) {
+    // Cruz médica gigante pulsando (Parallax 0.04)
+    const p0 = -cameraY * 0.04;
+    const crossX = this.width * 0.15;
+    const crossY = 180 + (p0 % 200);
+    const alpha = Math.sin(this.time * 1.5) * 0.2 + 0.5;
+    ctx.fillStyle = `rgba(248, 113, 113, ${alpha * 0.35})`;
+    ctx.shadowColor = '#ef4444';
+    ctx.shadowBlur = this.isMobile ? 0 : 20;
+    // Barra vertical
+    ctx.fillRect(crossX - 12, crossY - 50, 24, 100);
+    // Barra horizontal
+    ctx.fillRect(crossX - 50, crossY - 12, 100, 24);
+    ctx.shadowBlur = 0;
+
+    // Hélice de DNA (Parallax 0.12)
+    const p1 = -cameraY * 0.12;
+    ctx.strokeStyle = 'rgba(52, 211, 153, 0.3)';
+    ctx.lineWidth = 2;
+    const dnaX = this.width - 60;
+    const dnaOffset = (p1 * 0.3) % (Math.PI * 2);
+    // Fita A
+    ctx.beginPath();
+    for (let y = 0; y < this.height; y += 5) {
+      const x = dnaX + Math.sin(y * 0.04 + dnaOffset) * 35;
+      if (y === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Fita B
+    ctx.strokeStyle = 'rgba(248, 113, 113, 0.3)';
+    ctx.beginPath();
+    for (let y = 0; y < this.height; y += 5) {
+      const x = dnaX + Math.sin(y * 0.04 + dnaOffset + Math.PI) * 35;
+      if (y === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Pontes entre as fitas (pares de bases)
+    ctx.strokeStyle = 'rgba(100, 200, 180, 0.2)';
+    ctx.lineWidth = 1;
+    for (let y = 20; y < this.height; y += 28) {
+      const xA = dnaX + Math.sin(y * 0.04 + dnaOffset) * 35;
+      const xB = dnaX + Math.sin(y * 0.04 + dnaOffset + Math.PI) * 35;
+      ctx.beginPath();
+      ctx.moveTo(xA, y);
+      ctx.lineTo(xB, y);
+      ctx.stroke();
+    }
+
+    // Células vermelhas flutuando (Parallax 0.16)
+    const p2 = -cameraY * 0.16;
+    const cellPositions = [
+      { x: this.width * 0.25, y: 250 + (p2 % 300) },
+      { x: this.width * 0.5, y: 100 + (p2 % 280) },
+      { x: this.width * 0.7, y: 380 + (p2 % 260) },
+    ];
+    for (const cell of cellPositions) {
+      // Célula torus (doughnut)
+      ctx.strokeStyle = 'rgba(248, 113, 113, 0.2)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(cell.x, cell.y, 18, 0, Math.PI * 2);
+      ctx.stroke();
+      // Centro da célula
+      ctx.fillStyle = 'rgba(248, 113, 113, 0.08)';
+      ctx.beginPath();
+      ctx.arc(cell.x, cell.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Monitor de batimentos cardíacos (linha verde pulsante)
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const heartY = this.height - 80 + (-cameraY * 0.2) % 200;
+    ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const beat = this.time * 3;
+    for (let x = 0; x < this.width; x += 4) {
+      const phase = (x / this.width * 6 + beat) % (Math.PI * 2);
+      let y;
+      if (phase > 2.5 && phase < 3.0) {
+        y = heartY - 40 * Math.sin((phase - 2.5) * Math.PI / 0.5);
+      } else if (phase > 3.0 && phase < 3.3) {
+        y = heartY + 20 * Math.sin((phase - 3.0) * Math.PI / 0.3);
+      } else {
+        y = heartY;
+      }
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // REINO DO CÉU — Castelo Flutuante nas Nuvens
+  drawSkyRealm(ctx, cameraY) {
+    // Raios de luz divina do topo (Parallax 0.03)
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const p0 = -cameraY * 0.03;
+    for (let i = 0; i < 5; i++) {
+      const rayX = this.width * 0.1 + i * (this.width * 0.2);
+      const rayWidth = 30 + Math.sin(this.time * 0.5 + i) * 10;
+      const rayGrad = ctx.createLinearGradient(rayX, 0, rayX, this.height * 0.8);
+      rayGrad.addColorStop(0, 'rgba(253, 224, 71, 0.18)');
+      rayGrad.addColorStop(0.4, 'rgba(253, 224, 71, 0.05)');
+      rayGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = rayGrad;
+      ctx.beginPath();
+      ctx.moveTo(rayX - rayWidth * 0.3, 0);
+      ctx.lineTo(rayX + rayWidth * 0.3, 0);
+      ctx.lineTo(rayX + rayWidth * 0.7, this.height * 0.8);
+      ctx.lineTo(rayX - rayWidth * 0.7, this.height * 0.8);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Nuvens volumosas em múltiplas camadas (Parallax 0.08)
+    const p1 = -cameraY * 0.08;
+    const drawCloud = (cx, cy, scale, alpha) => {
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 45 * scale, 0, Math.PI * 2);
+      ctx.arc(cx + 35 * scale, cy - 18 * scale, 35 * scale, 0, Math.PI * 2);
+      ctx.arc(cx + 70 * scale, cy, 45 * scale, 0, Math.PI * 2);
+      ctx.arc(cx + 35 * scale, cy + 15 * scale, 35 * scale, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    drawCloud(30 + Math.sin(this.time * 0.2) * 10, 120 + (p1 % 80), 0.9, 0.06);
+    drawCloud(this.width * 0.5 - 60, 80 + (p1 % 100), 1.1, 0.08);
+    drawCloud(this.width - 180, 160 + (p1 % 90), 0.7, 0.05);
+    drawCloud(60, 350 + (p1 % 110), 1.0, 0.07);
+    drawCloud(this.width * 0.6, 300 + (p1 % 95), 0.8, 0.06);
+
+    // Castelo Flutuante (Parallax 0.12)
+    const p2 = -cameraY * 0.12;
+    const castleX = this.width * 0.5;
+    const castleY = 220 + (p2 % 150);
+    ctx.fillStyle = 'rgba(100, 120, 200, 0.45)';
+    ctx.strokeStyle = 'rgba(165, 180, 252, 0.5)';
+    ctx.lineWidth = 1.5;
+
+    // Base da ilha flutuante
+    ctx.beginPath();
+    ctx.ellipse(castleX, castleY + 70, 80, 25, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Parede principal do castelo
+    ctx.fillRect(castleX - 55, castleY, 110, 70);
+    ctx.strokeRect(castleX - 55, castleY, 110, 70);
+
+    // Torres laterais
+    ctx.fillRect(castleX - 68, castleY - 15, 22, 90);
+    ctx.fillRect(castleX + 46, castleY - 15, 22, 90);
+    ctx.strokeRect(castleX - 68, castleY - 15, 22, 90);
+    ctx.strokeRect(castleX + 46, castleY - 15, 22, 90);
+
+    // Ameias das torres
+    for (let am = 0; am < 3; am++) {
+      ctx.fillRect(castleX - 66 + am * 8, castleY - 28, 5, 13);
+      ctx.fillRect(castleX + 48 + am * 8, castleY - 28, 5, 13);
+    }
+
+    // Torre Central alta
+    ctx.fillRect(castleX - 20, castleY - 50, 40, 50);
+    ctx.strokeRect(castleX - 20, castleY - 50, 40, 50);
+    // Teto pontiagudo
+    ctx.beginPath();
+    ctx.moveTo(castleX, castleY - 90);
+    ctx.lineTo(castleX - 22, castleY - 50);
+    ctx.lineTo(castleX + 22, castleY - 50);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(220, 38, 38, 0.5)';
+    ctx.fill();
+    ctx.stroke();
+
+    // Janelas iluminadas
+    ctx.fillStyle = `rgba(253, 224, 71, ${Math.sin(this.time * 1.2) * 0.2 + 0.5})`;
+    ctx.fillRect(castleX - 8, castleY - 40, 16, 20);
+    ctx.fillRect(castleX - 40, castleY + 10, 10, 14);
+    ctx.fillRect(castleX + 30, castleY + 10, 10, 14);
+
+    // Bandeira acenando no topo
+    ctx.strokeStyle = 'rgba(200, 200, 200, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(castleX, castleY - 90);
+    ctx.lineTo(castleX, castleY - 120);
+    ctx.stroke();
+    const flagWave = Math.sin(this.time * 2) * 6;
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+    ctx.beginPath();
+    ctx.moveTo(castleX, castleY - 120);
+    ctx.quadraticCurveTo(castleX + 15 + flagWave, castleY - 115, castleX + 28, castleY - 108);
+    ctx.lineTo(castleX + 28, castleY - 105);
+    ctx.quadraticCurveTo(castleX + 12 + flagWave, castleY - 112, castleX, castleY - 108);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // CONTINENTES — Maravilhas do Mundo
+  drawContinents(ctx, cameraY) {
+    // Globe/Esfera da Terra ao fundo (Parallax 0.02)
+    const p0 = -cameraY * 0.02;
+    const globeX = this.width * 0.75;
+    const globeY = 180 + (p0 % 60);
+    const globeR = 90;
+
+    // Oceanos (esfera base)
+    const oceanGrad = ctx.createRadialGradient(globeX - 20, globeY - 20, 5, globeX, globeY, globeR);
+    oceanGrad.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+    oceanGrad.addColorStop(0.7, 'rgba(2, 132, 199, 0.18)');
+    oceanGrad.addColorStop(1, 'rgba(7, 89, 133, 0.1)');
+    ctx.fillStyle = oceanGrad;
+    ctx.beginPath();
+    ctx.arc(globeX, globeY, globeR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bordas de continentes (silhuetas simplificadas)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(globeX, globeY, globeR, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
+    // Continente 1 (América)
+    ctx.beginPath();
+    ctx.ellipse(globeX - 35, globeY - 5, 22, 40, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    // Continente 2 (Europa/África)
+    ctx.beginPath();
+    ctx.ellipse(globeX + 15, globeY - 15, 18, 30, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    // Continente 3 (Ásia)
+    ctx.beginPath();
+    ctx.ellipse(globeX + 45, globeY + 10, 28, 22, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Grade de latitude/longitude
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(globeX, globeY, globeR, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+    ctx.lineWidth = 0.8;
+    const globeRotation = this.time * 0.15;
+    for (let lat = -80; lat <= 80; lat += 40) {
+      const latY = globeY + (lat / 90) * globeR;
+      const latR = Math.sqrt(Math.max(0, globeR * globeR - (latY - globeY) ** 2));
+      ctx.beginPath();
+      ctx.ellipse(globeX, latY, latR, latR * 0.3, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    for (let lon = 0; lon < 360; lon += 60) {
+      const angle = (lon + globeRotation * 60) % 360;
+      ctx.beginPath();
+      ctx.ellipse(globeX, globeY, globeR * Math.abs(Math.cos(angle * Math.PI / 180)) * 0.3, globeR, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Silhueta da Torre Eiffel (Parallax 0.10)
+    const p1 = -cameraY * 0.1;
+    const eiffelX = 55;
+    const eiffelY = this.height - 60 + (p1 % 120);
+    ctx.fillStyle = 'rgba(30, 30, 60, 0.7)';
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.3)';
+    ctx.lineWidth = 1;
+    // Base
+    ctx.beginPath();
+    ctx.moveTo(eiffelX - 40, eiffelY);
+    ctx.lineTo(eiffelX - 20, eiffelY - 80);
+    ctx.lineTo(eiffelX, eiffelY - 100);
+    ctx.lineTo(eiffelX + 20, eiffelY - 80);
+    ctx.lineTo(eiffelX + 40, eiffelY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // Seção média
+    ctx.beginPath();
+    ctx.moveTo(eiffelX - 20, eiffelY - 80);
+    ctx.lineTo(eiffelX - 10, eiffelY - 130);
+    ctx.lineTo(eiffelX + 10, eiffelY - 130);
+    ctx.lineTo(eiffelX + 20, eiffelY - 80);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // Topo (flecha)
+    ctx.beginPath();
+    ctx.moveTo(eiffelX - 5, eiffelY - 130);
+    ctx.lineTo(eiffelX, eiffelY - 180);
+    ctx.lineTo(eiffelX + 5, eiffelY - 130);
+    ctx.closePath();
+    ctx.fill();
+
+    // Pirâmide no horizonte (Parallax 0.07)
+    const p2 = -cameraY * 0.07;
+    const pyrX2 = this.width - 80;
+    const pyrY2 = this.height - 80 + (p2 % 100);
+    ctx.fillStyle = 'rgba(120, 80, 10, 0.5)';
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.2)';
+    ctx.beginPath();
+    ctx.moveTo(pyrX2, pyrY2 - 120);
+    ctx.lineTo(pyrX2 - 70, pyrY2);
+    ctx.lineTo(pyrX2 + 70, pyrY2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Linha dourada de latitude central
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const latGrad = ctx.createLinearGradient(0, this.height * 0.5, this.width, this.height * 0.5);
+    latGrad.addColorStop(0, 'transparent');
+    latGrad.addColorStop(0.3, 'rgba(250, 204, 21, 0.06)');
+    latGrad.addColorStop(0.7, 'rgba(250, 204, 21, 0.06)');
+    latGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = latGrad;
+    ctx.fillRect(0, this.height * 0.48, this.width, this.height * 0.04);
+    ctx.restore();
+  }
+
+  // FUTURÍSTICO — Portal Holográfico e Sci-Fi
+  drawFuturistic(ctx, cameraY) {
+    // Portal holográfico giratório (Parallax 0.06)
+    const p0 = -cameraY * 0.06;
+    const portalX = this.width * 0.5;
+    const portalY = 200 + (p0 % 160);
+    const portalRot = this.time * 0.4;
+    const portalR = 65;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    // Anel exterior girando
+    ctx.strokeStyle = `rgba(56, 189, 248, ${Math.sin(portalRot) * 0.2 + 0.5})`;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(portalX, portalY, portalR, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Anel interior girando ao contrário
+    ctx.strokeStyle = `rgba(167, 139, 250, ${Math.cos(portalRot) * 0.2 + 0.45})`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(portalX, portalY, portalR * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Interior do portal com gradiente
+    const portalGrad = ctx.createRadialGradient(portalX, portalY, 5, portalX, portalY, portalR * 0.65);
+    portalGrad.addColorStop(0, 'rgba(167, 139, 250, 0.3)');
+    portalGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.15)');
+    portalGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = portalGrad;
+    ctx.beginPath();
+    ctx.arc(portalX, portalY, portalR * 0.65, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Raios do portal em rotação
+    for (let r = 0; r < 8; r++) {
+      const angle = r * Math.PI / 4 + portalRot;
+      ctx.strokeStyle = `rgba(56, 189, 248, 0.25)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(portalX + Math.cos(angle) * 18, portalY + Math.sin(angle) * 18);
+      ctx.lineTo(portalX + Math.cos(angle) * portalR, portalY + Math.sin(angle) * portalR);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Grade de holograma 3D isométrica (Parallax 0.12)
+    const p1 = -cameraY * 0.12;
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+    ctx.lineWidth = 0.8;
+    const gridSpacing = 45;
+    const gridOffsetY = (p1 % gridSpacing) + gridSpacing;
+    const gridOffsetX = (this.time * 12) % gridSpacing;
+    // Linhas diagonais \ 
+    for (let x = -gridSpacing; x < this.width + gridSpacing; x += gridSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(x + gridOffsetX, 0);
+      ctx.lineTo(x + gridOffsetX + this.height * 0.5, this.height);
+      ctx.stroke();
+    }
+    // Linhas horizontais
+    for (let y = gridOffsetY; y < this.height; y += gridSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+      ctx.stroke();
+    }
+
+    // Satélite orbitando (Parallax 0.08)
+    const satAngle = this.time * 0.5;
+    const satX = this.width * 0.2 + Math.cos(satAngle) * 80;
+    const satY = 350 + Math.sin(satAngle) * 30 + (-cameraY * 0.08) % 200;
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
+    ctx.fillRect(satX - 15, satY - 6, 30, 12);
+    // Painéis solares
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+    ctx.fillRect(satX - 38, satY - 4, 20, 8);
+    ctx.fillRect(satX + 18, satY - 4, 20, 8);
+
+    // Estrela longínqua ultrailuminada (Parallax 0.02)
+    const starX = this.width * 0.8;
+    const starY = 100 + (-cameraY * 0.02) % 80;
+    const starAlpha = Math.sin(this.time * 1.8) * 0.25 + 0.65;
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const starGrad = ctx.createRadialGradient(starX, starY, 2, starX, starY, 55);
+    starGrad.addColorStop(0, `rgba(255, 255, 255, ${starAlpha})`);
+    starGrad.addColorStop(0.3, `rgba(167, 139, 250, ${starAlpha * 0.4})`);
+    starGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = starGrad;
+    ctx.beginPath();
+    ctx.arc(starX, starY, 55, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Skyline cyberpunk simplificada no rodapé (Parallax 0.2)
+    const p2 = -cameraY * 0.2;
+    ctx.fillStyle = 'rgba(5, 8, 20, 0.8)';
+    for (let bx = 0; bx < this.width; bx += 38) {
+      const bh = 80 + Math.sin(bx * 0.06) * 50 + (p2 % 50);
+      ctx.fillRect(bx, this.height - bh, 32, bh);
+      // Janela neon
+      if ((bx + Math.floor(p2)) % 4 === 0) {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.fillRect(bx + 8, this.height - bh + 15, 6, 8);
+        ctx.fillStyle = 'rgba(5, 8, 20, 0.8)';
+      }
     }
   }
 
