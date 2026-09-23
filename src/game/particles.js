@@ -127,6 +127,77 @@ export class ParticleSystem {
         life: 0.6,
         gravity: 0.04
       });
+    } else if (trailStyle === 'bubble') {
+      const bubbleColors = ['rgba(56, 189, 248, 0.75)', 'rgba(165, 243, 252, 0.85)', 'rgba(255, 255, 255, 0.9)'];
+      const c = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
+      this.emit(px, py, 1, {
+        color: c,
+        size: Math.random() * 3.5 + 2,
+        speed: 0.6,
+        spread: Math.PI * 0.8,
+        baseAngle: -Math.PI / 2, // Flutua suavemente para cima como bolhas
+        life: 0.7,
+        gravity: -0.07
+      });
+    } else if (trailStyle === 'matrix') {
+      const matrixColors = ['#22c55e', '#4ade80', '#86efac', '#15803d'];
+      const c = matrixColors[Math.floor(Math.random() * matrixColors.length)];
+      this.emit(px, py, 1, {
+        color: c,
+        size: Math.random() * 3.2 + 2,
+        speed: 1.5,
+        spread: 0.3,
+        baseAngle: Math.PI / 2, // Chuva digital para baixo
+        life: 0.45,
+        gravity: 0.08,
+        shape: 'rect'
+      });
+    } else if (trailStyle === 'ice') {
+      const iceColors = ['#e0f2fe', '#bae6fd', '#38bdf8', '#ffffff'];
+      const c = iceColors[Math.floor(Math.random() * iceColors.length)];
+      this.emit(px, py, 1, {
+        color: c,
+        size: Math.random() * 3 + 1.8,
+        speed: 0.8,
+        spread: Math.PI * 2,
+        life: 0.6,
+        gravity: 0.02
+      });
+    } else if (trailStyle === 'gold') {
+      const goldColors = ['#fbbf24', '#f59e0b', '#fde047', '#ffffff'];
+      const c = goldColors[Math.floor(Math.random() * goldColors.length)];
+      this.emit(px, py, 1, {
+        color: c,
+        size: Math.random() * 3.6 + 2,
+        speed: 1.1,
+        spread: Math.PI * 2,
+        life: 0.5,
+        gravity: 0.03,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle'
+      });
+    } else if (trailStyle === 'toxic') {
+      const toxicColors = ['#10b981', '#84cc16', '#a3e635', '#059669'];
+      const c = toxicColors[Math.floor(Math.random() * toxicColors.length)];
+      this.emit(px, py, 1, {
+        color: c,
+        size: Math.random() * 4 + 2.5,
+        speed: 0.7,
+        spread: Math.PI * 1.2,
+        baseAngle: -Math.PI / 2,
+        life: 0.65,
+        gravity: -0.04
+      });
+    } else if (trailStyle === 'meteor') {
+      const meteorColors = ['#d946ef', '#8b5cf6', '#3b82f6', '#06b6d4'];
+      const c = meteorColors[Math.floor(Math.random() * meteorColors.length)];
+      this.emit(px, py, 1, {
+        color: c,
+        size: Math.random() * 3.8 + 2,
+        speed: 2.4,
+        spread: Math.PI * 2,
+        life: 0.35,
+        gravity: 0
+      });
     } else {
       // Default clássico
       this.emit(px, py, 1, {

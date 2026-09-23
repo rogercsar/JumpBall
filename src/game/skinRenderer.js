@@ -1397,6 +1397,323 @@ function drawSkinEmblem(ctx, skinId, r) {
       break;
     }
 
+    // ==========================================
+    // PROFISSÕES & MESTRES DAS NOVAS FASES
+    // ==========================================
+
+    case 'chef-gourmet': {
+      // Chapéu de Chef (Toque Blanche)
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.2;
+
+      // Topo fofo do chapéu
+      ctx.beginPath();
+      ctx.arc(-r * 0.25, -r * 0.35, r * 0.18, 0, Math.PI * 2);
+      ctx.arc(0, -r * 0.45, r * 0.22, 0, Math.PI * 2);
+      ctx.arc(r * 0.25, -r * 0.35, r * 0.18, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Faixa da base do chapéu
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-r * 0.35, -r * 0.22, r * 0.7, r * 0.12);
+      ctx.strokeRect(-r * 0.35, -r * 0.22, r * 0.7, r * 0.12);
+
+      // Bigodinho francês curvo
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.05);
+      ctx.bezierCurveTo(-r * 0.15, 0, -r * 0.3, r * 0.12, -r * 0.35, r * 0.05);
+      ctx.bezierCurveTo(-r * 0.25, r * 0.18, -r * 0.08, r * 0.15, 0, r * 0.1);
+      ctx.bezierCurveTo(r * 0.08, r * 0.15, r * 0.25, r * 0.18, r * 0.35, r * 0.05);
+      ctx.bezierCurveTo(r * 0.3, r * 0.12, r * 0.15, 0, 0, r * 0.05);
+      ctx.fill();
+
+      // Colher de ouro cruzada no peito
+      ctx.save();
+      ctx.rotate(0.35);
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.ellipse(r * 0.05, r * 0.35, r * 0.08, r * 0.14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(r * 0.03, r * 0.15, r * 0.04, r * 0.22);
+      ctx.restore();
+      break;
+    }
+
+    case 'medic-vital': {
+      // Estetoscópio curvo metálico
+      ctx.strokeStyle = '#0d9488';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.05, r * 0.42, 0.2 * Math.PI, 0.8 * Math.PI, false);
+      ctx.stroke();
+
+      // Olivas do estetoscópio
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(-r * 0.35, -r * 0.18, r * 0.06, 0, Math.PI * 2);
+      ctx.arc(r * 0.35, -r * 0.18, r * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Campânula central do estetoscópio
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#0d9488';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(0, r * 0.38, r * 0.12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cruz médica luminosa central
+      ctx.shadowColor = '#14b8a6';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ef4444';
+      // Barra horizontal
+      ctx.fillRect(-r * 0.28, -r * 0.04, r * 0.56, r * 0.12);
+      // Barra vertical
+      ctx.fillRect(-r * 0.06, -r * 0.26, r * 0.12, r * 0.56);
+
+      // Miolo brilhante da cruz
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-r * 0.04, -r * 0.02, r * 0.08, r * 0.08);
+      break;
+    }
+
+    case 'archaeo-hunter': {
+      // Chapéu Fedora de Couro
+      ctx.fillStyle = '#78350f';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.5;
+
+      // Copa do chapéu
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.38, -r * 0.15);
+      ctx.bezierCurveTo(-r * 0.3, -r * 0.55, r * 0.3, -r * 0.55, r * 0.38, -r * 0.15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Dobra característica no topo do fedora
+      ctx.fillStyle = '#54240b';
+      ctx.beginPath();
+      ctx.ellipse(0, -r * 0.42, r * 0.16, r * 0.05, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Aba curva larga do chapéu
+      ctx.fillStyle = '#92400e';
+      ctx.beginPath();
+      ctx.ellipse(0, -r * 0.12, r * 0.56, r * 0.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Faixa de couro do chapéu com fivela dourada
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(-r * 0.36, -r * 0.18, r * 0.72, r * 0.06);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-r * 0.06, -r * 0.2, r * 0.12, r * 0.1);
+
+      // Bússola dourada no peito
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = '#fef3c7';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(0, r * 0.25, r * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Ponteiro vermelho da bússola
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.08);
+      ctx.lineTo(r * 0.05, r * 0.25);
+      ctx.lineTo(-r * 0.05, r * 0.25);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.42);
+      ctx.lineTo(r * 0.05, r * 0.25);
+      ctx.lineTo(-r * 0.05, r * 0.25);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'sheriff-west': {
+      // Bandana vermelha do velho oeste
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.45, r * 0.05);
+      ctx.lineTo(r * 0.45, r * 0.05);
+      ctx.lineTo(0, r * 0.52);
+      ctx.closePath();
+      ctx.fill();
+
+      // Dobras da bandana
+      ctx.strokeStyle = '#991b1b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.2, r * 0.15);
+      ctx.lineTo(0, r * 0.38);
+      ctx.lineTo(r * 0.2, r * 0.15);
+      ctx.stroke();
+
+      // Estrela dourada de 6 pontas de Xerife
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.5;
+
+      const starPoints = 6;
+      const outerR = r * 0.28;
+      const innerR = r * 0.14;
+      const centerY = -r * 0.12;
+
+      ctx.beginPath();
+      for (let i = 0; i < starPoints * 2; i++) {
+        const rad = (Math.PI / starPoints) * i - Math.PI / 2;
+        const radius = i % 2 === 0 ? outerR : innerR;
+        const px = Math.cos(rad) * radius;
+        const py = centerY + Math.sin(rad) * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Círculos nas pontas da estrela de xerife
+      ctx.fillStyle = '#f59e0b';
+      for (let i = 0; i < starPoints; i++) {
+        const rad = ((2 * Math.PI) / starPoints) * i - Math.PI / 2;
+        const px = Math.cos(rad) * outerR;
+        const py = centerY + Math.sin(rad) * outerR;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.04, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Relevo central da estrela
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, centerY, r * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'cyborg-neon': {
+      // Placas cibernéticas metálicas na face
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-r * 0.5, -r * 0.25, r * 1.0, r * 0.45);
+
+      // Trilhas de circuitos integrados neon
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.45, -r * 0.35);
+      ctx.lineTo(-r * 0.25, -r * 0.35);
+      ctx.lineTo(-r * 0.15, -r * 0.25);
+      ctx.moveTo(r * 0.45, -r * 0.35);
+      ctx.lineTo(r * 0.25, -r * 0.35);
+      ctx.lineTo(r * 0.15, -r * 0.25);
+      ctx.moveTo(-r * 0.4, r * 0.3);
+      ctx.lineTo(-r * 0.2, r * 0.3);
+      ctx.lineTo(-r * 0.1, r * 0.2);
+      ctx.stroke();
+
+      // Visor holográfico visor-visor neon
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 12;
+      const visorGrad = ctx.createLinearGradient(-r * 0.45, 0, r * 0.45, 0);
+      visorGrad.addColorStop(0, '#06b6d4');
+      visorGrad.addColorStop(0.5, '#d946ef');
+      visorGrad.addColorStop(1, '#06b6d4');
+
+      ctx.fillStyle = visorGrad;
+      ctx.beginPath();
+      ctx.roundRect(-r * 0.48, -r * 0.12, r * 0.96, r * 0.22, [r * 0.08]);
+      ctx.fill();
+
+      // Scanline brilhante no centro do visor
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-r * 0.42, -r * 0.04, r * 0.84, r * 0.05);
+
+      // Luzes LED laterais
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(-r * 0.38, r * 0.26, r * 0.04, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-r * 0.28, r * 0.26, r * 0.04, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'olympic-pro': {
+      // Faixa atlética esportiva de cabeça (Headband)
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillRect(-r * 0.52, -r * 0.38, r * 1.04, r * 0.18);
+      // Listras da faixa
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(-r * 0.52, -r * 0.33, r * 1.04, r * 0.04);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-r * 0.52, -r * 0.29, r * 1.04, r * 0.04);
+
+      // Óculos esportivos espelhados aerodinâmicos
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 8;
+      const glassesGrad = ctx.createLinearGradient(0, -r * 0.16, 0, r * 0.08);
+      glassesGrad.addColorStop(0, '#f59e0b');
+      glassesGrad.addColorStop(0.5, '#ef4444');
+      glassesGrad.addColorStop(1, '#a855f7');
+
+      ctx.fillStyle = glassesGrad;
+      ctx.beginPath();
+      // Lente esquerda
+      ctx.roundRect(-r * 0.46, -r * 0.16, r * 0.42, r * 0.2, [r * 0.06]);
+      // Lente direita
+      ctx.roundRect(r * 0.04, -r * 0.16, r * 0.42, r * 0.2, [r * 0.06]);
+      ctx.fill();
+
+      // Ponte nasal dos óculos
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-r * 0.06, -r * 0.1, r * 0.12, r * 0.06);
+
+      // Fita e Medalha de Ouro Olímpica
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.18, r * 0.12);
+      ctx.lineTo(0, r * 0.32);
+      ctx.lineTo(r * 0.18, r * 0.12);
+      ctx.stroke();
+
+      // Medalha de ouro
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, r * 0.36, r * 0.14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Estrela / louro dentro da medalha
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, r * 0.36, r * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
     default:
       break;
   }

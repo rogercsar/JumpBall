@@ -32,11 +32,11 @@ export function Ranking({ onNavigate }) {
   const fetchLeaderboard = useCallback(async (showIndicator = false) => {
     if (showIndicator) setIsRefreshing(true);
 
-    // Sanitiza: ignora valores absurdos como 999 (ID de modo infinito) e limita a 50
+    // Sanitiza: ignora valores absurdos como 999 (ID de modo infinito) e limita a 150
     const cleanStage = (val) => {
       const n = Number(val);
       if (isNaN(n) || n < 0 || n >= 999) return 0;
-      return Math.min(50, n);
+      return Math.min(150, n);
     };
 
     try {
@@ -69,7 +69,7 @@ export function Ranking({ onNavigate }) {
       const isCurrentUserRoger = currentUserId === '5299645a-84f8-4d54-a15f-f52e544e5aaf' || profile?.username === 'Roger César' || local.username === 'Roger César';
 
       // Usa os contadores separados por modo (hero/free) para exibir o progresso real
-      const currentUserStages = Math.min(50, Math.max(
+      const currentUserStages = Math.min(150, Math.max(
         isCurrentUserRoger ? 48 : 0,
         cleanStage(profile?.stages_completed_hero),
         cleanStage(profile?.stages_completed_free),

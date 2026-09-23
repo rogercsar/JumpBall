@@ -289,11 +289,11 @@ export function AuthProvider({ children }) {
         );
       }
 
-      // Função de sanitização: limita a 50 e descarta 999 (ID de modo infinito)
+      // Função de sanitização: limita a 150 e descarta 999 (ID de modo infinito)
       const cleanStage = (val) => {
         const n = Number(val);
         if (isNaN(n) || n < 0 || n >= 999) return 0;
-        return Math.min(50, n);
+        return Math.min(150, n);
       };
 
       // Determina se houve reset intencional (indicado explicitamente por 0 no local ou na nuvem)
@@ -840,9 +840,9 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Restaura progresso das fases para um estágio desejado (ex: 42 fases conquistadas anteriormente)
+  // Restaura progresso das fases para um estágio desejado
   const restoreStageProgress = async (targetStage = 42, mode = 'all') => {
-    const stageNum = Math.min(50, Math.max(1, Number(targetStage) || 42));
+    const stageNum = Math.min(150, Math.max(1, Number(targetStage) || 42));
     const local = localStore.getProfile();
     const current = profile ? { ...local, ...profile } : local;
     const heroNum = (mode === 'all' || mode === 'hero') ? stageNum : (current.stages_completed_hero || 0);

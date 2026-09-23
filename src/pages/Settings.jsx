@@ -21,7 +21,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useDialog } from '../contexts/DialogContext';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { soundEngine } from '../game/audio';
-import { STAGES } from '../game/stages';
+import { STAGES, MAX_HERO_STAGES, MAX_FREE_STAGES } from '../game/stages';
 import { TiltMeter } from '../components/TiltMeter';
 
 const PRESET_RADIOS = [
@@ -675,10 +675,10 @@ export function Settings({ orientation, requestOrientationPermission, permission
         {/* Badges de progresso por modo */}
         <div className="flex flex-wrap gap-2">
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
-            ⚔️ Herói: {heroCompleted} / 50 fases
+            ⚔️ Herói: {heroCompleted} / {MAX_HERO_STAGES} fases
           </span>
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-            🌿 Livre: {freeCompleted} / 50 fases
+            🌿 Livre: {freeCompleted} / {MAX_FREE_STAGES} fases
           </span>
         </div>
 

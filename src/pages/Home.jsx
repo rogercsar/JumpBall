@@ -416,11 +416,11 @@ export function Home({ onNavigate }) {
             <div className="flex items-center gap-2">
               <Compass className="w-5 h-5 text-cyan-400" />
               <h2 className="text-base sm:text-lg font-bold text-white">
-                Os 10 Mundos Temáticos
+                Os 30 Mundos Temáticos
               </h2>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              50 fases no total, distribuídas em 10 mundos com chefões épicos na 5ª fase de cada mundo.
+              150 fases por modo (300 fases totais), distribuídas em 30 mundos temáticos até 150.000m!
             </p>
           </div>
           <button
@@ -432,7 +432,7 @@ export function Home({ onNavigate }) {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 max-h-[580px] overflow-y-auto pr-1">
           {WORLDS.map((w) => (
             <div
               key={w.id}

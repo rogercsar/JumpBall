@@ -47,7 +47,13 @@ const TRAIL_ICONS = {
   Star: '⭐',
   Zap: '⚡',
   Music: '🎵',
-  Flower2: '🌸'
+  Flower2: '🌸',
+  Droplets: '🫧',
+  Binary: '💻',
+  Snowflake: '❄️',
+  Coins: '🪙',
+  Atom: '🧪',
+  Rocket: '🚀'
 };
 
 const ACH_ICONS = {
@@ -344,6 +350,18 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
     } else if (ach.id === 'stage_50') {
       current = Math.min(50, stagesCompleted);
       target = 50;
+    } else if (ach.id === 'stage_75') {
+      current = Math.min(75, stagesCompleted);
+      target = 75;
+    } else if (ach.id === 'stage_100') {
+      current = Math.min(100, stagesCompleted);
+      target = 100;
+    } else if (ach.id === 'stage_125') {
+      current = Math.min(125, stagesCompleted);
+      target = 125;
+    } else if (ach.id === 'stage_150') {
+      current = Math.min(150, stagesCompleted);
+      target = 150;
     } else if (ach.id === 'gem_hunter') {
       current = Math.min(500, profile?.gems || 0);
       target = 500;
@@ -744,6 +762,7 @@ export function Profile({ onNavigate, initialTab = 'skins' }) {
             {[
               { id: 'all', label: 'Todas', count: BALL_SKINS.length },
               { id: 'recommended', label: '⭐ Para Você', count: recommendedSkins.length },
+              { id: 'professions', label: '🎩 Mestres & Ofícios', count: BALL_SKINS.filter(s => s.category === 'professions').length },
               { id: 'heroines', label: '🦸‍♀️ Heroínas & Princesas', count: BALL_SKINS.filter(s => s.category === 'heroines').length },
               { id: 'heroes', label: 'Heróis', count: BALL_SKINS.filter(s => s.category === 'heroes').length },
               { id: 'army', label: 'Militar & Tática', count: BALL_SKINS.filter(s => s.category === 'army').length },

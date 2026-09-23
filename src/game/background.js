@@ -657,6 +657,22 @@ export class BackgroundRenderer {
         });
       }
     }
+
+    // Partículas temáticas dinâmicas para os novos temas
+    if (this.particles.length === 0) {
+      for (let i = 0; i < 28; i++) {
+        this.particles.push({
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2.8 + 1.2,
+          speedY: -(Math.random() * 0.45 + 0.15),
+          speedX: (Math.random() - 0.5) * 0.4,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.04 + 0.02,
+          color: this.stage?.ballGlow ? `${this.stage.ballGlow}99` : 'rgba(56, 189, 248, 0.6)'
+        });
+      }
+    }
   }
 
   update(dt = 1) {
@@ -847,6 +863,33 @@ export class BackgroundRenderer {
         break;
       case 'wood':
         this.drawWood(ctx, cameraY);
+        break;
+      case 'quantum_core':
+        this.drawComputer(ctx, cameraY);
+        break;
+      case 'wild_west':
+        this.drawDesert(ctx, cameraY);
+        break;
+      case 'dinosaur':
+        this.drawForest(ctx, cameraY);
+        break;
+      case 'sports':
+        this.drawSoccer(ctx, cameraY);
+        break;
+      case 'gastronomy':
+        this.drawCandy(ctx, cameraY);
+        break;
+      case 'health':
+        this.drawCrystal(ctx, cameraY);
+        break;
+      case 'sky_realm':
+        this.drawSky(ctx, cameraY);
+        break;
+      case 'continents':
+        this.drawOlympus(ctx, cameraY);
+        break;
+      case 'futuristic':
+        this.drawCyberpunk(ctx, cameraY);
         break;
       default:
         this.drawDefaultGrid(ctx, cameraY);

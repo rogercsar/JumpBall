@@ -107,7 +107,17 @@ const STAGE_THEME_TAGS = {
   heroes: ['heroes', 'guerreiras', 'mitologia', 'desafio'],
   dragon: ['desafio', 'mitologia', 'volcano', 'fantasia'],
   arcade: ['retro', 'games', 'arcade'],
-  temple: ['mitologia', 'aventura', 'fantasia']
+  temple: ['mitologia', 'aventura', 'fantasia'],
+  quantum_core: ['scifi', 'games', 'arcade', 'retro'],
+  wild_west: ['aventura', 'desafio', 'natureza'],
+  dinosaur: ['aventura', 'natureza', 'desafio'],
+  olympus: ['mitologia', 'fantasia', 'guerreiras'],
+  sports: ['heroes', 'desafio', 'games'],
+  gastronomy: ['fantasia', 'natureza', 'arcade'],
+  health: ['natureza', 'magia', 'heroes'],
+  sky_realm: ['natureza', 'fantasia', 'espaco'],
+  continents: ['aventura', 'mitologia', 'natureza'],
+  futuristic: ['scifi', 'espaco', 'games', 'arcade']
 };
 
 /**

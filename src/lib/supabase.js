@@ -90,14 +90,14 @@ export const localStore = {
         return {
           ...defaultProfile,
           ...parsed,
-          stages_completed: Math.min(50, (parsed.stages_completed !== undefined && Number(parsed.stages_completed) < 999) ? Number(parsed.stages_completed) : defaultProfile.stages_completed),
+          stages_completed: Math.min(150, (parsed.stages_completed !== undefined && Number(parsed.stages_completed) < 999) ? Number(parsed.stages_completed) : defaultProfile.stages_completed),
           // Se explicitamente 0, é um reset intencional — não aplica o floor
           stages_completed_hero: parsed.stages_completed_hero === 0 ? 0
-            : Math.min(50, Math.max(heroFloor, (parsed.stages_completed_hero !== undefined && Number(parsed.stages_completed_hero) < 999)
+            : Math.min(150, Math.max(heroFloor, (parsed.stages_completed_hero !== undefined && Number(parsed.stages_completed_hero) < 999)
               ? Number(parsed.stages_completed_hero)
               : defaultProfile.stages_completed_hero)),
           stages_completed_free: parsed.stages_completed_free === 0 ? 0
-            : Math.min(50, Math.max(freeFloor, (parsed.stages_completed_free !== undefined && Number(parsed.stages_completed_free) < 999)
+            : Math.min(150, Math.max(freeFloor, (parsed.stages_completed_free !== undefined && Number(parsed.stages_completed_free) < 999)
               ? Number(parsed.stages_completed_free)
               : defaultProfile.stages_completed_free)),
           birth_date: parsed.birth_date !== undefined ? parsed.birth_date : defaultProfile.birth_date,
@@ -134,14 +134,14 @@ export const localStore = {
       const merged = {
         ...existing,
         ...profile,
-        stages_completed: profile.stages_completed !== undefined ? Math.min(50, profile.stages_completed) : (existing.stages_completed || 0),
+        stages_completed: profile.stages_completed !== undefined ? Math.min(150, profile.stages_completed) : (existing.stages_completed || 0),
         // Se o valor passado for explicitamente 0, trata-se de um reset intencional — ignora o floor
-        stages_completed_hero: Math.min(50, profile.stages_completed_hero === 0
+        stages_completed_hero: Math.min(150, profile.stages_completed_hero === 0
           ? 0
           : Math.max(heroFloor, profile.stages_completed_hero !== undefined
             ? profile.stages_completed_hero
             : (existing.stages_completed_hero !== undefined ? existing.stages_completed_hero : 0))),
-        stages_completed_free: Math.min(50, profile.stages_completed_free === 0
+        stages_completed_free: Math.min(150, profile.stages_completed_free === 0
           ? 0
           : Math.max(freeFloor, profile.stages_completed_free !== undefined
             ? profile.stages_completed_free
@@ -198,12 +198,12 @@ export const localStore = {
     profile.high_score = Math.max(profile.high_score || 0, entry.score || 0);
     profile.total_jumps = (profile.total_jumps || 0) + jumpsCount;
     profile.games_played = (profile.games_played || 0) + 1;
-    if ((entry.status === 'completed' || entry.status === 'victory' || entry.isWin) && stageId <= 50) {
+    if ((entry.status === 'completed' || entry.status === 'victory' || entry.isWin) && stageId <= 150) {
       const isFree = entry.journey_mode === 'free' || entry.soloJourney === 'free';
       if (isFree) {
-        profile.stages_completed_free = Math.min(50, Math.max(profile.stages_completed_free || 0, stageId));
+        profile.stages_completed_free = Math.min(150, Math.max(profile.stages_completed_free || 0, stageId));
       } else {
-        profile.stages_completed_hero = Math.min(50, Math.max(profile.stages_completed_hero || 0, stageId));
+        profile.stages_completed_hero = Math.min(150, Math.max(profile.stages_completed_hero || 0, stageId));
       }
       profile.stages_completed = Math.max(profile.stages_completed_hero || 0, profile.stages_completed_free || 0);
     }

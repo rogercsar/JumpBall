@@ -42,7 +42,17 @@ import {
   Infinity,
   Pickaxe,
   Anvil,
-  Axe
+  Axe,
+  Utensils,
+  Activity,
+  Heart,
+  Medal,
+  Dna,
+  Crosshair,
+  Footprints,
+  Coffee,
+  Rocket,
+  Apple
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -84,7 +94,17 @@ const ICON_MAP = {
   Infinity,
   Pickaxe,
   Anvil,
-  Axe
+  Axe,
+  Utensils,
+  Activity,
+  Heart,
+  Medal,
+  Dna,
+  Crosshair,
+  Footprints,
+  Coffee,
+  Rocket,
+  Apple
 };
 
 export function StageCard({ stage, isUnlocked, isCompleted, onSelect, journeyMode = 'hero' }) {

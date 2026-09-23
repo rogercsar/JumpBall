@@ -30,7 +30,7 @@ import {
   Compass
 } from 'lucide-react';
 import { GameEngine } from '../game/engine';
-import { STAGES, BALL_SKINS, WORLDS, getStagesForMode } from '../game/stages';
+import { STAGES, BALL_SKINS, WORLDS, getStagesForMode, getWorldsForMode } from '../game/stages';
 import { getActiveCommemorativeStages } from '../game/events';
 import { soundEngine } from '../game/audio';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -105,14 +105,18 @@ export function Game({ onNavigate }) {
   const rematchTimeoutRef = useRef(null);
 
   // Progresso estritamente independente para cada modo (Livre ou Herói)
-  // Garante que o progresso de um modo nunca vaze para o outro e limita a 50
+  // Garante que o progresso de um modo nunca vaze para o outro e suporta até 150 fases
   const activeCompletedStages = soloJourney === 'free'
-    ? Math.min(50, Math.max(0, profile?.stages_completed_free || 0, localStore.getProfile()?.stages_completed_free || 0))
-    : Math.min(50, Math.max(0, profile?.stages_completed_hero || 0, localStore.getProfile()?.stages_completed_hero || 0));
+    ? Math.min(150, Math.max(0, profile?.stages_completed_free || 0, localStore.getProfile()?.stages_completed_free || 0))
+    : Math.min(150, Math.max(0, profile?.stages_completed_hero || 0, localStore.getProfile()?.stages_completed_hero || 0));
 
-  // Fases customizadas para o modo selecionado
+  // Fases e Mundos customizados para o modo selecionado
   const activeStages = React.useMemo(() => {
     return getStagesForMode(soloJourney);
+  }, [soloJourney]);
+
+  const activeWorlds = React.useMemo(() => {
+    return getWorldsForMode(soloJourney);
   }, [soloJourney]);
 
   const handleSoloJourneyChange = (journey) => {
@@ -121,9 +125,9 @@ export function Game({ onNavigate }) {
       localStorage.setItem('jumpball_solo_journey', journey);
     } catch (e) { /* ignore */ }
     const journeyCompleted = journey === 'free'
-      ? Math.min(50, Math.max(0, profile?.stages_completed_free || 0, localStore.getProfile()?.stages_completed_free || 0))
-      : Math.min(50, Math.max(0, profile?.stages_completed_hero || 0, localStore.getProfile()?.stages_completed_hero || 0));
-    setSelectedWorldId(Math.min(10, Math.max(1, Math.floor(journeyCompleted / 5) + 1)));
+      ? Math.min(150, Math.max(0, profile?.stages_completed_free || 0, localStore.getProfile()?.stages_completed_free || 0))
+      : Math.min(150, Math.max(0, profile?.stages_completed_hero || 0, localStore.getProfile()?.stages_completed_hero || 0));
+    setSelectedWorldId(Math.min(30, Math.max(1, Math.floor(journeyCompleted / 5) + 1)));
   };
 
   const [aiDifficulty, setAiDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
@@ -332,13 +336,13 @@ export function Game({ onNavigate }) {
     // Apenas partidas no modo 'solo' avançam os contadores de fases concluídas.
     const isRaceMode = gameMode === 'race_pvp' || gameMode === 'race_ai' || gameMode === 'endless';
 
-    const currentHeroCompleted = Math.min(50, Math.max(
+    const currentHeroCompleted = Math.min(150, Math.max(
       profileRef.current?.stages_completed_hero || 0,
       profile?.stages_completed_hero || 0,
       localProf.stages_completed_hero || 0
     ));
 
-    const currentFreeCompleted = Math.min(50, Math.max(
+    const currentFreeCompleted = Math.min(150, Math.max(
       profileRef.current?.stages_completed_free || 0,
       profile?.stages_completed_free || 0,
       localProf.stages_completed_free || 0
@@ -346,12 +350,12 @@ export function Game({ onNavigate }) {
 
     const isEventStage = Boolean(stageObj?.isEvent);
     // Avança estritamente o progresso do modo solo jogado (nunca nos modos de corrida/duelo)
-    const newHeroCompleted = (!isRaceMode && !isFreeMode && isWin && !isEventStage && stageNumber <= 50)
-      ? Math.min(50, Math.max(currentHeroCompleted, stageNumber))
+    const newHeroCompleted = (!isRaceMode && !isFreeMode && isWin && !isEventStage && stageNumber <= 150)
+      ? Math.min(150, Math.max(currentHeroCompleted, stageNumber))
       : currentHeroCompleted;
 
-    const newFreeCompleted = (!isRaceMode && isFreeMode && isWin && !isEventStage && stageNumber <= 50)
-      ? Math.min(50, Math.max(currentFreeCompleted, stageNumber))
+    const newFreeCompleted = (!isRaceMode && isFreeMode && isWin && !isEventStage && stageNumber <= 150)
+      ? Math.min(150, Math.max(currentFreeCompleted, stageNumber))
       : currentFreeCompleted;
 
     const newHighScore = Math.max(profileRef.current?.high_score || 0, localProf.high_score || 0, scoreVal);
@@ -1219,13 +1223,13 @@ export function Game({ onNavigate }) {
                       : 'bg-slate-800/80 text-slate-400 hover:text-white border border-slate-700/60 hover:bg-slate-700/60'
                       }`}
                   >
-                    Ver Todas as 50 Fases
+                    Ver Todas as {activeStages.length} Fases
                   </button>
                 </div>
 
                 {/* Abas Horizontais dos Mundos com Scroll Suave */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                  {WORLDS.map((w) => {
+                  {activeWorlds.map((w) => {
                     const completedStages = activeCompletedStages;
                     const isWorldUnlocked = w.stageRange[0] <= Math.max(1, completedStages + 1);
                     const worldStagesCompleted = Math.max(
@@ -1264,7 +1268,7 @@ export function Game({ onNavigate }) {
                               {w.shortName}
                             </span>
                             {soloJourney === 'free' ? (
-                              <span className="text-[10px]" title={`Cume: Fase ${w.bossStageNumber}`}>
+                              <span className="text-[10px]" title={`Cume: Fase ${w.bossStageNumber || w.summitStageNumber}`}>
                                 🏔️
                               </span>
                             ) : (
@@ -1292,7 +1296,7 @@ export function Game({ onNavigate }) {
 
                 {/* Banner Informativo do Mundo Selecionado */}
                 {selectedWorldId !== 'all' && (() => {
-                  const currentWorld = WORLDS.find((w) => w.id === selectedWorldId) || WORLDS[0];
+                  const currentWorld = activeWorlds.find((w) => w.id === selectedWorldId) || activeWorlds[0];
                   return (
                     <div className="p-3.5 rounded-2xl border border-slate-800/80 bg-gradient-to-r from-slate-900/90 via-slate-800/50 to-slate-900/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
                       <div>
@@ -1316,7 +1320,7 @@ export function Game({ onNavigate }) {
                         <span>{soloJourney === 'free' ? '🏔️' : '👑'}</span>
                         <span>
                           {soloJourney === 'free'
-                            ? `Cume do Mundo: Fase ${currentWorld.bossStageNumber} (Escalada Pura)`
+                            ? `Cume do Mundo: Fase ${currentWorld.bossStageNumber || currentWorld.summitStageNumber} (${currentWorld.summitName || 'Escalada Pura'})`
                             : `Chefão: ${currentWorld.bossName} (${currentWorld.bossTitle})`}
                         </span>
                       </div>
@@ -1329,7 +1333,7 @@ export function Game({ onNavigate }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeStages.filter((stage) => {
                   if (selectedWorldId === 'all') return true;
-                  const world = WORLDS.find((w) => w.id === selectedWorldId);
+                  const world = activeWorlds.find((w) => w.id === selectedWorldId);
                   if (!world) return true;
                   return stage.number >= world.stageRange[0] && stage.number <= world.stageRange[1];
                 }).map((stage) => {
