@@ -925,8 +925,8 @@ export function Game({ onNavigate }) {
             ) : (
               <div className="text-xs text-slate-400 hidden md:block">
                 {soloJourney === 'free'
-                  ? 'Jornada Livre: 50 fases de pura escalada sem chefões com física e ritmo zen.'
-                  : 'Jornada do Herói: 50 fases épicas enfrentando os 10 Titãs Guardiões.'}
+                  ? 'Jornada Livre: 150 fases de pura escalada sem chefões com física e ritmo zen.'
+                  : 'Jornada do Herói: 150 fases épicas enfrentando os 30 Titãs Guardiões.'}
               </div>
             )}
           </div>
@@ -979,7 +979,7 @@ export function Game({ onNavigate }) {
                         <h2 className="text-base sm:text-lg font-black text-white">Escolha o seu Estilo de Jornada Solo</h2>
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        Defina como deseja explorar as 50 fases cósmicas do JumpBall
+                        Defina como deseja explorar as 150 fases cósmicas do JumpBall
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1015,7 +1015,7 @@ export function Game({ onNavigate }) {
                               </span>
                             </div>
                             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                              Subida clássica pelas 50 fases <strong>sem combates com chefões</strong>. Foco total em ritmo, física de salto e cruzar a linha de chegada no topo.
+                              Subida clássica pelas 150 fases <strong>sem combates com chefões</strong>. Foco total em ritmo, física de salto e cruzar a linha de chegada no topo dos 30 cumes.
                             </p>
                           </div>
                         </div>
@@ -1028,7 +1028,7 @@ export function Game({ onNavigate }) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-black">Progresso: {profile?.stages_completed_free || localStore.getProfile()?.stages_completed_free || 0}/50 Fases</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-black">Progresso: {profile?.stages_completed_free || localStore.getProfile()?.stages_completed_free || 0}/150 Fases</span>
                         <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-300">✓ Linha de Chegada Clássica</span>
                         <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold">✓ Ritmo Contínuo</span>
                       </div>
@@ -1058,7 +1058,7 @@ export function Game({ onNavigate }) {
                               </span>
                             </div>
                             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                              A campanha clássica lendária! Supere armadilhas e <strong>combata os 10 Titãs Guardiões</strong> a cada 5 fases ativando canhões anti-chefão.
+                              A campanha clássica lendária! Supere armadilhas e <strong>combata os 30 Titãs Guardiões</strong> a cada 5 fases ativando canhões anti-chefão até os 150.000m.
                             </p>
                           </div>
                         </div>
@@ -1071,7 +1071,7 @@ export function Game({ onNavigate }) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/60 text-[10px] font-semibold text-slate-400">
-                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">Progresso: {profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0}/50 Fases</span>
+                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">Progresso: {profile?.stages_completed_hero ?? localStore.getProfile()?.stages_completed_hero ?? 0}/150 Fases</span>
                         <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">⚡ Baterias de Energia</span>
                         <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold">🌌 Ataque do Multiverso</span>
                       </div>
@@ -1186,7 +1186,7 @@ export function Game({ onNavigate }) {
                         <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
                           MUNDOS & EXPEDIÇÕES
                           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
-                            10 Mundos · 50 Fases Livres
+                            30 Mundos · 150 Fases Livres
                           </span>
                         </h2>
                         <p className="text-xs text-slate-400">
@@ -1203,7 +1203,7 @@ export function Game({ onNavigate }) {
                         <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
                           MUNDOS & CHEFÕES
                           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                            10 Mundos · 50 Fases
+                            30 Mundos · 150 Fases
                           </span>
                         </h2>
                         <p className="text-xs text-slate-400">

@@ -114,7 +114,7 @@ export function Home({ onNavigate }) {
                 )}
               </h1>
               <p className="text-slate-400 text-sm max-w-md leading-relaxed">
-                Desafie {STAGES.length} fases em 10 mundos épicos, jogue no Modo Herói ou Modo Livre, colecione mais de {BALL_SKINS.length} esferas e domine o topo do ranking.
+                Desafie {STAGES.length} fases em 30 mundos épicos, jogue no Modo Herói ou Modo Livre, colecione mais de {BALL_SKINS.length} esferas e domine o topo do ranking.
               </p>
             </div>
 
@@ -272,7 +272,7 @@ export function Home({ onNavigate }) {
           <div className="space-y-1.5">
             <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
               <span>Modo Herói</span>
-              <span className="text-xs text-amber-400 font-bold">({stagesHeroCompleted}/50)</span>
+              <span className="text-xs text-amber-400 font-bold">({stagesHeroCompleted}/150)</span>
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               Jornada linear épica: complete cada fase para desbloquear a próxima. Enfrente chefões titânicos a cada 5 fases e prove sua habilidade suprema!
@@ -302,10 +302,10 @@ export function Home({ onNavigate }) {
           <div className="space-y-1.5">
             <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
               <span>Modo Livre</span>
-              <span className="text-xs text-emerald-400 font-bold">({stagesFreeCompleted}/50)</span>
+              <span className="text-xs text-emerald-400 font-bold">({stagesFreeCompleted}/150)</span>
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Todas as 50 fases e 10 mundos liberados desde o início. Escolha qualquer bioma para treinar, explorar e quebrar recordes sem restrições de bloqueio.
+              Todas as 150 fases e 30 mundos liberados desde o início. Escolha qualquer bioma para treinar, explorar e quebrar recordes sem restrições de bloqueio.
             </p>
           </div>
 
